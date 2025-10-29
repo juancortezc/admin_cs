@@ -7,6 +7,8 @@
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
+import ModalRegistroPago from '@/app/components/ModalRegistroPago'
+import Toast from '@/app/components/Toast'
 
 type Evento = {
   id: string
@@ -17,6 +19,9 @@ type Evento = {
   fecha: string
   dia: number
   vencido: boolean
+  espacioId?: string
+  servicioId?: string
+  empleadoId?: string
 }
 
 export default function CalendarioPage() {
@@ -24,6 +29,8 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true)
   const [filtroTipo, setFiltroTipo] = useState<string>('todos')
   const [mesActual, setMesActual] = useState('')
+  const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null)
+  const [mostrarToast, setMostrarToast] = useState(false)
 
   useEffect(() => {
     // Obtener mes actual en formato YYYY-MM
@@ -47,14 +54,35 @@ export default function CalendarioPage() {
       })
   }
 
+  const handleSuccess = () => {
+    cargarEventos(mesActual)
+    setMostrarToast(true)
+  }
+
+  const handleClickEvento = (evento: Evento) => {
+    setEventoSeleccionado(evento)
+  }
+
   // Filtrar eventos por tipo
   const eventosFiltrados = filtroTipo === 'todos'
     ? eventos
     : eventos.filter(e => e.tipo === filtroTipo)
 
-  // Separar eventos vencidos y próximos
-  const eventosVencidos = eventosFiltrados.filter(e => e.vencido)
-  const eventoProximos = eventosFiltrados.filter(e => !e.vencido)
+  // Separar eventos en: Vencen Hoy y Vencidos
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+
+  const eventosHoy = eventosFiltrados.filter(e => {
+    const fechaEvento = new Date(e.fecha)
+    fechaEvento.setHours(0, 0, 0, 0)
+    return fechaEvento.getTime() === hoy.getTime()
+  })
+
+  const eventosVencidos = eventosFiltrados.filter(e => {
+    const fechaEvento = new Date(e.fecha)
+    fechaEvento.setHours(0, 0, 0, 0)
+    return fechaEvento.getTime() < hoy.getTime()
+  })
 
   const getColorTipo = (tipo: string) => {
     switch (tipo) {
@@ -100,6 +128,11 @@ export default function CalendarioPage() {
           <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">Calendario</h1>
           <p className="text-sm text-zinc-600 mt-0.5">
             {eventos.length} evento{eventos.length !== 1 ? 's' : ''}
+            {eventosHoy.length > 0 && (
+              <span className="ml-2 text-[#FF9500] font-medium">
+                · {eventosHoy.length} hoy
+              </span>
+            )}
             {eventosVencidos.length > 0 && (
               <span className="ml-2 text-[#FF3B30] font-medium">
                 · {eventosVencidos.length} vencido{eventosVencidos.length !== 1 ? 's' : ''}
@@ -133,6 +166,43 @@ export default function CalendarioPage() {
           })}
         </div>
 
+        {/* Eventos que Vencen Hoy */}
+        {eventosHoy.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-base font-semibold text-[#FF9500] mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+              Vencen Hoy ({eventosHoy.length})
+            </h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {eventosHoy.map((evento) => (
+                <button
+                  key={evento.id}
+                  onClick={() => handleClickEvento(evento)}
+                  className="bg-white rounded-xl border border-[#FF9500]/30 p-3 shadow-sm hover:shadow-md transition-all text-left w-full"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-zinc-900 text-sm truncate">{evento.titulo}</h3>
+                      <p className="text-xs text-zinc-600 mt-0.5 truncate">{evento.descripcion}</p>
+                    </div>
+                    <span className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-md border flex-shrink-0 ${getColorTipo(evento.tipo)}`}>
+                      {getTipoLabel(evento.tipo)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-zinc-100">
+                    <span className="text-[#FF9500] font-medium">Hoy</span>
+                    {evento.monto && (
+                      <span className="text-zinc-900 font-semibold">${evento.monto.toLocaleString()}</span>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Eventos Vencidos */}
         {eventosVencidos.length > 0 && (
           <div className="mb-6">
@@ -144,9 +214,10 @@ export default function CalendarioPage() {
             </h2>
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {eventosVencidos.map((evento) => (
-                <div
+                <button
                   key={evento.id}
-                  className="bg-white rounded-xl border border-[#FF3B30]/20 p-3 shadow-sm hover:shadow-md transition-all"
+                  onClick={() => handleClickEvento(evento)}
+                  className="bg-white rounded-xl border border-[#FF3B30]/20 p-3 shadow-sm hover:shadow-md transition-all text-left w-full"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1 min-w-0">
@@ -169,51 +240,36 @@ export default function CalendarioPage() {
           </div>
         )}
 
-        {/* Eventos Próximos */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Próximos Pagos ({eventoProximos.length})
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {eventoProximos.map((evento) => (
-              <div
-                key={evento.id}
-                className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{evento.titulo}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{evento.descripcion}</p>
-                  </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getColorTipo(evento.tipo)}`}>
-                    {getTipoLabel(evento.tipo)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">
-                    Día {evento.dia}
-                  </span>
-                  {evento.monto && (
-                    <span className="text-gray-900 font-semibold">
-                      ${evento.monto.toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+        {/* Mensaje vacío */}
+        {eventosHoy.length === 0 && eventosVencidos.length === 0 && (
+          <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
+            <svg className="w-12 h-12 text-zinc-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-zinc-500">
+              {filtroTipo === 'todos'
+                ? 'No hay eventos pendientes para este mes'
+                : `No hay eventos de tipo "${getTipoLabel(filtroTipo)}" pendientes`}
+            </p>
           </div>
-
-          {eventoProximos.length === 0 && eventosVencidos.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-              <p className="text-gray-500">
-                {filtroTipo === 'todos'
-                  ? 'No hay eventos registrados para este mes'
-                  : `No hay eventos de tipo "${getTipoLabel(filtroTipo)}" para este mes`}
-              </p>
-            </div>
-          )}
-        </div>
+        )}
       </main>
+
+      {/* Modal de Registro */}
+      <ModalRegistroPago
+        evento={eventoSeleccionado}
+        onClose={() => setEventoSeleccionado(null)}
+        onSuccess={handleSuccess}
+      />
+
+      {/* Toast de confirmación */}
+      {mostrarToast && (
+        <Toast
+          message="Pago registrado exitosamente"
+          tipo="success"
+          onClose={() => setMostrarToast(false)}
+        />
+      )}
     </div>
   )
 }
