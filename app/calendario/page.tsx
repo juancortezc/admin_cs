@@ -234,7 +234,7 @@ export default function CalendarioPage() {
                       <span className="text-zinc-900 font-semibold">${evento.monto.toLocaleString()}</span>
                     )}
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
