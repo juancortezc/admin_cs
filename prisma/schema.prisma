@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Modelo de Arrendatario
+model Arrendatario {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String   @unique
+  celular   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relación con Espacios
+  espacios  Espacio[]
+}
+
+// Modelo de Espacio (Local, Consultorio, Habitación)
+model Espacio {
+  id                String    @id @default(cuid())
+  identificador     String    @unique // Ejemplo: L-001, C-001, H-001
+  tipo              TipoEspacio // Local, Consultorio, Habitación
+
+  // Información del arriendo
+  arrendatarioId    String?
+  arrendatario      Arrendatario? @relation(fields: [arrendatarioId], references: [id])
+
+  fechaInicio       DateTime?
+  fechaFin          DateTime?
+  monto             Float?
+  diaPago           Int? // Día del mes (1-31)
+  observaciones     String?   @db.Text
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([arrendatarioId])
+  @@index([tipo])
+}
+
+// Enum para tipos de espacios
+enum TipoEspacio {
+  LOCAL
+  CONSULTORIO
+  HABITACION
+}

@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Casa del Sol - Sistema de Administración
 
-## Getting Started
+Sistema de administración para edificio con Next.js, TypeScript, Prisma y Neon.
 
-First, run the development server:
+## Stack Tecnológico
 
+- **Framework**: Next.js 15 + TypeScript
+- **Base de datos**: PostgreSQL (Neon)
+- **ORM**: Prisma
+- **Estilos**: Tailwind CSS
+- **Hosting**: Vercel
+
+## Configuración Inicial
+
+1. **Instalar dependencias**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Configurar base de datos Neon**
+   - Ir a [Neon Console](https://console.neon.tech)
+   - Copiar `DATABASE_URL` y `DIRECT_URL`
+   - Pegar en `.env`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Ejecutar migraciones**
+```bash
+npx prisma migrate dev --name init
+npx prisma generate
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Iniciar desarrollo**
+```bash
+npm run dev
+```
 
-## Learn More
+## Estructura Base de Datos
 
-To learn more about Next.js, take a look at the following resources:
+### Espacios
+- Identificador único (L-001, C-001, H-001)
+- Tipo: Local, Consultorio, Habitación
+- Información de arriendo y arrendatario
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Arrendatarios
+- Datos de contacto
+- Relación con espacios arrendados
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Comandos Prisma
 
-## Deploy on Vercel
+```bash
+# Ver BD en navegador
+npx prisma studio
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Crear migración
+npx prisma migrate dev --name nombre_migracion
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Generar cliente
+npx prisma generate
+```
