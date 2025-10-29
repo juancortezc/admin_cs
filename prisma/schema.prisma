@@ -63,6 +63,8 @@ model CobroArriendo {
   fechaCobro      DateTime // Fecha real en que se cobró
   fechaRegistro   DateTime @default(now())
   diasRetraso     Int      @default(0) // Días de diferencia respecto al día esperado
+  formaPago       FormaPago?
+  referencia      String?  // Número de transferencia o cheque
   observaciones   String?  @db.Text
 
   createdAt       DateTime @default(now())
@@ -101,6 +103,8 @@ model PagoServicio {
   monto             Float
   fechaPago         DateTime
   fechaRegistro     DateTime       @default(now())
+  formaPago         FormaPago?
+  referencia        String?        // Número de transferencia o cheque
   comprobante       String?        // URL externa del comprobante
   observaciones     String?        @db.Text
 
@@ -145,6 +149,8 @@ model PagoSalario {
   total         Float    // monto + bonos - descuentos
   fechaPago     DateTime
   fechaRegistro DateTime @default(now())
+  formaPago     FormaPago?
+  referencia    String?  // Número de transferencia o cheque
   observaciones String?  @db.Text
 
   createdAt     DateTime @default(now())
@@ -164,6 +170,8 @@ model OtroPago {
   monto         Float
   fechaPago     DateTime
   recurrente    Boolean  @default(false)
+  formaPago     FormaPago?
+  referencia    String?  // Número de transferencia o cheque
   observaciones String?  @db.Text
 
   createdAt     DateTime @default(now())
@@ -184,4 +192,11 @@ enum TipoEspacio {
 enum TipoMontoServicio {
   FIJO
   VARIABLE
+}
+
+// Enum para formas de pago
+enum FormaPago {
+  TRANSFERENCIA
+  EFECTIVO
+  CHEQUE
 }
