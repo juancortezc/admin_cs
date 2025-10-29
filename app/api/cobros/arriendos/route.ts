@@ -1,7 +1,7 @@
 /**
- * API de Pagos de Arriendos
- * POST - Registrar pago de arriendo
- * GET - Listar pagos de arriendos
+ * API de Cobros de Arriendos (ingresos)
+ * POST - Registrar cobro de arriendo
+ * GET - Listar cobros de arriendos
  */
 
 import { NextResponse } from 'next/server'
@@ -24,13 +24,13 @@ export async function GET(request: Request) {
       const startDate = new Date(parseInt(year), parseInt(month) - 1, 1)
       const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59)
 
-      where.fechaPago = {
+      where.fechaCobro = {
         gte: startDate,
         lte: endDate,
       }
     }
 
-    const pagos = await prisma.pagoArriendo.findMany({
+    const cobros = await prisma.cobroArriendo.findMany({
       where,
       include: {
         espacio: {
@@ -39,34 +39,34 @@ export async function GET(request: Request) {
           },
         },
       },
-      orderBy: { fechaPago: 'desc' },
+      orderBy: { fechaCobro: 'desc' },
     })
 
-    return NextResponse.json(pagos)
+    return NextResponse.json(cobros)
   } catch (error) {
-    console.error('Error:', error)
-    return NextResponse.json({ error: 'Error al obtener pagos' }, { status: 500 })
+    console.error('Error al obtener cobros:', error)
+    return NextResponse.json({ error: 'Error al obtener cobros' }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { espacioId, monto, fechaPago, diasRetraso, observaciones } = body
+    const { espacioId, monto, fechaCobro, diasRetraso, observaciones } = body
 
-    if (!espacioId || !monto || !fechaPago) {
+    if (!espacioId || !monto || !fechaCobro) {
       return NextResponse.json(
-        { error: 'Espacio, monto y fecha de pago son requeridos' },
+        { error: 'Espacio, monto y fecha de cobro son requeridos' },
         { status: 400 }
       )
     }
 
-    // Crear pago de arriendo
-    const pago = await prisma.pagoArriendo.create({
+    // Crear cobro de arriendo
+    const cobro = await prisma.cobroArriendo.create({
       data: {
         espacioId,
         monto: parseFloat(monto),
-        fechaPago: new Date(fechaPago),
+        fechaCobro: new Date(fechaCobro),
         diasRetraso: parseInt(diasRetraso) || 0,
         observaciones,
       },
@@ -79,9 +79,9 @@ export async function POST(request: Request) {
       },
     })
 
-    return NextResponse.json(pago, { status: 201 })
+    return NextResponse.json(cobro, { status: 201 })
   } catch (error) {
-    console.error('Error:', error)
-    return NextResponse.json({ error: 'Error al registrar pago' }, { status: 500 })
+    console.error('Error al registrar cobro:', error)
+    return NextResponse.json({ error: 'Error al registrar cobro' }, { status: 500 })
   }
 }

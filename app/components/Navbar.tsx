@@ -1,7 +1,10 @@
 /**
- * Navbar principal con navegación
- * Desktop: Tabs horizontales
- * Mobile: Menú hamburguesa con drawer lateral
+ * Navbar estilo Apple
+ * - Compacto y elegante (h-14)
+ * - Backdrop blur translúcido
+ * - Border inferior sutil
+ * - Desktop: tabs horizontales con hover suave
+ * - Mobile: hamburguesa con drawer desde la derecha
  */
 
 'use client'
@@ -32,27 +35,28 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
   return (
     <>
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      {/* Navbar con backdrop blur */}
+      <nav className="bg-white/80 backdrop-blur-xl border-b border-zinc-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center h-14">
             {/* Logo/Título */}
             <button
               onClick={() => handleNavegar('/calendario')}
-              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              className="text-lg font-semibold text-zinc-900 hover:text-[#007AFF] transition-colors tracking-tight"
             >
               Casa del Sol
             </button>
 
-            {/* Desktop Tabs */}
-            <div className="hidden md:flex space-x-1">
+            {/* Desktop Tabs - compactos */}
+            <div className="hidden md:flex items-center gap-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.nombre}
                   onClick={() => handleNavegar(tab.ruta)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     activeTab === tab.nombre
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-[#007AFF] bg-[#007AFF]/10'
+                      : 'text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900'
                   }`}
                 >
                   {tab.nombre}
@@ -60,13 +64,14 @@ export default function Navbar({ activeTab }: NavbarProps) {
               ))}
             </div>
 
-            {/* Mobile Hamburguesa */}
+            {/* Mobile Hamburguesa - icono más pequeño */}
             <button
               onClick={() => setMenuAbierto(!menuAbierto)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-zinc-100 active:scale-95 transition-all"
+              aria-label="Menu"
             >
               <svg
-                className="w-6 h-6 text-gray-700"
+                className="w-5 h-5 text-zinc-700"
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -88,24 +93,25 @@ export default function Navbar({ activeTab }: NavbarProps) {
       {/* Mobile Drawer */}
       {menuAbierto && (
         <>
-          {/* Overlay */}
+          {/* Overlay con fade in */}
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
             onClick={() => setMenuAbierto(false)}
           />
 
-          {/* Drawer */}
-          <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 md:hidden transform transition-transform duration-300">
+          {/* Drawer desde la derecha */}
+          <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 md:hidden animate-in slide-in-from-right duration-300">
             <div className="p-4">
               {/* Header del drawer */}
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-gray-900">Menú</h2>
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-zinc-200">
+                <h2 className="text-base font-semibold text-zinc-900">Menú</h2>
                 <button
                   onClick={() => setMenuAbierto(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100"
+                  className="p-2 rounded-lg hover:bg-zinc-100 active:scale-95 transition-all"
+                  aria-label="Cerrar"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-700"
+                    className="w-5 h-5 text-zinc-700"
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -118,16 +124,16 @@ export default function Navbar({ activeTab }: NavbarProps) {
                 </button>
               </div>
 
-              {/* Links del drawer */}
-              <div className="space-y-2">
+              {/* Links del drawer - compactos */}
+              <div className="space-y-1">
                 {tabs.map((tab) => (
                   <button
                     key={tab.nombre}
                     onClick={() => handleNavegar(tab.ruta)}
-                    className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                    className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                       activeTab === tab.nombre
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'text-[#007AFF] bg-[#007AFF]/10'
+                        : 'text-zinc-700 hover:bg-zinc-100 active:scale-95'
                     }`}
                   >
                     {tab.nombre}

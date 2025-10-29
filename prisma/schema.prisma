@@ -46,21 +46,21 @@ model Espacio {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  // Relación con pagos de arriendo
-  pagosArriendo     PagoArriendo[]
+  // Relación con cobros de arriendo
+  cobrosArriendo    CobroArriendo[]
 
   @@index([arrendatarioId])
   @@index([tipo])
 }
 
-// Registro de pagos de arriendo realizados
-model PagoArriendo {
+// Registro de cobros de arriendo (ingresos)
+model CobroArriendo {
   id              String   @id @default(cuid())
   espacioId       String
   espacio         Espacio  @relation(fields: [espacioId], references: [id])
 
   monto           Float
-  fechaPago       DateTime // Fecha real en que se pagó
+  fechaCobro      DateTime // Fecha real en que se cobró
   fechaRegistro   DateTime @default(now())
   diasRetraso     Int      @default(0) // Días de diferencia respecto al día esperado
   observaciones   String?  @db.Text
@@ -69,7 +69,7 @@ model PagoArriendo {
   updatedAt       DateTime @updatedAt
 
   @@index([espacioId])
-  @@index([fechaPago])
+  @@index([fechaCobro])
 }
 
 // Catálogo de servicios básicos (luz, agua, internet, etc)
@@ -126,14 +126,14 @@ model Empleado {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  // Relación con pagos
-  pagos             PagoEmpleado[]
+  // Relación con pagos de salario
+  pagosSalario      PagoSalario[]
 
   @@index([activo])
 }
 
-// Registro de pagos a empleados
-model PagoEmpleado {
+// Registro de pagos de salario a empleados
+model PagoSalario {
   id            String   @id @default(cuid())
   empleadoId    String
   empleado      Empleado @relation(fields: [empleadoId], references: [id])

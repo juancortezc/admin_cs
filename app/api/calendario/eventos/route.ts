@@ -31,9 +31,9 @@ export async function GET(request: Request) {
         },
         include: {
           arrendatario: true,
-          pagosArriendo: {
+          cobrosArriendo: {
             where: {
-              fechaPago: {
+              fechaCobro: {
                 gte: new Date(year, month - 1, 1),
                 lt: new Date(year, month, 1),
               },
@@ -43,8 +43,8 @@ export async function GET(request: Request) {
       })
 
       espacios.forEach((espacio) => {
-        // Solo agregar si no hay pago registrado para este mes
-        if (espacio.pagosArriendo.length === 0 && espacio.diaPago) {
+        // Solo agregar si no hay cobro registrado para este mes
+        if (espacio.cobrosArriendo.length === 0 && espacio.diaPago) {
           const fechaEvento = new Date(year, month - 1, espacio.diaPago)
           const hoy = new Date()
           hoy.setHours(0, 0, 0, 0)
@@ -109,7 +109,7 @@ export async function GET(request: Request) {
       const empleados = await prisma.empleado.findMany({
         where: { activo: true },
         include: {
-          pagos: {
+          pagosSalario: {
             where: {
               periodo: `${year}-${month.toString().padStart(2, '0')}`,
             },
@@ -118,8 +118,8 @@ export async function GET(request: Request) {
       })
 
       empleados.forEach((empleado) => {
-        // Solo agregar si no hay pago registrado para este período
-        if (empleado.pagos.length === 0) {
+        // Solo agregar si no hay pago de salario registrado para este período
+        if (empleado.pagosSalario.length === 0) {
           const fechaEvento = new Date(year, month - 1, empleado.diaPago)
           const hoy = new Date()
           hoy.setHours(0, 0, 0, 0)

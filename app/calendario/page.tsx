@@ -1,5 +1,6 @@
 /**
  * Página de Calendario - Vista principal con eventos pendientes
+ * Diseño Apple: compacto, minimalista, elegante
  */
 
 'use client'
@@ -55,14 +56,13 @@ export default function CalendarioPage() {
   const eventosVencidos = eventosFiltrados.filter(e => e.vencido)
   const eventoProximos = eventosFiltrados.filter(e => !e.vencido)
 
-  // Colores por tipo de evento
   const getColorTipo = (tipo: string) => {
     switch (tipo) {
-      case 'arriendo': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'servicio': return 'bg-green-100 text-green-800 border-green-200'
-      case 'empleado': return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'otro': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'arriendo': return 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'
+      case 'servicio': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
+      case 'empleado': return 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20'
+      case 'otro': return 'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20'
+      default: return 'bg-zinc-100 text-zinc-800 border-zinc-200'
     }
   }
 
@@ -70,90 +70,97 @@ export default function CalendarioPage() {
     switch (tipo) {
       case 'arriendo': return 'Arriendo'
       case 'servicio': return 'Servicio'
-      case 'empleado': return 'Empleado'
-      case 'otro': return 'Otro Pago'
+      case 'empleado': return 'Salario'
+      case 'otro': return 'Otro'
       default: return tipo
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-zinc-50">
         <Navbar activeTab="Calendario" />
         <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-zinc-600">Cargando...</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-50">
       <Navbar activeTab="Calendario" />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header con resumen */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Calendario</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            {eventos.length} evento{eventos.length !== 1 ? 's' : ''} este mes
+      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+        {/* Header compacto */}
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">Calendario</h1>
+          <p className="text-sm text-zinc-600 mt-0.5">
+            {eventos.length} evento{eventos.length !== 1 ? 's' : ''}
             {eventosVencidos.length > 0 && (
-              <span className="ml-2 text-red-600 font-medium">
+              <span className="ml-2 text-[#FF3B30] font-medium">
                 · {eventosVencidos.length} vencido{eventosVencidos.length !== 1 ? 's' : ''}
               </span>
             )}
           </p>
         </div>
 
-        {/* Filtros */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {['todos', 'arriendo', 'servicio', 'empleado', 'otro'].map((tipo) => (
-            <button
-              key={tipo}
-              onClick={() => setFiltroTipo(tipo)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filtroTipo === tipo
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {tipo === 'todos' ? 'Todos' : getTipoLabel(tipo)}
-              <span className="ml-2 text-sm opacity-75">
-                ({tipo === 'todos' ? eventos.length : eventos.filter(e => e.tipo === tipo).length})
-              </span>
-            </button>
-          ))}
+        {/* Filtros compactos */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {['todos', 'arriendo', 'servicio', 'empleado', 'otro'].map((tipo) => {
+            const count = tipo === 'todos' ? eventos.length : eventos.filter(e => e.tipo === tipo).length
+            const isActive = filtroTipo === tipo
+
+            return (
+              <button
+                key={tipo}
+                onClick={() => setFiltroTipo(tipo)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#007AFF] text-white shadow-sm'
+                    : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
+                }`}
+              >
+                {tipo === 'todos' ? 'Todos' : getTipoLabel(tipo)}
+                <span className={`ml-1.5 text-xs ${isActive ? 'opacity-90' : 'opacity-60'}`}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         {/* Eventos Vencidos */}
         {eventosVencidos.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-red-600 mb-4">
-              ⚠ Pagos Vencidos ({eventosVencidos.length})
+          <div className="mb-6">
+            <h2 className="text-base font-semibold text-[#FF3B30] mb-3 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              Vencidos ({eventosVencidos.length})
             </h2>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {eventosVencidos.map((evento) => (
                 <div
                   key={evento.id}
-                  className="bg-white rounded-lg border-2 border-red-200 p-4 shadow-sm"
+                  className="bg-white rounded-xl border border-[#FF3B30]/20 p-3 shadow-sm hover:shadow-md transition-all"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{evento.titulo}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{evento.descripcion}</p>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-zinc-900 text-sm truncate">{evento.titulo}</h3>
+                      <p className="text-xs text-zinc-600 mt-0.5 truncate">{evento.descripcion}</p>
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getColorTipo(evento.tipo)}`}>
+                    <span className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-md border flex-shrink-0 ${getColorTipo(evento.tipo)}`}>
                       {getTipoLabel(evento.tipo)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-red-600 font-medium">
-                      Día {evento.dia}
-                    </span>
+                  <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-zinc-100">
+                    <span className="text-[#FF3B30] font-medium">Día {evento.dia}</span>
                     {evento.monto && (
-                      <span className="text-gray-900 font-semibold">
-                        ${evento.monto.toLocaleString()}
-                      </span>
+                      <span className="text-zinc-900 font-semibold">${evento.monto.toLocaleString()}</span>
                     )}
                   </div>
                 </div>
