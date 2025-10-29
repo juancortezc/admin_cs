@@ -132,88 +132,96 @@ export default function ArrendatariosPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#007AFF]/30 border-t-[#007AFF] mx-auto"></div>
+          <p className="mt-3 text-sm text-zinc-600">Cargando...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-zinc-50">
       <Navbar activeTab="Arrendatarios" />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
         {/* Header con buscador y botón nuevo */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+        <div className="mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Arrendatarios</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <h1 className="text-xl font-bold text-zinc-900">Arrendatarios</h1>
+              <p className="text-xs text-zinc-600 mt-0.5">
                 {arrendatariosFiltrados.length} de {arrendatarios.length} registrados
               </p>
             </div>
             <button
               onClick={abrirModalNuevo}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors shadow-sm"
             >
               + Nuevo
             </button>
           </div>
 
           {/* Buscador */}
-          <input
-            type="text"
-            placeholder="Buscar por nombre, email o celular..."
-            value={busqueda}
-            onChange={(e) => setBusqueda(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-colors"
-          />
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Buscar por nombre, email o celular..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all placeholder:text-zinc-400"
+            />
+          </div>
         </div>
 
         {/* Lista de arrendatarios */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {arrendatariosFiltrados.map((arr) => (
             <div
               key={arr.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+              className="bg-white rounded-xl border border-zinc-200 p-3"
             >
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-base font-semibold text-zinc-900 flex-1">
                   {arr.nombre}
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex gap-2 ml-2">
                   <button
                     onClick={() => abrirModalEditar(arr)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    className="text-[#007AFF] hover:text-[#0051D5] text-xs font-medium"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => handleEliminar(arr.id)}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium"
+                    className="text-[#FF3B30] hover:text-[#D70015] text-xs font-medium"
                   >
                     Eliminar
                   </button>
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm">
+              <div className="space-y-1.5 text-sm">
                 <div>
-                  <span className="text-gray-600">Email:</span>
-                  <p className="text-gray-900">{arr.email}</p>
+                  <span className="text-zinc-500 text-xs">Email:</span>
+                  <p className="text-zinc-900 text-xs mt-0.5">{arr.email}</p>
                 </div>
                 <div>
-                  <span className="text-gray-600">Celular:</span>
-                  <p className="text-gray-900">{arr.celular}</p>
+                  <span className="text-zinc-500 text-xs">Celular:</span>
+                  <p className="text-zinc-900 text-xs mt-0.5">{arr.celular}</p>
                 </div>
                 {arr.espacios.length > 0 && (
-                  <div className="pt-2 border-t border-gray-100">
-                    <span className="text-gray-600 text-xs">Espacios:</span>
+                  <div className="pt-1.5 border-t border-zinc-100">
+                    <span className="text-zinc-500 text-xs">Espacios:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {arr.espacios.map((esp, idx) => (
                         <span
                           key={idx}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                          className="px-2 py-0.5 text-xs bg-[#007AFF]/10 text-[#007AFF] font-medium rounded-md"
                         >
                           {esp.identificador}
                         </span>
@@ -228,13 +236,13 @@ export default function ArrendatariosPage() {
 
         {arrendatariosFiltrados.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">
+            <p className="text-zinc-500 text-sm">
               {busqueda ? 'No se encontraron arrendatarios' : 'No hay arrendatarios registrados'}
             </p>
             {!busqueda && (
               <button
                 onClick={abrirModalNuevo}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="mt-3 px-3 py-1.5 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors"
               >
                 Crear el primero
               </button>
@@ -243,79 +251,106 @@ export default function ArrendatariosPage() {
         )}
       </main>
 
-      {/* Modal para crear/editar */}
+      {/* Modal para crear/editar - Apple style */}
       {modalAbierto && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              {editando ? 'Editar Arrendatario' : 'Nuevo Arrendatario'}
-            </h2>
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+            onClick={() => setModalAbierto(false)}
+          />
 
-            <form onSubmit={handleGuardar} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nombre completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.nombre}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nombre: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                />
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full pointer-events-auto animate-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-zinc-200">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-zinc-900">
+                    {editando ? 'Editar Arrendatario' : 'Nuevo Arrendatario'}
+                  </h2>
+                  <button
+                    onClick={() => setModalAbierto(false)}
+                    className="p-2 rounded-lg hover:bg-zinc-100 transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                />
-              </div>
+              {/* Form */}
+              <form onSubmit={handleGuardar} className="px-6 py-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                    Nombre completo *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.nombre}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nombre: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Celular *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={formData.celular}
-                  onChange={(e) =>
-                    setFormData({ ...formData, celular: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
-                />
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                  />
+                </div>
 
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setModalAbierto(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={guardando}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                >
-                  {guardando ? 'Guardando...' : 'Guardar'}
-                </button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                    Celular *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.celular}
+                    onChange={(e) =>
+                      setFormData({ ...formData, celular: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalAbierto(false)}
+                    disabled={guardando}
+                    className="flex-1 px-4 py-2.5 border border-zinc-300 text-zinc-900 font-medium text-sm rounded-lg hover:bg-zinc-50 transition-colors disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={guardando}
+                    className="flex-1 px-4 py-2.5 bg-[#007AFF] text-white font-medium text-sm rounded-lg hover:bg-[#0051D5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {guardando ? 'Guardando...' : 'Guardar'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   )
