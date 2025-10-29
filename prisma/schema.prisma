@@ -46,8 +46,131 @@ model Espacio {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // Relación con pagos de arriendo
+  pagosArriendo     PagoArriendo[]
+
   @@index([arrendatarioId])
   @@index([tipo])
+}
+
+// Registro de pagos de arriendo realizados
+model PagoArriendo {
+  id              String   @id @default(cuid())
+  espacioId       String
+  espacio         Espacio  @relation(fields: [espacioId], references: [id])
+
+  monto           Float
+  fechaPago       DateTime // Fecha real en que se pagó
+  fechaRegistro   DateTime @default(now())
+  diasRetraso     Int      @default(0) // Días de diferencia respecto al día esperado
+  observaciones   String?  @db.Text
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([espacioId])
+  @@index([fechaPago])
+}
+
+// Catálogo de servicios básicos (luz, agua, internet, etc)
+model ServicioBasico {
+  id              String          @id @default(cuid())
+  nombre          String          // Ej: "Luz", "Agua", "Internet"
+  proveedor       String?         // Empresa proveedora
+  tipoMonto       TipoMontoServicio @default(VARIABLE)
+  montoFijo       Float?          // Monto fijo si tipoMonto = FIJO
+  diaPago         Int             // Día del mes de vencimiento (1-31)
+  numeroCuenta    String?         // Número de cuenta/contrato
+  activo          Boolean         @default(true)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relación con pagos
+  pagos           PagoServicio[]
+
+  @@index([activo])
+}
+
+// Registro de pagos de servicios
+model PagoServicio {
+  id                String         @id @default(cuid())
+  servicioBasicoId  String
+  servicioBasico    ServicioBasico @relation(fields: [servicioBasicoId], references: [id])
+
+  monto             Float
+  fechaPago         DateTime
+  fechaRegistro     DateTime       @default(now())
+  comprobante       String?        // URL externa del comprobante
+  observaciones     String?        @db.Text
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@index([servicioBasicoId])
+  @@index([fechaPago])
+}
+
+// Empleados del edificio
+model Empleado {
+  id                String    @id @default(cuid())
+  nombre            String
+  celular           String
+  email             String?   @unique
+  cargo             String    // Función que desempeña
+  salario           Float     // Salario base mensual
+  diaPago           Int       // Día del mes de pago (1-31)
+  fechaContratacion DateTime
+  activo            Boolean   @default(true)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relación con pagos
+  pagos             PagoEmpleado[]
+
+  @@index([activo])
+}
+
+// Registro de pagos a empleados
+model PagoEmpleado {
+  id            String   @id @default(cuid())
+  empleadoId    String
+  empleado      Empleado @relation(fields: [empleadoId], references: [id])
+
+  periodo       String   // Formato: "2024-01" (año-mes)
+  monto         Float    // Salario base
+  bonos         Float    @default(0)
+  descuentos    Float    @default(0)
+  total         Float    // monto + bonos - descuentos
+  fechaPago     DateTime
+  fechaRegistro DateTime @default(now())
+  observaciones String?  @db.Text
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([empleadoId, periodo]) // Un pago por período
+  @@index([empleadoId])
+  @@index([fechaPago])
+}
+
+// Otros pagos (impuestos, reparaciones, proveedores, etc)
+model OtroPago {
+  id            String   @id @default(cuid())
+  descripcion   String
+  categoria     String   // Ej: "Impuesto", "Reparación", "Proveedor"
+  beneficiario  String?  // A quién se paga
+  monto         Float
+  fechaPago     DateTime
+  recurrente    Boolean  @default(false)
+  observaciones String?  @db.Text
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([fechaPago])
 }
 
 // Enum para tipos de espacios
@@ -55,4 +178,10 @@ enum TipoEspacio {
   LOCAL
   CONSULTORIO
   HABITACION
+}
+
+// Enum para tipo de monto de servicios
+enum TipoMontoServicio {
+  FIJO
+  VARIABLE
 }
