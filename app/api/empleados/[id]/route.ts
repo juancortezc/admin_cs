@@ -12,7 +12,7 @@ export async function GET(request: Request, { params }: Params) {
     const { id } = await params
     const empleado = await prisma.empleado.findUnique({
       where: { id },
-      include: { pagos: { orderBy: { fechaPago: 'desc' } } },
+      include: { pagosSalario: { orderBy: { fechaPago: 'desc' } } },
     })
 
     if (!empleado) {

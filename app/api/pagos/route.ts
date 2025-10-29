@@ -92,7 +92,7 @@ export async function GET(request: Request) {
     })
 
     // Normalizar todos los pagos a un formato unificado
-    const pagosUnificados = []
+    const pagosUnificados: any[] = []
 
     // Arriendos (ingresos)
     if (!tipo || tipo === 'todos' || tipo === 'arriendo') {

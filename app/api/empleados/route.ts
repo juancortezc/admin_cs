@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const empleados = await prisma.empleado.findMany({
       include: {
-        pagos: {
+        pagosSalario: {
           orderBy: { fechaPago: 'desc' },
           take: 3,
         },
