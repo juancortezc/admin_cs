@@ -10,7 +10,8 @@
     "seed": "tsx prisma/seed.ts",
     "seed:arrendatarios": "tsx prisma/seed-arrendatarios.ts",
     "seed:espacios": "tsx prisma/seed-espacios-update.ts",
-    "seed:cobros": "tsx prisma/seed-cobros-pdf.ts"
+    "seed:cobros": "tsx prisma/seed-cobros-pdf.ts",
+    "seed:pagos": "tsx prisma/seed-pagos-pdf.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

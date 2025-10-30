@@ -1,5 +1,6 @@
 /**
  * API de Otros Pagos - Operaciones individuales
+ * GET, PUT, DELETE
  */
 
 import { NextResponse } from 'next/server'
@@ -7,22 +8,48 @@ import { prisma } from '@/lib/prisma'
 
 type Params = { params: Promise<{ id: string }> }
 
+export async function GET(request: Request, { params }: Params) {
+  try {
+    const { id } = await params
+    const pago = await prisma.otroPago.findUnique({
+      where: { id },
+      include: {
+        pagoRecurrente: true,
+      },
+    })
+
+    if (!pago) {
+      return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 })
+    }
+
+    return NextResponse.json(pago)
+  } catch (error) {
+    return NextResponse.json({ error: 'Error al obtener pago' }, { status: 500 })
+  }
+}
+
 export async function PUT(request: Request, { params }: Params) {
   try {
     const { id } = await params
     const body = await request.json()
-    const { descripcion, categoria, beneficiario, monto, fechaPago, recurrente, observaciones } = body
 
     const pago = await prisma.otroPago.update({
       where: { id },
       data: {
-        descripcion,
-        categoria,
-        beneficiario,
-        monto: parseFloat(monto),
-        fechaPago: new Date(fechaPago),
-        recurrente,
-        observaciones,
+        proveedor: body.proveedor,
+        ruc: body.ruc || null,
+        cuentaDestino: body.cuentaDestino || null,
+        fechaPago: new Date(body.fechaPago),
+        fechaVencimiento: body.fechaVencimiento ? new Date(body.fechaVencimiento) : null,
+        periodo: body.periodo,
+        categoria: body.categoria,
+        monto: parseFloat(body.monto),
+        descripcion: body.descripcion,
+        numeroFactura: body.numeroFactura || null,
+        numeroDocumento: body.numeroDocumento || null,
+        metodoPago: body.metodoPago,
+        estado: body.estado,
+        observaciones: body.observaciones || null,
       },
     })
 

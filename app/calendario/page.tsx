@@ -12,7 +12,7 @@ import Toast from '@/app/components/Toast'
 
 type Evento = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'empleado' | 'otro'
+  tipo: 'arriendo' | 'servicio' | 'empleado' | 'pago'
   titulo: string
   descripcion: string
   monto: number | null
@@ -22,6 +22,8 @@ type Evento = {
   espacioId?: string
   servicioId?: string
   empleadoId?: string
+  pagoId?: string
+  categoria?: string
 }
 
 export default function CalendarioPage() {
@@ -89,7 +91,7 @@ export default function CalendarioPage() {
       case 'arriendo': return 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'
       case 'servicio': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
       case 'empleado': return 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20'
-      case 'otro': return 'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20'
+      case 'pago': return 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20'
       default: return 'bg-zinc-100 text-zinc-800 border-zinc-200'
     }
   }
@@ -99,7 +101,7 @@ export default function CalendarioPage() {
       case 'arriendo': return 'Arriendo'
       case 'servicio': return 'Servicio'
       case 'empleado': return 'Salario'
-      case 'otro': return 'Otro'
+      case 'pago': return 'Pago'
       default: return tipo
     }
   }
@@ -143,7 +145,7 @@ export default function CalendarioPage() {
 
         {/* Filtros compactos */}
         <div className="mb-4 flex flex-wrap gap-2">
-          {['todos', 'arriendo', 'servicio', 'empleado', 'otro'].map((tipo) => {
+          {['todos', 'arriendo', 'servicio', 'empleado', 'pago'].map((tipo) => {
             const count = tipo === 'todos' ? eventos.length : eventos.filter(e => e.tipo === tipo).length
             const isActive = filtroTipo === tipo
 

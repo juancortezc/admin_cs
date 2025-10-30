@@ -164,24 +164,81 @@ model PagoSalario {
   @@index([fechaPago])
 }
 
-// Otros pagos (impuestos, reparaciones, proveedores, etc)
+// Otros pagos (gastos del edificio) - Sistema completo
 model OtroPago {
-  id            String   @id @default(cuid())
-  descripcion   String
-  categoria     String   // Ej: "Impuesto", "Reparación", "Proveedor"
-  beneficiario  String?  // A quién se paga
-  monto         Float
-  fechaPago     DateTime
-  recurrente    Boolean  @default(false)
-  formaPago     FormaPago?
-  referencia    String?  // Número de transferencia o cheque
-  observaciones String?  @db.Text
+  id                    String              @id @default(cuid())
+  codigoInterno         String              @unique // G-0001, S-001, etc.
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  // Información del proveedor
+  proveedor             String
+  ruc                   String?
+  cuentaDestino         String?             // Cuenta bancaria del proveedor
+
+  // Detalles del pago
+  fechaPago             DateTime
+  fechaVencimiento      DateTime?
+  periodo               String              // YYYY-MM
+  categoria             CategoriaPago
+  monto                 Float
+
+  // Documentación (3 columnas separadas)
+  descripcion           String              @db.Text
+  numeroFactura         String?             // Factura del proveedor
+  numeroDocumento       String?             // Referencia de transacción bancaria
+
+  // Ejecución del pago
+  metodoPago            FormaPago
+  estado                EstadoPago          @default(PENDIENTE)
+
+  // Relación con pago recurrente (si fue auto-generado)
+  pagoRecurrenteId      String?
+  pagoRecurrente        PagoRecurrente?     @relation(fields: [pagoRecurrenteId], references: [id])
+
+  // Metadata
+  observaciones         String?             @db.Text
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
 
   @@index([categoria])
+  @@index([estado])
   @@index([fechaPago])
+  @@index([periodo])
+  @@index([pagoRecurrenteId])
+}
+
+// Configuración de pagos recurrentes
+model PagoRecurrente {
+  id                String              @id @default(cuid())
+  codigoInterno     String              @unique // PR-0001, PR-0002, etc.
+  nombre            String              // Nombre descriptivo
+  proveedor         String
+  ruc               String?
+  cuentaDestino     String?             // Cuenta bancaria del proveedor
+  categoria         CategoriaPago
+  descripcion       String              @db.Text
+
+  // Configuración de montos
+  montoFijo         Float?              // Null si es variable
+  esMontoVariable   Boolean             @default(false)
+  metodoPago        FormaPago           @default(TRANSFERENCIA)
+
+  // Configuración de recurrencia
+  frecuencia        FrecuenciaPago
+  diaPago           Int?                // Día del mes (1-30) para frecuencia mensual
+  fechaInicio       DateTime
+  fechaFin          DateTime?           // Null = indefinido
+  activo            Boolean             @default(true)
+
+  // Relación con pagos generados
+  pagosGenerados    OtroPago[]
+
+  // Metadata
+  observaciones     String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([activo])
+  @@index([frecuencia])
 }
 
 // Modelo de Cobro - Sistema completo de cobros (reemplaza/amplía CobroArriendo)
@@ -264,4 +321,35 @@ enum EstadoCobro {
   PAGADO
   PENDIENTE
   PARCIAL
+}
+
+// Enum para categorías de pagos
+enum CategoriaPago {
+  MANTENIMIENTO
+  SERVICIOS_PUBLICOS      // Agua, luz, internet
+  SERVICIOS_PERSONALES    // Empleados, contratistas
+  LIMPIEZA
+  HONORARIOS              // Contador, abogado, etc
+  IMPUESTOS
+  NOMINA                  // Salarios
+  OTROS
+}
+
+// Enum para frecuencia de pagos recurrentes
+enum FrecuenciaPago {
+  SEMANAL
+  QUINCENAL
+  MENSUAL
+  BIMENSUAL
+  TRIMESTRAL
+  ANUAL
+  UNICA                   // Pago único
+}
+
+// Enum para estados de pagos
+enum EstadoPago {
+  PENDIENTE
+  PAGADO
+  VENCIDO
+  CANCELADO
 }

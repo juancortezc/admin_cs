@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const mes = searchParams.get('mes') // Formato: 2024-10
-    const tipo = searchParams.get('tipo') // arriendos, servicios, empleados, otros
+    const tipo = searchParams.get('tipo') // arriendos, servicios, empleados, pagos
 
     const now = new Date()
     const currentYear = now.getFullYear()
@@ -186,13 +186,31 @@ export async function GET(request: Request) {
       })
     }
 
-    // Otros pagos
-    if (!tipo || tipo === 'otros') {
+    // Otros pagos (PENDIENTES y VENCIDOS solamente)
+    if (!tipo || tipo === 'pagos') {
       const otrosPagos = await prisma.otroPago.findMany({
         where: {
-          fechaPago: {
-            gte: new Date(year, month - 1, 1),
-            lt: new Date(year, month, 1),
+          estado: { in: ['PENDIENTE', 'VENCIDO'] },
+          OR: [
+            {
+              fechaPago: {
+                gte: new Date(year, month - 1, 1),
+                lt: new Date(year, month, 1),
+              },
+            },
+            {
+              fechaVencimiento: {
+                gte: new Date(year, month - 1, 1),
+                lt: new Date(year, month, 1),
+              },
+            },
+          ],
+        },
+        include: {
+          pagoRecurrente: {
+            select: {
+              nombre: true,
+            },
           },
         },
       })
@@ -200,17 +218,19 @@ export async function GET(request: Request) {
       otrosPagos.forEach((pago) => {
         const hoy = new Date()
         hoy.setHours(0, 0, 0, 0)
-        const vencido = new Date(pago.fechaPago) < hoy
+        const fechaRef = pago.fechaVencimiento || pago.fechaPago
+        const vencido = new Date(fechaRef) < hoy
 
         eventos.push({
-          id: `otro-${pago.id}`,
-          tipo: 'otro',
-          titulo: pago.descripcion,
-          descripcion: pago.categoria,
+          id: `pago-${pago.id}`,
+          tipo: 'pago',
+          titulo: pago.proveedor,
+          descripcion: pago.descripcion.substring(0, 50) + (pago.descripcion.length > 50 ? '...' : ''),
           monto: pago.monto,
-          fecha: pago.fechaPago.toISOString(),
-          dia: new Date(pago.fechaPago).getDate(),
+          fecha: fechaRef.toISOString(),
+          dia: new Date(fechaRef).getDate(),
           vencido,
+          categoria: pago.categoria,
           pagoId: pago.id,
         })
       })

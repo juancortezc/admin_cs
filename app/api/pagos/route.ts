@@ -78,7 +78,7 @@ export async function GET(request: Request) {
     // Obtener otros pagos
     const otrosPagos = await prisma.otroPago.findMany({
       where: {
-        ...(formaPago && { formaPago: formaPago as any }),
+        ...(formaPago && { metodoPago: formaPago as any }),
         ...(fechaInicio && fechaFin && {
           fechaPago: {
             gte: new Date(fechaInicio),
@@ -164,13 +164,15 @@ export async function GET(request: Request) {
           tipo: 'otro',
           tipoLabel: 'Otro',
           esIngreso: false,
-          titulo: pago.descripcion,
-          descripcion: pago.categoria || '',
+          titulo: pago.proveedor,
+          descripcion: pago.descripcion,
           monto: pago.monto,
           fecha: pago.fechaPago,
-          formaPago: pago.formaPago,
-          referencia: pago.referencia,
+          formaPago: pago.metodoPago,
+          referencia: pago.numeroDocumento,
           observaciones: pago.observaciones,
+          categoria: pago.categoria,
+          numeroFactura: pago.numeroFactura,
           createdAt: pago.createdAt,
         })
       })

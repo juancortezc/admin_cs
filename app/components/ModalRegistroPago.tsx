@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 
 type Evento = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'empleado' | 'otro'
+  tipo: 'arriendo' | 'servicio' | 'empleado' | 'otro' | 'pago'
   titulo: string
   descripcion: string
   monto: number | null
@@ -17,6 +17,7 @@ type Evento = {
   espacioId?: string
   servicioId?: string
   empleadoId?: string
+  pagoId?: string
 }
 
 type ModalRegistroPagoProps = {
@@ -96,6 +97,46 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
       } else if (evento.tipo === 'otro') {
         endpoint = '/api/otros-pagos'
         body.fechaPago = fecha
+      } else if (evento.tipo === 'pago') {
+        // Para pagos existentes pendientes, actualizar a PAGADO
+        if (evento.pagoId) {
+          // Primero obtener el pago completo
+          const pagoRes = await fetch(`/api/otros-pagos/${evento.pagoId}`)
+          if (!pagoRes.ok) {
+            alert('Error al obtener datos del pago')
+            setGuardando(false)
+            return
+          }
+          const pagoData = await pagoRes.json()
+
+          // Actualizar con los nuevos valores
+          endpoint = `/api/otros-pagos/${evento.pagoId}`
+          const updateBody = {
+            ...pagoData,
+            estado: 'PAGADO',
+            fechaPago: fecha,
+            monto: parseFloat(monto),
+            metodoPago: formaPago,
+            numeroDocumento: referencia || pagoData.numeroDocumento,
+            observaciones: observaciones || pagoData.observaciones,
+          }
+
+          const res = await fetch(endpoint, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateBody),
+          })
+
+          if (res.ok) {
+            onSuccess()
+            onClose()
+          } else {
+            const error = await res.json()
+            alert(error.error || 'Error al registrar pago')
+          }
+          setGuardando(false)
+          return
+        }
       }
 
       const res = await fetch(endpoint, {
