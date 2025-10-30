@@ -62,15 +62,25 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
 
       // Determinar endpoint y campos específicos según tipo
       if (evento.tipo === 'arriendo') {
-        endpoint = '/api/cobros/arriendos'
+        // Usar el nuevo modelo de Cobros
+        endpoint = '/api/cobros'
         body.espacioId = evento.espacioId
-        body.fechaCobro = fecha
-        // Calcular días de retraso
-        const fechaEsperada = new Date()
-        fechaEsperada.setDate(evento.dia)
-        const fechaReal = new Date(fecha)
-        const diasRetraso = Math.max(0, Math.floor((fechaReal.getTime() - fechaEsperada.getTime()) / (1000 * 60 * 60 * 24)))
-        body.diasRetraso = diasRetraso
+        body.fechaPago = fecha
+        body.montoPagado = parseFloat(monto)
+        body.montoPactado = parseFloat(monto) // Asumimos que paga exacto
+        body.concepto = 'RENTA' // Por defecto
+        body.metodoPago = formaPago
+
+        // Calcular fecha de vencimiento
+        const fechaVencimiento = new Date()
+        fechaVencimiento.setDate(evento.dia)
+        body.fechaVencimiento = fechaVencimiento.toISOString().split('T')[0]
+
+        // Período actual (YYYY-MM)
+        const now = new Date()
+        body.periodo = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+        body.estado = 'PAGADO'
+        body.numeroComprobante = referencia
       } else if (evento.tipo === 'servicio') {
         endpoint = '/api/pagos/servicios'
         body.servicioBasicoId = evento.servicioId

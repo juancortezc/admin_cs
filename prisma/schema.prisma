@@ -40,7 +40,9 @@ model Espacio {
   fechaInicio       DateTime?
   fechaFin          DateTime?
   monto             Float?
+  montoPactado      Float?    // Monto pactado que puede diferir del monto real
   diaPago           Int? // Día del mes (1-31)
+  conceptoCobro     ConceptoCobro @default(RENTA) // Tipo de cobro: RENTA, AIRBNB, OTRO
   observaciones     String?   @db.Text
 
   createdAt         DateTime  @default(now())
@@ -48,6 +50,7 @@ model Espacio {
 
   // Relación con cobros de arriendo
   cobrosArriendo    CobroArriendo[]
+  cobros            Cobro[]
 
   @@index([arrendatarioId])
   @@index([tipo])
@@ -181,6 +184,54 @@ model OtroPago {
   @@index([fechaPago])
 }
 
+// Modelo de Cobro - Sistema completo de cobros (reemplaza/amplía CobroArriendo)
+model Cobro {
+  id                    String        @id @default(cuid())
+  codigoInterno         String        @unique // P-0001, P-0002, etc. (auto-generado)
+  espacioId             String
+  espacio               Espacio       @relation(fields: [espacioId], references: [id])
+
+  // Concepto del cobro
+  concepto              ConceptoCobro @default(RENTA)
+  conceptoPersonalizado String?       // Si concepto = OTRO, especificar aquí
+  periodo               String?       // YYYY-MM (opcional para Airbnb, obligatorio para rentas)
+
+  // Montos
+  montoPagado           Float
+  montoPactado          Float
+  diferencia            Float         // montoPagado - montoPactado (calculado)
+
+  // Fechas
+  fechaPago             DateTime
+  fechaVencimiento      DateTime
+  diasDiferencia        Int?          // días entre fechaPago y fechaVencimiento (solo si pagado completo)
+
+  // Método de pago
+  metodoPago            FormaPago
+  numeroComprobante     String?
+
+  // Estado
+  estado                EstadoCobro   @default(PENDIENTE)
+
+  // Pagos parciales
+  esParcial             Boolean       @default(false)
+  cobroRelacionadoId    String?       // ID del cobro principal (para vincular pagos parciales)
+  cobroRelacionado      Cobro?        @relation("PagosParciales", fields: [cobroRelacionadoId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  pagosParciales        Cobro[]       @relation("PagosParciales")
+
+  // Metadata
+  observaciones         String?       @db.Text
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([espacioId])
+  @@index([concepto])
+  @@index([estado])
+  @@index([fechaPago])
+  @@index([periodo])
+  @@index([cobroRelacionadoId])
+}
+
 // Enum para tipos de espacios
 enum TipoEspacio {
   LOCAL
@@ -199,4 +250,18 @@ enum FormaPago {
   TRANSFERENCIA
   EFECTIVO
   CHEQUE
+}
+
+// Enum para conceptos de cobro
+enum ConceptoCobro {
+  RENTA
+  AIRBNB
+  OTRO
+}
+
+// Enum para estados de cobro
+enum EstadoCobro {
+  PAGADO
+  PENDIENTE
+  PARCIAL
 }

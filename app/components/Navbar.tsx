@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 type NavbarProps = {
-  activeTab?: 'Calendario' | 'Pagos' | 'Caja' | 'Mantenimiento' | 'Espacios' | 'Arrendatarios'
+  activeTab?: 'Calendario' | 'Cobros' | 'Pagos' | 'Caja' | 'Mantenimiento' | 'Espacios' | 'Arrendatarios'
 }
 
 export default function Navbar({ activeTab }: NavbarProps) {
@@ -22,6 +22,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
   const tabs = [
     { nombre: 'Calendario', ruta: '/calendario' },
+    { nombre: 'Cobros', ruta: '/cobros' },
     { nombre: 'Pagos', ruta: '/pagos' },
     { nombre: 'Caja', ruta: '/caja' },
     { nombre: 'Mantenimiento', ruta: '/mantenimiento' },

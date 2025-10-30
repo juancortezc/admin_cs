@@ -38,6 +38,11 @@ async function main() {
     { identificador: 'H-202', tipo: 'HABITACION', observaciones: '' },
     { identificador: 'H-204', tipo: 'HABITACION', observaciones: '' },
     { identificador: 'H-205', tipo: 'HABITACION', observaciones: '' },
+    { identificador: 'H-209', tipo: 'HABITACION', observaciones: 'HOSPEDAJE AIRBNB', conceptoCobro: 'AIRBNB' },
+
+    // Locales adicionales
+    { identificador: 'L-117', tipo: 'LOCAL', observaciones: '' },
+    { identificador: 'L-118', tipo: 'LOCAL', observaciones: '' },
   ]
 
   // Crear espacios

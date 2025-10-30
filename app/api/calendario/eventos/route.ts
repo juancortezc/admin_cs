@@ -23,6 +23,7 @@ export async function GET(request: Request) {
     const eventos: any[] = []
 
     // Calcular arriendos pendientes (espacios con arrendatario y día de pago)
+    // Ahora verifica cobros en el nuevo modelo "Cobro" en lugar de "CobroArriendo"
     if (!tipo || tipo === 'arriendos') {
       const espacios = await prisma.espacio.findMany({
         where: {
@@ -39,12 +40,18 @@ export async function GET(request: Request) {
               },
             },
           },
+          cobros: {
+            where: {
+              periodo: `${year}-${month.toString().padStart(2, '0')}`,
+              estado: { not: 'PENDIENTE' }, // Si NO está pendiente, ya fue pagado
+            },
+          },
         },
       })
 
       espacios.forEach((espacio) => {
-        // Solo agregar si no hay cobro registrado para este mes
-        if (espacio.cobrosArriendo.length === 0 && espacio.diaPago) {
+        // Solo agregar si no hay cobro registrado para este mes (ni en CobroArriendo ni en Cobro)
+        if (espacio.cobrosArriendo.length === 0 && espacio.cobros.length === 0 && espacio.diaPago) {
           const fechaEvento = new Date(year, month - 1, espacio.diaPago)
           const hoy = new Date()
           hoy.setHours(0, 0, 0, 0)
@@ -62,6 +69,45 @@ export async function GET(request: Request) {
             espacioId: espacio.id,
           })
         }
+      })
+    }
+
+    // También incluir cobros con estado PENDIENTE del nuevo modelo
+    if (!tipo || tipo === 'arriendos') {
+      const cobrosPendientes = await prisma.cobro.findMany({
+        where: {
+          estado: 'PENDIENTE',
+          fechaVencimiento: {
+            gte: new Date(year, month - 1, 1),
+            lt: new Date(year, month, 1),
+          },
+        },
+        include: {
+          espacio: {
+            include: {
+              arrendatario: true,
+            },
+          },
+        },
+      })
+
+      cobrosPendientes.forEach((cobro) => {
+        const hoy = new Date()
+        hoy.setHours(0, 0, 0, 0)
+        const vencido = new Date(cobro.fechaVencimiento) < hoy
+
+        eventos.push({
+          id: `cobro-pendiente-${cobro.id}`,
+          tipo: 'arriendo',
+          titulo: `${cobro.concepto} ${cobro.espacio.identificador}`,
+          descripcion: cobro.espacio.arrendatario?.nombre || '',
+          monto: cobro.montoPactado,
+          fecha: cobro.fechaVencimiento.toISOString(),
+          dia: new Date(cobro.fechaVencimiento).getDate(),
+          vencido,
+          espacioId: cobro.espacioId,
+          cobroId: cobro.id, // Para poder editarlo si ya existe
+        })
       })
     }
 
