@@ -52,6 +52,7 @@ model Espacio {
   cobrosArriendo    CobroArriendo[]
   cobros            Cobro[]
   movimientosInventario MovimientoInventario[]
+  ticketsMantenimiento TicketMantenimiento[]
 
   @@index([arrendatarioId])
   @@index([tipo])
@@ -94,6 +95,7 @@ model ServicioBasico {
 
   // Relación con pagos
   pagos           PagoServicio[]
+  ticketsMantenimiento TicketMantenimiento[]
 
   @@index([activo])
 }
@@ -775,4 +777,124 @@ enum TipoMovimiento {
   SALIDA              // Consumo, entrega, pérdida
   AJUSTE_POSITIVO     // Corrección de inventario
   AJUSTE_NEGATIVO     // Corrección de inventario
+}
+
+// ============================================
+// SISTEMA DE TICKETS DE MANTENIMIENTO
+// ============================================
+
+// Ticket de Mantenimiento
+model TicketMantenimiento {
+  id                    String                      @id @default(cuid())
+  numeroTicket          String                      @unique // TKT-0001, TKT-0002, etc.
+
+  // Información básica
+  titulo                String
+  descripcion           String                      @db.Text
+  prioridad             PrioridadTicket             @default(MEDIA)
+  categoria             CategoriaTicket             @default(GENERAL)
+
+  // Estado y fechas
+  estado                EstadoTicket                @default(PENDIENTE)
+  fechaCreacion         DateTime                    @default(now())
+  fechaInicio           DateTime?                   // Cuando se empieza a trabajar
+  fechaEstimada         DateTime?                   // Fecha estimada de finalización
+  fechaCompletado       DateTime?                   // Fecha real de finalización
+
+  // Costos
+  costoEstimado         Float?                      @default(0)
+  costoReal             Float?                      @default(0)
+
+  // Relaciones
+  espacioId             String?
+  espacio               Espacio?                    @relation(fields: [espacioId], references: [id])
+
+  proveedorId           String?
+  proveedor             ServicioBasico?             @relation(fields: [proveedorId], references: [id])
+
+  // Personal asignado
+  asignadoA             String?                     // Nombre del técnico/persona asignada
+
+  // Metadata
+  observaciones         String?                     @db.Text
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+
+  // Relaciones
+  novedades             NovedadTicket[]
+
+  @@index([estado])
+  @@index([prioridad])
+  @@index([categoria])
+  @@index([espacioId])
+  @@index([fechaCreacion])
+}
+
+// Novedades/Actualizaciones de un Ticket
+model NovedadTicket {
+  id                    String                      @id @default(cuid())
+
+  ticketId              String
+  ticket                TicketMantenimiento         @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  // Contenido de la novedad
+  descripcion           String                      @db.Text
+  tipo                  TipoNovedad                 @default(ACTUALIZACION)
+
+  // Costos asociados a esta novedad
+  costoAsociado         Float?                      @default(0)
+
+  // Usuario que registra
+  registradoPor         String?                     // Nombre de quien registra
+
+  // Metadata
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+
+  @@index([ticketId])
+  @@index([tipo])
+  @@index([createdAt])
+}
+
+// ============================================
+// ENUMS PARA TICKETS DE MANTENIMIENTO
+// ============================================
+
+enum PrioridadTicket {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum EstadoTicket {
+  PENDIENTE
+  EN_PROCESO
+  EN_ESPERA           // Esperando piezas, aprobación, etc.
+  COMPLETADO
+  CANCELADO
+}
+
+enum CategoriaTicket {
+  GENERAL
+  ELECTRICIDAD
+  PLOMERIA
+  PINTURA
+  CARPINTERIA
+  CERRAJERIA
+  LIMPIEZA
+  ELECTRODOMESTICOS
+  CLIMATIZACION       // AC, calefacción
+  TECNOLOGIA          // Internet, cámaras, etc.
+  MOBILIARIO
+  OTROS
+}
+
+enum TipoNovedad {
+  ACTUALIZACION       // Progreso general
+  CAMBIO_ESTADO       // Cambio de estado del ticket
+  COSTO_ADICIONAL     // Registro de costo adicional
+  PROBLEMA            // Problema encontrado
+  SOLUCION            // Solución aplicada
+  NOTA                // Nota general
 }
