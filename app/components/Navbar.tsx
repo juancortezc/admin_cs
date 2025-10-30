@@ -13,7 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 type NavbarProps = {
-  activeTab?: 'Calendario' | 'Cobros' | 'Pagos' | 'Caja' | 'Mantenimiento' | 'Espacios' | 'Arrendatarios' | 'Airbnb'
+  activeTab?: 'Calendario' | 'Cobros' | 'Pagos' | 'Caja' | 'Mantenimiento' | 'Espacios' | 'Arrendatarios' | 'Airbnb' | 'Inventario'
 }
 
 export default function Navbar({ activeTab }: NavbarProps) {
@@ -25,6 +25,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
     { nombre: 'Cobros', ruta: '/cobros' },
     { nombre: 'Pagos', ruta: '/pagos' },
     { nombre: 'Airbnb', ruta: '/airbnb' },
+    { nombre: 'Inventario', ruta: '/inventario' },
     { nombre: 'Caja', ruta: '/caja' },
     { nombre: 'Mantenimiento', ruta: '/mantenimiento' },
     { nombre: 'Espacios', ruta: '/espacios' },

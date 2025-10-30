@@ -51,6 +51,7 @@ model Espacio {
   // Relación con cobros de arriendo
   cobrosArriendo    CobroArriendo[]
   cobros            Cobro[]
+  movimientosInventario MovimientoInventario[]
 
   @@index([arrendatarioId])
   @@index([tipo])
@@ -474,6 +475,7 @@ model ReservaAirbnb {
   // Relaciones
   abonos                AbonoReserva[]
   mantenimientos        MantenimientoAirbnb[]
+  kitsEntregados        EntregaKit[]
 
   @@index([espacioId])
   @@index([huespedId])
@@ -580,4 +582,197 @@ enum EstadoMantenimiento {
   EN_PROCESO
   COMPLETADO
   CANCELADO
+}
+
+// ============================================
+// SISTEMA DE INVENTARIO
+// ============================================
+
+// Items de inventario (productos, amenidades, suministros)
+model ItemInventario {
+  id                String    @id @default(cuid())
+  codigo            String    @unique // INV-0001, INV-0002, etc.
+  nombre            String
+  descripcion       String?   @db.Text
+  categoria         CategoriaInventario
+  unidadMedida      String    // Unidad, Paquete, Caja, Litro, etc.
+
+  // Stock y control
+  stockActual       Int       @default(0)
+  stockMinimo       Int       @default(0)
+
+  // Proveedor y costos
+  proveedor         String?
+  costoUnitario     Float     @default(0)
+
+  // Estado
+  activo            Boolean   @default(true)
+
+  // Metadata
+  observaciones     String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relaciones
+  movimientos       MovimientoInventario[]
+  itemsKit          ItemKit[]
+
+  @@index([categoria])
+  @@index([activo])
+  @@index([stockActual])
+}
+
+// Movimientos de inventario (Kardex)
+model MovimientoInventario {
+  id                String              @id @default(cuid())
+  numeroMovimiento  String              @unique // MOV-0001, MOV-0002, etc.
+
+  // Relación con item
+  itemId            String
+  item              ItemInventario      @relation(fields: [itemId], references: [id])
+
+  // Tipo de movimiento
+  tipoMovimiento    TipoMovimiento
+  motivo            String?             @db.Text
+
+  // Cantidades y costos
+  cantidad          Int
+  costoUnitario     Float
+  costoTotal        Float               // cantidad * costoUnitario
+
+  // Saldos después del movimiento
+  saldoCantidad     Int
+  saldoValor        Float
+
+  // Información de salida
+  personaRecibe     String?             // Para salidas
+  espacioId         String?             // Vinculación con espacio
+  espacio           Espacio?            @relation(fields: [espacioId], references: [id], onDelete: SetNull)
+
+  // Información de entrada
+  numeroFactura     String?
+  numeroDocumento   String?
+
+  // Vinculación con kits
+  entregaKitId      String?
+  entregaKit        EntregaKit?         @relation(fields: [entregaKitId], references: [id], onDelete: SetNull)
+
+  // Metadata
+  fecha             DateTime            @default(now())
+  observaciones     String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([itemId])
+  @@index([tipoMovimiento])
+  @@index([fecha])
+  @@index([espacioId])
+  @@index([entregaKitId])
+}
+
+// Kits de Airbnb (conjunto de items)
+model KitAirbnb {
+  id                String    @id @default(cuid())
+  codigo            String    @unique // KIT-0001, KIT-0002, etc.
+  nombre            String    // Ej: "Kit Check-in Estándar", "Kit Premium"
+  descripcion       String?   @db.Text
+
+  // Estado
+  activo            Boolean   @default(true)
+
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relaciones
+  items             ItemKit[]
+  entregas          EntregaKit[]
+
+  @@index([activo])
+}
+
+// Items que componen un kit (relación muchos a muchos)
+model ItemKit {
+  id                String            @id @default(cuid())
+
+  kitId             String
+  kit               KitAirbnb         @relation(fields: [kitId], references: [id], onDelete: Cascade)
+
+  itemId            String
+  item              ItemInventario    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  cantidad          Int               @default(1) // Cantidad del item en el kit
+
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@unique([kitId, itemId]) // Un item solo puede estar una vez en un kit
+  @@index([kitId])
+  @@index([itemId])
+}
+
+// Entregas de kits a reservas (control de check-in/check-out)
+model EntregaKit {
+  id                String              @id @default(cuid())
+  numeroEntrega     String              @unique // ENT-0001, ENT-0002, etc.
+
+  // Relación con kit y reserva
+  kitId             String
+  kit               KitAirbnb           @relation(fields: [kitId], references: [id])
+
+  reservaId         String
+  reserva           ReservaAirbnb       @relation(fields: [reservaId], references: [id])
+
+  // Control de entrega
+  fechaEntrega      DateTime            @default(now())
+  entregadoPor      String?             // Nombre de quien entrega
+
+  // Control de devolución
+  devuelto          Boolean             @default(false)
+  fechaDevolucion   DateTime?
+  recibidoPor       String?             // Nombre de quien recibe devolución
+
+  // Items faltantes o dañados en devolución
+  itemsFaltantes    String?             @db.Text // JSON con items y cantidades
+  itemsDanados      String?             @db.Text // JSON con items y cantidades
+
+  // Costo total del kit al momento de entrega
+  costoTotal        Float
+
+  // Metadata
+  observaciones     String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  // Relación con movimientos (se crean movimientos por cada item del kit)
+  movimientos       MovimientoInventario[]
+
+  @@index([kitId])
+  @@index([reservaId])
+  @@index([devuelto])
+  @@index([fechaEntrega])
+}
+
+// ============================================
+// ENUMS PARA INVENTARIO
+// ============================================
+
+enum CategoriaInventario {
+  LIMPIEZA
+  AMENIDADES          // Toallas, sábanas, jabones
+  COCINA              // Utensilios, vajilla
+  BANO                // Papel higiénico, shampoo
+  ELECTRODOMESTICOS
+  MUEBLES
+  DECORACION
+  MANTENIMIENTO       // Herramientas, pinturas
+  OFICINA             // Papelería, útiles
+  OTROS
+}
+
+enum TipoMovimiento {
+  ENTRADA             // Compra, devolución
+  SALIDA              // Consumo, entrega, pérdida
+  AJUSTE_POSITIVO     // Corrección de inventario
+  AJUSTE_NEGATIVO     // Corrección de inventario
 }
