@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
 import ModalRegistroCobro from '@/app/components/ModalRegistroCobro'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 type Cobro = {
   id: string
@@ -218,25 +219,27 @@ export default function CobrosPage() {
         )}
 
         {/* Sub-tabs */}
-        <div className="mb-4 flex flex-wrap gap-2">
-          <button
-            onClick={() => router.push('/cobros')}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-[#007AFF] text-white shadow-sm"
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => router.push('/cobros/parciales')}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200"
-          >
-            Pagos Parciales
-          </button>
-          <button
-            onClick={() => router.push('/cobros/espacios')}
-            className="px-3 py-1.5 rounded-lg text-sm font-medium bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200"
-          >
-            Por Espacio
-          </button>
+        <div className="border-b border-zinc-200 mb-4">
+          <nav className="-mb-px flex space-x-8">
+            <Link
+              href="/cobros"
+              className="border-[#007AFF] text-[#007AFF] whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+              Todos los Cobros
+            </Link>
+            <Link
+              href="/cobros/parciales"
+              className="border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+              Pagos Parciales
+            </Link>
+            <Link
+              href="/cobros/espacios"
+              className="border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+              Por Espacio
+            </Link>
+          </nav>
         </div>
 
         {/* Búsqueda y Filtros */}
@@ -355,10 +358,10 @@ export default function CobrosPage() {
         {/* Listado de Cobros */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {cobros.map((cobro) => (
-            <div
+            <Link
               key={cobro.id}
-              className="bg-white rounded-xl border border-zinc-200 p-3 hover:shadow-md transition-all cursor-pointer"
-              onClick={() => router.push(`/cobros/${cobro.id}`)}
+              href={`/cobros/${cobro.id}`}
+              className="bg-white rounded-xl border border-zinc-200 p-3 hover:shadow-md transition-all cursor-pointer block"
             >
               {/* Header */}
               <div className="flex justify-between items-start mb-2">
@@ -432,7 +435,7 @@ export default function CobrosPage() {
                   {new Date(cobro.fechaPago).toLocaleDateString('es-ES')}
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
