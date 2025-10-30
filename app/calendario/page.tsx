@@ -12,7 +12,7 @@ import Toast from '@/app/components/Toast'
 
 type Evento = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'empleado' | 'pago'
+  tipo: 'arriendo' | 'servicio' | 'empleado' | 'pago' | 'airbnb_checkin' | 'airbnb_checkout'
   titulo: string
   descripcion: string
   monto: number | null
@@ -24,6 +24,8 @@ type Evento = {
   empleadoId?: string
   pagoId?: string
   categoria?: string
+  reservaId?: string
+  codigoReserva?: string
 }
 
 export default function CalendarioPage() {
@@ -92,6 +94,8 @@ export default function CalendarioPage() {
       case 'servicio': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
       case 'empleado': return 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20'
       case 'pago': return 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20'
+      case 'airbnb_checkin': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
+      case 'airbnb_checkout': return 'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20'
       default: return 'bg-zinc-100 text-zinc-800 border-zinc-200'
     }
   }
@@ -102,6 +106,8 @@ export default function CalendarioPage() {
       case 'servicio': return 'Servicio'
       case 'empleado': return 'Salario'
       case 'pago': return 'Pago'
+      case 'airbnb_checkin': return 'Check-in'
+      case 'airbnb_checkout': return 'Check-out'
       default: return tipo
     }
   }

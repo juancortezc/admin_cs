@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const mes = searchParams.get('mes') // Formato: 2024-10
-    const tipo = searchParams.get('tipo') // arriendos, servicios, empleados, pagos
+    const tipo = searchParams.get('tipo') // arriendos, servicios, empleados, pagos, airbnb
 
     const now = new Date()
     const currentYear = now.getFullYear()
@@ -233,6 +233,85 @@ export async function GET(request: Request) {
           categoria: pago.categoria,
           pagoId: pago.id,
         })
+      })
+    }
+
+    // Reservas Airbnb (check-ins y check-outs del mes)
+    if (!tipo || tipo === 'airbnb') {
+      const reservasAirbnb = await prisma.reservaAirbnb.findMany({
+        where: {
+          OR: [
+            {
+              checkIn: {
+                gte: new Date(year, month - 1, 1),
+                lt: new Date(year, month, 1),
+              },
+            },
+            {
+              checkOut: {
+                gte: new Date(year, month - 1, 1),
+                lt: new Date(year, month, 1),
+              },
+            },
+            {
+              AND: [
+                { checkIn: { lt: new Date(year, month - 1, 1) } },
+                { checkOut: { gte: new Date(year, month, 1) } },
+              ],
+            },
+          ],
+          estadoReserva: { in: ['CONFIRMADA', 'EN_CURSO'] },
+        },
+        include: {
+          espacio: true,
+          huesped: true,
+        },
+      })
+
+      reservasAirbnb.forEach((reserva) => {
+        const hoy = new Date()
+        hoy.setHours(0, 0, 0, 0)
+        const checkIn = new Date(reserva.checkIn)
+        const checkOut = new Date(reserva.checkOut)
+
+        // Agregar evento de check-in si está en este mes
+        if (
+          checkIn >= new Date(year, month - 1, 1) &&
+          checkIn < new Date(year, month, 1)
+        ) {
+          eventos.push({
+            id: `airbnb-checkin-${reserva.id}`,
+            tipo: 'airbnb_checkin',
+            titulo: `Check-in: ${reserva.espacio.nombre}`,
+            descripcion: reserva.huesped.nombre,
+            monto: reserva.balancePendiente > 0 ? reserva.balancePendiente : null,
+            fecha: reserva.checkIn.toISOString(),
+            dia: new Date(reserva.checkIn).getDate(),
+            vencido: false,
+            reservaId: reserva.id,
+            codigoReserva: reserva.codigoReserva,
+            estadoPago: reserva.estadoPago,
+          })
+        }
+
+        // Agregar evento de check-out si está en este mes
+        if (
+          checkOut >= new Date(year, month - 1, 1) &&
+          checkOut < new Date(year, month, 1)
+        ) {
+          eventos.push({
+            id: `airbnb-checkout-${reserva.id}`,
+            tipo: 'airbnb_checkout',
+            titulo: `Check-out: ${reserva.espacio.nombre}`,
+            descripcion: reserva.huesped.nombre,
+            monto: null,
+            fecha: reserva.checkOut.toISOString(),
+            dia: new Date(reserva.checkOut).getDate(),
+            vencido: false,
+            reservaId: reserva.id,
+            codigoReserva: reserva.codigoReserva,
+          })
+        }
       })
     }
 

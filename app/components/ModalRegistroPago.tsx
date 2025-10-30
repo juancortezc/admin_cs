@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 
 type Evento = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'empleado' | 'otro' | 'pago'
+  tipo: 'arriendo' | 'servicio' | 'empleado' | 'otro' | 'pago' | 'airbnb_checkin' | 'airbnb_checkout'
   titulo: string
   descripcion: string
   monto: number | null
@@ -18,6 +18,7 @@ type Evento = {
   servicioId?: string
   empleadoId?: string
   pagoId?: string
+  reservaId?: string
 }
 
 type ModalRegistroPagoProps = {

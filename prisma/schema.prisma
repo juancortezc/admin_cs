@@ -353,3 +353,231 @@ enum EstadoPago {
   VENCIDO
   CANCELADO
 }
+
+// ============================================
+// SISTEMA AIRBNB
+// ============================================
+
+// Espacios Airbnb (propiedades disponibles para renta corta)
+model EspacioAirbnb {
+  id                String    @id @default(cuid())
+  nombre            String    // Ej: "Apartamento Centro", "Habitación Azul"
+  descripcion       String?   @db.Text
+
+  // Capacidad y características
+  capacidadHuespedes Int      @default(2)
+  numCamas          Int       @default(1)
+  numBanos          Int       @default(1)
+  amenidades        String?   @db.Text // JSON string con lista de amenidades
+
+  // Precios
+  precioBaseNoche   Float     // Precio estándar por noche
+  precioLimpieza    Float     @default(0)
+
+  // Estado
+  activo            Boolean   @default(true)
+
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relaciones
+  reservas          ReservaAirbnb[]
+  mantenimientos    MantenimientoAirbnb[]
+
+  @@index([activo])
+}
+
+// Huéspedes (contactos de Airbnb)
+model HuespedAirbnb {
+  id                String    @id @default(cuid())
+
+  // Información personal
+  nombre            String
+  email             String?
+  telefono          String?
+  whatsapp          String?
+  pais              String?
+
+  // Calificación promedio del huésped
+  calificacionPromedio Float?  @default(0)
+
+  // Notas generales sobre el huésped
+  notas             String?   @db.Text
+
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relaciones
+  reservas          ReservaAirbnb[]
+
+  @@index([email])
+  @@index([nombre])
+}
+
+// Reservas de Airbnb
+model ReservaAirbnb {
+  id                    String              @id @default(cuid())
+  codigoReserva         String              @unique // Auto-generado: AB-0001, AB-0002
+
+  // Relaciones principales
+  espacioId             String
+  espacio               EspacioAirbnb       @relation(fields: [espacioId], references: [id])
+
+  huespedId             String
+  huesped               HuespedAirbnb       @relation(fields: [huespedId], references: [id])
+
+  // Fechas
+  checkIn               DateTime
+  checkOut              DateTime
+  noches                Int                 // Calculado: checkOut - checkIn
+
+  // Huéspedes
+  numHuespedes          Int                 @default(1)
+
+  // Información de la reserva
+  canalReserva          CanalReserva        @default(AIRBNB)
+  codigoConfirmacion    String?             // Código de confirmación de la plataforma
+
+  // Precios
+  precioTotal           Float               // Precio total acordado
+  precioPorNoche        Float               // Precio por noche acordado
+  precioLimpieza        Float               @default(0)
+  depositoSeguridad     Float               @default(0)
+  comisionPlataforma    Float               @default(0)
+
+  // Estado de la reserva
+  estadoReserva         EstadoReserva       @default(CONFIRMADA)
+
+  // Estado de pago
+  estadoPago            EstadoPagoReserva   @default(PENDIENTE)
+  montoPagado           Float               @default(0)
+  balancePendiente      Float               // precioTotal - montoPagado
+
+  // Check-in / Check-out
+  checkInRealizado      Boolean             @default(false)
+  fechaCheckInReal      DateTime?
+  checkOutRealizado     Boolean             @default(false)
+  fechaCheckOutReal     DateTime?
+
+  // Calificación y notas
+  calificacionHuesped   Int?                // 1-5 estrellas
+  notasReserva          String?             @db.Text // Notas durante la reserva
+  notasFinales          String?             @db.Text // Notas al finalizar
+  observaciones         String?             @db.Text
+
+  // Metadata
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  // Relaciones
+  abonos                AbonoReserva[]
+  mantenimientos        MantenimientoAirbnb[]
+
+  @@index([espacioId])
+  @@index([huespedId])
+  @@index([checkIn])
+  @@index([checkOut])
+  @@index([estadoReserva])
+  @@index([estadoPago])
+}
+
+// Abonos/Pagos de reservas
+model AbonoReserva {
+  id                String          @id @default(cuid())
+  reservaId         String
+  reserva           ReservaAirbnb   @relation(fields: [reservaId], references: [id], onDelete: Cascade)
+
+  monto             Float
+  fechaPago         DateTime
+  metodoPago        FormaPago
+  referencia        String?         // Número de transferencia
+
+  observaciones     String?         @db.Text
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([reservaId])
+  @@index([fechaPago])
+}
+
+// Mantenimientos relacionados a reservas Airbnb
+model MantenimientoAirbnb {
+  id                String              @id @default(cuid())
+
+  // Relaciones
+  espacioId         String
+  espacio           EspacioAirbnb       @relation(fields: [espacioId], references: [id])
+
+  reservaId         String?
+  reserva           ReservaAirbnb?      @relation(fields: [reservaId], references: [id], onDelete: SetNull)
+
+  // Tipo de mantenimiento
+  tipo              TipoMantenimiento
+  descripcion       String              @db.Text
+
+  // Fechas
+  fechaProgramada   DateTime
+  fechaCompletada   DateTime?
+
+  // Estado
+  estado            EstadoMantenimiento @default(PENDIENTE)
+
+  // Costos
+  costo             Float               @default(0)
+
+  // Responsable
+  responsable       String?
+
+  // Metadata
+  observaciones     String?             @db.Text
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([espacioId])
+  @@index([reservaId])
+  @@index([estado])
+  @@index([fechaProgramada])
+}
+
+// ============================================
+// ENUMS PARA AIRBNB
+// ============================================
+
+enum CanalReserva {
+  AIRBNB
+  BOOKING
+  DIRECTO
+  OTRO
+}
+
+enum EstadoReserva {
+  PENDIENTE           // Pendiente de confirmación
+  CONFIRMADA          // Confirmada
+  EN_CURSO            // El huésped está actualmente en el espacio
+  COMPLETADA          // Reserva finalizada
+  CANCELADA           // Cancelada
+}
+
+enum EstadoPagoReserva {
+  PENDIENTE
+  PARCIAL
+  PAGADO
+  REEMBOLSADO
+}
+
+enum TipoMantenimiento {
+  LIMPIEZA_PRE_ENTRADA
+  LIMPIEZA_POST_SALIDA
+  MANTENIMIENTO_GENERAL
+  REPARACION
+  REABASTECIMIENTO      // Amenidades, toallas, etc
+}
+
+enum EstadoMantenimiento {
+  PENDIENTE
+  EN_PROCESO
+  COMPLETADO
+  CANCELADO
+}
