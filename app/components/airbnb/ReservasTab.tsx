@@ -6,6 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ModalNuevaReserva from './ModalNuevaReserva'
 
 type Reserva = {
   id: string
@@ -37,6 +38,7 @@ export default function ReservasTab() {
   const [loading, setLoading] = useState(true)
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [filtroEstadoPago, setFiltroEstadoPago] = useState('todos')
+  const [mostrarModal, setMostrarModal] = useState(false)
 
   useEffect(() => {
     cargarReservas()
@@ -106,6 +108,12 @@ export default function ReservasTab() {
             <h2 className="text-lg font-semibold text-zinc-900">Reservas</h2>
             <p className="text-sm text-zinc-600 mt-1">{reservas.length} reservas</p>
           </div>
+          <button
+            onClick={() => setMostrarModal(true)}
+            className="px-4 py-2 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors"
+          >
+            + Nueva Reserva
+          </button>
         </div>
 
         {/* Filtros */}
@@ -239,6 +247,17 @@ export default function ReservasTab() {
           </svg>
           <p className="text-sm text-zinc-500">No se encontraron reservas con los filtros aplicados</p>
         </div>
+      )}
+
+      {/* Modal Nueva Reserva */}
+      {mostrarModal && (
+        <ModalNuevaReserva
+          onClose={() => setMostrarModal(false)}
+          onGuardar={() => {
+            setMostrarModal(false)
+            cargarReservas()
+          }}
+        />
       )}
     </div>
   )
