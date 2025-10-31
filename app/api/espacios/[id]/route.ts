@@ -86,3 +86,37 @@ export async function PUT(request: Request, { params }: Params) {
     )
   }
 }
+
+// PATCH - Actualizar estado activo del espacio
+export async function PATCH(request: Request, { params }: Params) {
+  try {
+    const { id } = await params
+    const body = await request.json()
+
+    const espacio = await prisma.espacio.update({
+      where: { id },
+      data: {
+        activo: body.activo,
+      },
+      include: {
+        arrendatario: true,
+      },
+    })
+
+    return NextResponse.json(espacio)
+  } catch (error: any) {
+    console.error('Error:', error)
+
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Espacio no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(
+      { error: 'Error al actualizar espacio' },
+      { status: 500 }
+    )
+  }
+}

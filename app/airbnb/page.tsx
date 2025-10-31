@@ -24,7 +24,7 @@ export default function AirbnbPage() {
 
   return (
     <div className="min-h-screen bg-zinc-50">
-      <Navbar activeTab="Airbnb" />
+      <Navbar activeTab="Reservas" />
 
       <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         {/* Header */}
