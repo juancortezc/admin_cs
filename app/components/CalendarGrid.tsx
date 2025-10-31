@@ -9,6 +9,7 @@ type Bill = {
   id: string
   codigoInterno?: string
   espacioId?: string
+  proveedor?: string
   titulo: string
   monto: number
   estado: string
@@ -155,7 +156,7 @@ export default function CalendarGrid({
                       {day}
                     </div>
 
-                    {/* Bills for this day - only show codigo */}
+                    {/* Bills for this day - show codigo for cobros, proveedor for pagos */}
                     <div className="space-y-1">
                       {dayBills.slice(0, 5).map((bill) => (
                         <button
@@ -166,7 +167,10 @@ export default function CalendarGrid({
                           )}`}
                         >
                           <div className="truncate">
-                            {bill.codigoInterno || bill.id.substring(0, 8)}
+                            {bill.tipo === 'pago'
+                              ? bill.proveedor || bill.titulo
+                              : bill.codigoInterno || bill.id.substring(0, 8)
+                            }
                           </div>
                         </button>
                       ))}
