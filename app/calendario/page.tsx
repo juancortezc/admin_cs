@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
 import CalendarGrid from '@/app/components/CalendarGrid'
+import CalendarWeekView from '@/app/components/CalendarWeekView'
 import ModalRegistroPago from '@/app/components/ModalRegistroPago'
 import Toast from '@/app/components/Toast'
 
@@ -52,11 +53,28 @@ export default function CalendarioPage() {
   const [loading, setLoading] = useState(true)
   const [filtroEstado, setFiltroEstado] = useState<string>('todos')
 
-  // Month/Year controls
+  // Month/Year/Week controls
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth() + 1) // 1-12
+  const [weekNumber, setWeekNumber] = useState(0) // 0-based week of month
   const weekStartsOn = 'monday' // Fixed to Monday
+
+  // Calculate current week on mount
+  useEffect(() => {
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const dayOfWeek = firstDay.getDay()
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    const firstMonday = new Date(firstDay)
+    firstMonday.setDate(1 + daysToMonday)
+
+    const diffTime = now.getTime() - firstMonday.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const currentWeek = Math.max(0, Math.floor(diffDays / 7))
+
+    setWeekNumber(currentWeek)
+  }, [])
 
   // Modal state
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
@@ -114,6 +132,51 @@ export default function CalendarioPage() {
   const goToToday = () => {
     setYear(today.getFullYear())
     setMonth(today.getMonth() + 1)
+
+    // Calculate current week
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const dayOfWeek = firstDay.getDay()
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    const firstMonday = new Date(firstDay)
+    firstMonday.setDate(1 + daysToMonday)
+
+    const diffTime = now.getTime() - firstMonday.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const currentWeek = Math.max(0, Math.floor(diffDays / 7))
+
+    setWeekNumber(currentWeek)
+  }
+
+  // Week navigation
+  const goToPreviousWeek = () => {
+    if (weekNumber > 0) {
+      setWeekNumber(weekNumber - 1)
+    } else {
+      // Go to previous month, last week
+      goToPreviousMonth()
+      setWeekNumber(3) // Approximate last week
+    }
+  }
+
+  const goToNextWeek = () => {
+    setWeekNumber(weekNumber + 1)
+  }
+
+  // Calculate week dates for display
+  const getWeekDates = () => {
+    const firstDayOfMonth = new Date(year, month - 1, 1)
+    const startOfWeek = new Date(firstDayOfMonth)
+    startOfWeek.setDate(1 + weekNumber * 7)
+
+    const dayOfWeek = startOfWeek.getDay()
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    startOfWeek.setDate(startOfWeek.getDate() + daysToMonday)
+
+    const endOfWeek = new Date(startOfWeek)
+    endOfWeek.setDate(startOfWeek.getDate() + 6)
+
+    return { startOfWeek, endOfWeek }
   }
 
   // Filter bills by estado
@@ -263,27 +326,17 @@ export default function CalendarioPage() {
 
         {/* Main content: Calendar + Bill List */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar Grid */}
+          {/* Calendar Views */}
           <div className="lg:col-span-2">
-            {/* Month/Year Controls */}
-            <div className="card-elevated bg-white rounded-2xl p-4 mb-4">
+            {/* Desktop: Month/Year Controls */}
+            <div className="hidden lg:block card-elevated bg-white rounded-2xl p-4 mb-4">
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={goToPreviousMonth}
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
-                  <svg
-                    className="w-5 h-5 text-gray-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
 
@@ -295,18 +348,8 @@ export default function CalendarioPage() {
                   onClick={goToNextMonth}
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
-                  <svg
-                    className="w-5 h-5 text-gray-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
 
@@ -319,14 +362,69 @@ export default function CalendarioPage() {
               </div>
             </div>
 
-            {/* Calendar */}
-            <CalendarGrid
-              year={year}
-              month={month}
-              bills={bills}
-              weekStartsOn={weekStartsOn}
-              onBillClick={handleBillClick}
-            />
+            {/* Mobile: Week Controls */}
+            <div className="lg:hidden card-elevated bg-white rounded-2xl p-4 mb-4">
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={goToPreviousWeek}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+
+                <div className="text-center">
+                  <div className="text-lg font-bold text-gray-900">
+                    {(() => {
+                      const { startOfWeek, endOfWeek } = getWeekDates()
+                      return `${startOfWeek.getDate()} - ${endOfWeek.getDate()}`
+                    })()}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {monthNames[month - 1]} {year}
+                  </div>
+                </div>
+
+                <button
+                  onClick={goToNextWeek}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={goToToday}
+                  className="px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100 transition-colors cursor-pointer text-sm"
+                >
+                  Hoy
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop: Calendar Grid */}
+            <div className="hidden lg:block">
+              <CalendarGrid
+                year={year}
+                month={month}
+                bills={bills}
+                weekStartsOn={weekStartsOn}
+                onBillClick={handleBillClick}
+              />
+            </div>
+
+            {/* Mobile: Week View */}
+            <div className="lg:hidden">
+              <CalendarWeekView
+                year={year}
+                month={month}
+                weekNumber={weekNumber}
+                bills={bills}
+                onBillClick={handleBillClick}
+              />
+            </div>
           </div>
 
           {/* Bill List Side Panel */}
