@@ -48,7 +48,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
       { nombre: 'Egresos', ruta: '/calendario?tipo=egresos' },
     ],
     'Espacios': [
-      { nombre: 'Estado de cuenta', ruta: '/cobros' },
+      { nombre: 'Estado de cuenta', ruta: '/cobros/espacios' },
       { nombre: 'Arrendatarios', ruta: '/arrendatarios' },
       { nombre: 'Espacios', ruta: '/espacios' },
     ],

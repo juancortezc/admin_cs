@@ -262,7 +262,7 @@ function CalendarioContent() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab={activeTab === 'cobros' ? 'Ingresos' : 'Egresos'} />
 
-      <main className="max-w-[1800px] mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Summary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">

@@ -1,12 +1,13 @@
 /**
- * Página de Cobros por Espacio - Casa del Sol
- * Vista agrupada de cobros organizados por espacio
+ * Página de Por Espacio - Casa del Sol
+ * Vista de cobros agrupados por espacio con diseño Material
  */
 
 'use client'
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type CobroPorEspacio = {
@@ -35,10 +36,11 @@ type CobroPorEspacio = {
 }
 
 export default function EspaciosPage() {
+  const router = useRouter()
   const [espacios, setEspacios] = useState<CobroPorEspacio[]>([])
   const [cargando, setCargando] = useState(true)
   const [busqueda, setBusqueda] = useState('')
-  const [filtroTipo, setFiltroTipo] = useState('todos')
+  const [activeView, setActiveView] = useState<'todos' | 'parciales' | 'espacios'>('espacios')
 
   useEffect(() => {
     cargarCobrosEspacios()
@@ -100,7 +102,6 @@ export default function EspaciosPage() {
       })
 
       const espaciosArray = Array.from(espaciosMap.values())
-      // Sort by total recaudado descending
       espaciosArray.sort((a, b) => b.totalRecaudado - a.totalRecaudado)
 
       setEspacios(espaciosArray)
@@ -117,127 +118,102 @@ export default function EspaciosPage() {
       espacio.espacioIdentificador.toLowerCase().includes(busqueda.toLowerCase()) ||
       espacio.arrendatarioNombre?.toLowerCase().includes(busqueda.toLowerCase())
 
-    const matchTipo = filtroTipo === 'todos' || espacio.espacioTipo === filtroTipo
-
-    return matchBusqueda && matchTipo
+    return matchBusqueda
   })
 
-  const totalRecaudadoGeneral = espacios.reduce((sum, e) => sum + e.totalRecaudado, 0)
+  if (cargando) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+        <Navbar activeTab="Estado de cuenta" />
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab="Estado de cuenta" />
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <Link href="/cobros" className="hover:text-gray-700">
-              Cobros
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900 font-medium">Por Espacio</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900">Cobros por Espacio</h1>
-              <p className="mt-2 text-sm text-gray-600">
-                Historial de cobros agrupado por espacio arrendado
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            <Link
-              href="/cobros"
-              className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Todos los Cobros
-            </Link>
-            <Link
-              href="/cobros/parciales"
-              className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Pagos Parciales
-            </Link>
-            <Link
-              href="/cobros/espacios"
-              className="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Por Espacio
-            </Link>
-          </nav>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar Espacio o Arrendatario
-              </label>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Ej: L-001 o LORENA PAEZ"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Espacio</label>
-              <select
-                value={filtroTipo}
-                onChange={(e) => setFiltroTipo(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Navigation Buttons + Search (Primera Fila) */}
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            {/* Left: Navigation buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setActiveView('espacios')}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  activeView === 'espacios'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
               >
-                <option value="todos">Todos</option>
-                <option value="LOCAL">Local</option>
-                <option value="CONSULTORIO">Consultorio</option>
-                <option value="HABITACION">Habitación</option>
-                <option value="OFICINA">Oficina</option>
-              </select>
+                Por Espacio
+              </button>
+              <button
+                onClick={() => {
+                  setActiveView('todos')
+                  router.push('/cobros')
+                }}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  activeView === 'todos'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                Todos los Cobros
+              </button>
+              <button
+                onClick={() => {
+                  setActiveView('parciales')
+                  router.push('/cobros/parciales')
+                }}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  activeView === 'parciales'
+                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+              >
+                Pagos Parciales
+              </button>
+            </div>
+
+            {/* Right: Compact Search */}
+            <div className="flex gap-2 items-center flex-wrap">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar espacio o arrendatario..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  className="w-64 px-4 py-2 pl-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-white"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm font-medium text-gray-500">Espacios con Cobros</div>
-            <div className="mt-2 text-3xl font-semibold text-gray-900">
-              {espaciosFiltrados.length}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm font-medium text-gray-500">Total Recaudado</div>
-            <div className="mt-2 text-3xl font-semibold text-green-600">
-              ${totalRecaudadoGeneral.toFixed(2)}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="text-sm font-medium text-gray-500">Total de Cobros</div>
-            <div className="mt-2 text-3xl font-semibold text-gray-900">
-              {espacios.reduce((sum, e) => sum + e.totalCobros, 0)}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        {cargando ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Cargando cobros por espacio...</p>
-          </div>
-        ) : espaciosFiltrados.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+        {/* Espacios Cards */}
+        {espaciosFiltrados.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
             <svg
               className="mx-auto h-12 w-12 text-gray-400"
               fill="none"
@@ -251,42 +227,40 @@ export default function EspaciosPage() {
                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No se encontraron espacios
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Intenta ajustar los filtros de búsqueda.
-            </p>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron espacios</h3>
+            <p className="mt-1 text-sm text-gray-500">Intenta ajustar la búsqueda.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {espaciosFiltrados.map((espacio) => (
               <div
                 key={espacio.espacioId}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
               >
                 {/* Space Header */}
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <Link
                         href={`/espacios/${espacio.espacioId}`}
-                        className="text-xl font-semibold text-gray-900 hover:text-blue-600"
+                        className="text-xl font-bold text-indigo-700 hover:text-indigo-900"
                       >
                         {espacio.espacioIdentificador}
                       </Link>
-                      <span className="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                      <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full font-medium">
                         {espacio.espacioTipo}
                       </span>
                       {espacio.arrendatarioNombre && (
-                        <span className="text-sm text-gray-600">• {espacio.arrendatarioNombre}</span>
+                        <span className="text-sm text-gray-700 font-medium">
+                          • {espacio.arrendatarioNombre}
+                        </span>
                       )}
                     </div>
 
                     <div className="text-right">
-                      <div className="text-sm text-gray-500">Total Recaudado</div>
-                      <div className="text-2xl font-semibold text-green-600">
-                        ${espacio.totalRecaudado.toFixed(2)}
+                      <div className="text-xs text-gray-600 mb-1">Total Recaudado</div>
+                      <div className="text-2xl font-bold text-emerald-600">
+                        ${espacio.totalRecaudado.toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -294,21 +268,21 @@ export default function EspaciosPage() {
                   {/* Stats Row */}
                   <div className="flex items-center gap-6 mt-3 text-sm">
                     <div>
-                      <span className="text-gray-500">Cobros registrados:</span>{' '}
-                      <span className="font-medium text-gray-900">{espacio.totalCobros}</span>
+                      <span className="text-gray-600">Cobros:</span>{' '}
+                      <span className="font-semibold text-gray-900">{espacio.totalCobros}</span>
                     </div>
                     {espacio.montoPactadoMensual && (
                       <div>
-                        <span className="text-gray-500">Monto mensual:</span>{' '}
-                        <span className="font-medium text-gray-900">
-                          ${espacio.montoPactadoMensual.toFixed(2)}
+                        <span className="text-gray-600">Monto mensual:</span>{' '}
+                        <span className="font-semibold text-gray-900">
+                          ${espacio.montoPactadoMensual.toLocaleString()}
                         </span>
                       </div>
                     )}
                     {espacio.ultimoPago && (
                       <div>
-                        <span className="text-gray-500">Último pago:</span>{' '}
-                        <span className="font-medium text-gray-900">
+                        <span className="text-gray-600">Último pago:</span>{' '}
+                        <span className="font-semibold text-gray-900">
                           {new Date(espacio.ultimoPago.fecha).toLocaleDateString('es-EC')}
                         </span>
                       </div>
@@ -316,47 +290,76 @@ export default function EspaciosPage() {
                   </div>
                 </div>
 
-                {/* Cobros List */}
-                <div className="divide-y divide-gray-200">
-                  {espacio.cobros.slice(0, 5).map((cobro) => (
-                    <Link
-                      key={cobro.id}
-                      href={`/cobros/${cobro.id}`}
-                      className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm font-medium text-blue-600">{cobro.codigoInterno}</div>
-                        <div className="text-sm text-gray-600">
-                          {cobro.periodo || new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
-                        </div>
-                        <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          {cobro.concepto}
-                        </div>
-                        <div
-                          className={`text-xs px-2 py-1 rounded ${
-                            cobro.estado === 'PAGADO'
-                              ? 'bg-green-100 text-green-800'
-                              : cobro.estado === 'PENDIENTE'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
+                {/* Cobros Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
+                          Código
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
+                          Periodo
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
+                          Concepto
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">
+                          Pactado
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">
+                          Pagado
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600">
+                          Estado
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {espacio.cobros.slice(0, 2).map((cobro) => (
+                        <tr
+                          key={cobro.id}
+                          onClick={() => router.push(`/cobros/${cobro.id}`)}
+                          className="hover:bg-gray-50 transition-colors cursor-pointer"
                         >
-                          {cobro.estado}
-                        </div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        ${cobro.montoPagado.toFixed(2)}
-                      </div>
-                    </Link>
-                  ))}
+                          <td className="px-4 py-3 text-sm font-medium text-indigo-600">
+                            {cobro.codigoInterno}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700">
+                            {cobro.periodo || new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-gray-600">{cobro.concepto}</td>
+                          <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                            ${cobro.montoPactado.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right font-semibold text-emerald-600">
+                            ${cobro.montoPagado.toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span
+                              className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                cobro.estado === 'PAGADO'
+                                  ? 'bg-gray-100 text-gray-700'
+                                  : cobro.estado === 'PENDIENTE'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-orange-100 text-orange-700'
+                              }`}
+                            >
+                              {cobro.estado}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Show more link */}
-                {espacio.cobros.length > 5 && (
+                {espacio.cobros.length > 2 && (
                   <div className="bg-gray-50 px-6 py-3 text-center border-t border-gray-200">
                     <Link
                       href={`/cobros/historial/${espacio.espacioId}`}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
                     >
                       Ver todos los {espacio.cobros.length} cobros →
                     </Link>
@@ -366,6 +369,13 @@ export default function EspaciosPage() {
             ))}
           </div>
         )}
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Total: <span className="font-semibold text-gray-900">{espaciosFiltrados.length}</span> espacio(s)
+          </p>
+        </div>
       </main>
     </div>
   )

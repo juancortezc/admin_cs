@@ -1,15 +1,13 @@
 /**
- * Página principal de Cobros - Casa del Sol
- * Sistema completo de gestión de cobros con KPIs, filtros, búsqueda y exportación
+ * Página Todos los Cobros - Casa del Sol
+ * Vista de tabla Excel con todos los cobros y selector de mes
  */
 
 'use client'
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
-import ModalRegistroCobro from '@/app/components/ModalRegistroCobro'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 
 type Cobro = {
   id: string
@@ -37,59 +35,49 @@ type Cobro = {
   }
 }
 
-type Estadisticas = {
-  totalCobros: number
-  totalCobrado: number
-  totalPorEstado: {
-    PAGADO: number
-    PENDIENTE: number
-    PARCIAL: number
-  }
-  totalPorMetodo: {
-    TRANSFERENCIA: number
-    EFECTIVO: number
-    CHEQUE: number
-  }
-  totalPorConcepto: {
-    RENTA: number
-    AIRBNB: number
-    OTRO: number
-  }
-}
-
 export default function CobrosPage() {
   const router = useRouter()
   const [cobros, setCobros] = useState<Cobro[]>([])
-  const [estadisticas, setEstadisticas] = useState<Estadisticas | null>(null)
   const [loading, setLoading] = useState(true)
-  const [modalAbierto, setModalAbierto] = useState(false)
+  const [activeView, setActiveView] = useState<'todos' | 'parciales' | 'espacios'>('todos')
 
   // Filtros
   const [busqueda, setBusqueda] = useState('')
-  const [filtroConcepto, setFiltroConcepto] = useState('todos')
-  const [filtroMetodo, setFiltroMetodo] = useState('todos')
-  const [filtroEstado, setFiltroEstado] = useState('todos')
-  const [fechaInicio, setFechaInicio] = useState('')
-  const [fechaFin, setFechaFin] = useState('')
+  const [mesSeleccionado, setMesSeleccionado] = useState('')
+
+  // Inicializar con el mes actual
+  useEffect(() => {
+    const now = new Date()
+    const mesActual = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+    setMesSeleccionado(mesActual)
+  }, [])
 
   // Cargar cobros
   const cargarCobros = () => {
+    if (!mesSeleccionado) return
+
     setLoading(true)
 
-    // Construir query params
     const params = new URLSearchParams()
     if (busqueda) params.append('busqueda', busqueda)
-    if (filtroConcepto !== 'todos') params.append('concepto', filtroConcepto)
-    if (filtroMetodo !== 'todos') params.append('metodoPago', filtroMetodo)
-    if (filtroEstado !== 'todos') params.append('estado', filtroEstado)
-    if (fechaInicio) params.append('fechaInicio', fechaInicio)
-    if (fechaFin) params.append('fechaFin', fechaFin)
+
+    // Filtrar por mes
+    const [year, month] = mesSeleccionado.split('-')
+    const fechaInicio = `${year}-${month}-01`
+    const ultimoDia = new Date(parseInt(year), parseInt(month), 0).getDate()
+    const fechaFin = `${year}-${month}-${ultimoDia}`
+
+    params.append('fechaInicio', fechaInicio)
+    params.append('fechaFin', fechaFin)
 
     fetch(`/api/cobros?${params.toString()}`)
       .then((r) => r.json())
       .then((data) => {
-        setCobros(data.cobros)
-        setEstadisticas(data.estadisticas)
+        // Ordenar por fecha descendente
+        const cobrosOrdenados = data.cobros.sort((a: Cobro, b: Cobro) => {
+          return new Date(b.fechaPago).getTime() - new Date(a.fechaPago).getTime()
+        })
+        setCobros(cobrosOrdenados)
         setLoading(false)
       })
       .catch((error) => {
@@ -99,71 +87,37 @@ export default function CobrosPage() {
   }
 
   useEffect(() => {
-    cargarCobros()
-  }, [])
+    if (mesSeleccionado) {
+      cargarCobros()
+    }
+  }, [mesSeleccionado])
 
   const handleFiltrar = () => {
     cargarCobros()
   }
 
-  const handleLimpiarFiltros = () => {
-    setBusqueda('')
-    setFiltroConcepto('todos')
-    setFiltroMetodo('todos')
-    setFiltroEstado('todos')
-    setFechaInicio('')
-    setFechaFin('')
-    setTimeout(() => cargarCobros(), 100)
-  }
-
-  const handleExportarExcel = () => {
-    // Construir query params para exportar
-    const params = new URLSearchParams()
-    if (busqueda) params.append('busqueda', busqueda)
-    if (filtroConcepto !== 'todos') params.append('concepto', filtroConcepto)
-    if (filtroMetodo !== 'todos') params.append('metodoPago', filtroMetodo)
-    if (filtroEstado !== 'todos') params.append('estado', filtroEstado)
-    if (fechaInicio) params.append('fechaInicio', fechaInicio)
-    if (fechaFin) params.append('fechaFin', fechaFin)
-
-    // Descargar archivo
-    window.open(`/api/cobros/exportar?${params.toString()}`, '_blank')
-  }
-
   const getColorEstado = (estado: string) => {
     switch (estado) {
       case 'PAGADO':
-        return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
+      case 'COBRADO':
+        return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
       case 'PENDIENTE':
-        return 'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20'
+        return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
       case 'PARCIAL':
-        return 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'
+        return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
       default:
-        return 'bg-zinc-100 text-zinc-700'
-    }
-  }
-
-  const getColorConcepto = (concepto: string) => {
-    switch (concepto) {
-      case 'RENTA':
-        return 'text-[#007AFF]'
-      case 'AIRBNB':
-        return 'text-[#AF52DE]'
-      case 'OTRO':
-        return 'text-zinc-600'
-      default:
-        return 'text-zinc-900'
+        return 'bg-gray-100 text-gray-700'
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
         <Navbar activeTab="Estado de cuenta" />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-zinc-600">Cargando...</p>
+            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
           </div>
         </div>
       </div>
@@ -171,304 +125,229 @@ export default function CobrosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab="Estado de cuenta" />
 
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-4">
-          <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">Cobros</h1>
-          <p className="text-sm text-zinc-600 mt-0.5">{cobros.length} registro(s)</p>
-        </div>
-
-        {/* KPIs */}
-        {estadisticas && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-            {/* Total Cobrado */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-3">
-              <p className="text-xs text-zinc-600 mb-1">Total Cobrado</p>
-              <p className="text-lg font-semibold text-zinc-900">
-                ${estadisticas.totalCobrado.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Por Transferencia */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-3">
-              <p className="text-xs text-zinc-600 mb-1">Transferencia</p>
-              <p className="text-lg font-semibold text-[#007AFF]">
-                ${estadisticas.totalPorMetodo.TRANSFERENCIA.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Por Efectivo */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-3">
-              <p className="text-xs text-zinc-600 mb-1">Efectivo</p>
-              <p className="text-lg font-semibold text-[#34C759]">
-                ${estadisticas.totalPorMetodo.EFECTIVO.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Por Cheque */}
-            <div className="bg-white rounded-xl border border-zinc-200 p-3">
-              <p className="text-xs text-zinc-600 mb-1">Cheque</p>
-              <p className="text-lg font-semibold text-[#AF52DE]">
-                ${estadisticas.totalPorMetodo.CHEQUE.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Sub-tabs */}
-        <div className="border-b border-zinc-200 mb-4">
-          <nav className="-mb-px flex space-x-8">
-            <Link
-              href="/cobros"
-              className="border-[#007AFF] text-[#007AFF] whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Todos los Cobros
-            </Link>
-            <Link
-              href="/cobros/parciales"
-              className="border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Pagos Parciales
-            </Link>
-            <Link
-              href="/cobros/espacios"
-              className="border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
-              Por Espacio
-            </Link>
-          </nav>
-        </div>
-
-        {/* Búsqueda y Filtros */}
-        <div className="bg-white rounded-xl border border-zinc-200 p-4 mb-4">
-          {/* Búsqueda */}
-          <div className="mb-3">
-            <div className="relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Navigation Buttons + Back Button + Filters (Primera Fila) */}
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            {/* Left: Back button + Navigation buttons */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Back Button */}
+              <button
+                onClick={() => router.push('/cobros/espacios')}
+                className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-all"
+                title="Volver"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              </button>
+
+              {/* Navigation Buttons */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setActiveView('espacios')
+                    router.push('/cobros/espacios')
+                  }}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    activeView === 'espacios'
+                      ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  Por Espacio
+                </button>
+                <button
+                  onClick={() => setActiveView('todos')}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    activeView === 'todos'
+                      ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  Todos los Cobros
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveView('parciales')
+                    router.push('/cobros/parciales')
+                  }}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                    activeView === 'parciales'
+                      ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                  }`}
+                >
+                  Pagos Parciales
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Selector de Mes + Búsqueda + Filtrar */}
+            <div className="flex gap-2 items-center flex-wrap">
+              {/* Selector de Mes */}
               <input
-                type="text"
-                placeholder="Buscar por código, arrendatario, comprobante..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleFiltrar()}
-                className="w-full pl-10 pr-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                type="month"
+                value={mesSeleccionado}
+                onChange={(e) => setMesSeleccionado(e.target.value)}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white"
               />
+
+              {/* Búsqueda compacta */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleFiltrar()}
+                  className="w-48 px-4 py-2 pl-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-white"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+
+              {/* Botón Filtrar */}
+              <button
+                onClick={handleFiltrar}
+                className="px-5 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all text-sm font-medium"
+              >
+                Filtrar
+              </button>
             </div>
           </div>
-
-          {/* Filtros */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-            {/* Concepto */}
-            <select
-              value={filtroConcepto}
-              onChange={(e) => setFiltroConcepto(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-            >
-              <option value="todos">Todos los conceptos</option>
-              <option value="RENTA">Renta</option>
-              <option value="AIRBNB">Airbnb</option>
-              <option value="OTRO">Otro</option>
-            </select>
-
-            {/* Método de Pago */}
-            <select
-              value={filtroMetodo}
-              onChange={(e) => setFiltroMetodo(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-            >
-              <option value="todos">Todos los métodos</option>
-              <option value="TRANSFERENCIA">Transferencia</option>
-              <option value="EFECTIVO">Efectivo</option>
-              <option value="CHEQUE">Cheque</option>
-            </select>
-
-            {/* Estado */}
-            <select
-              value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-            >
-              <option value="todos">Todos los estados</option>
-              <option value="PAGADO">Pagado</option>
-              <option value="PENDIENTE">Pendiente</option>
-              <option value="PARCIAL">Parcial</option>
-            </select>
-
-            {/* Fecha Inicio */}
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-            />
-
-            {/* Fecha Fin */}
-            <input
-              type="date"
-              value={fechaFin}
-              onChange={(e) => setFechaFin(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF]"
-            />
-          </div>
-
-          {/* Botones de acción */}
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={handleFiltrar}
-              className="px-4 py-2 rounded-lg bg-[#007AFF] text-white text-sm font-medium hover:bg-[#0051D5] transition-colors"
-            >
-              Filtrar
-            </button>
-            <button
-              onClick={handleLimpiarFiltros}
-              className="px-4 py-2 rounded-lg bg-white text-zinc-700 text-sm font-medium border border-zinc-300 hover:bg-zinc-50 transition-colors"
-            >
-              Limpiar
-            </button>
-            <button
-              onClick={() => setModalAbierto(true)}
-              className="px-4 py-2 rounded-lg bg-[#AF52DE] text-white text-sm font-medium hover:bg-[#8E44AD] transition-colors ml-auto"
-            >
-              + Registrar Nuevo
-            </button>
-            <button
-              onClick={handleExportarExcel}
-              className="px-4 py-2 rounded-lg bg-[#34C759] text-white text-sm font-medium hover:bg-[#248A3D] transition-colors"
-            >
-              Descargar Excel
-            </button>
-          </div>
         </div>
 
-        {/* Listado de Cobros */}
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {cobros.map((cobro) => (
-            <Link
-              key={cobro.id}
-              href={`/cobros/${cobro.id}`}
-              className="bg-white rounded-xl border border-zinc-200 p-3 hover:shadow-md transition-all cursor-pointer block"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-start mb-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-semibold text-zinc-500">{cobro.codigoInterno}</span>
-                    <span className="text-xs text-zinc-400">·</span>
-                    <span className="text-xs font-medium text-zinc-700">{cobro.espacio.identificador}</span>
-                  </div>
-                  <p className="text-sm font-medium text-zinc-900 truncate">
-                    {cobro.espacio.arrendatario?.nombre || 'Sin arrendatario'}
-                  </p>
-                </div>
-                <span
-                  className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-md border flex-shrink-0 ${getColorEstado(
-                    cobro.estado
-                  )}`}
-                >
-                  {cobro.estado}
-                </span>
-              </div>
-
-              {/* Concepto y Período */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-xs font-semibold ${getColorConcepto(cobro.concepto)}`}>
-                  {cobro.concepto === 'OTRO' && cobro.conceptoPersonalizado
-                    ? cobro.conceptoPersonalizado
-                    : cobro.concepto}
-                </span>
-                {cobro.periodo && (
-                  <>
-                    <span className="text-xs text-zinc-400">·</span>
-                    <span className="text-xs text-zinc-600">{cobro.periodo}</span>
-                  </>
-                )}
-              </div>
-
-              {/* Montos */}
-              <div className="space-y-1 mb-2 pb-2 border-b border-zinc-100">
-                <div className="flex justify-between text-xs">
-                  <span className="text-zinc-600">Pagado:</span>
-                  <span className="font-semibold text-zinc-900">${cobro.montoPagado.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-zinc-600">Pactado:</span>
-                  <span className="font-medium text-zinc-700">${cobro.montoPactado.toLocaleString()}</span>
-                </div>
-                {cobro.diferencia !== 0 && (
-                  <div className="flex justify-between text-xs">
-                    <span className="text-zinc-600">Diferencia:</span>
-                    <span
-                      className={`font-semibold ${
-                        cobro.diferencia > 0 ? 'text-[#34C759]' : 'text-[#FF3B30]'
-                      }`}
+        {/* Tabla de Cobros (Excel-like) */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
+                <tr>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Código</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Fecha</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Espacio</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Arrendatario</th>
+                  <th className="px-4 py-4 text-left text-sm font-semibold">Concepto</th>
+                  <th className="px-4 py-4 text-right text-sm font-semibold">Monto Pactado</th>
+                  <th className="px-4 py-4 text-right text-sm font-semibold">Monto Pagado</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold">Estado</th>
+                  <th className="px-4 py-4 text-center text-sm font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {cobros.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
+                      No se encontraron cobros para este mes
+                    </td>
+                  </tr>
+                ) : (
+                  cobros.map((cobro) => (
+                    <tr
+                      key={cobro.id}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/cobros/${cobro.id}`)}
                     >
-                      {cobro.diferencia > 0 ? '+' : ''}${cobro.diferencia.toLocaleString()}
-                    </span>
-                  </div>
+                      <td className="px-4 py-3 text-sm font-medium text-indigo-600">
+                        {cobro.codigoInterno}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                        {cobro.espacio.identificador}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {cobro.espacio.arrendatario?.nombre || '-'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{cobro.concepto}</td>
+                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
+                        ${cobro.montoPactado.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-right font-medium text-emerald-600">
+                        ${cobro.montoPagado.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span
+                          className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${getColorEstado(
+                            cobro.estado
+                          )}`}
+                        >
+                          {cobro.estado}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push(`/cobros/${cobro.id}`)
+                            }}
+                            className="p-2 rounded-lg hover:bg-indigo-50 transition-all"
+                            title="Ver detalles"
+                          >
+                            <svg
+                              className="w-4 h-4 text-indigo-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-between items-center text-xs">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-zinc-600">{cobro.metodoPago}</span>
-                  {cobro.numeroComprobante && (
-                    <span className="text-zinc-500 truncate"># {cobro.numeroComprobante}</span>
-                  )}
-                </div>
-                <span className="text-zinc-600">
-                  {new Date(cobro.fechaPago).toLocaleDateString('es-ES')}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Sin resultados */}
-        {cobros.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-            <svg
-              className="w-12 h-12 text-zinc-300 mx-auto mb-3"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-            <p className="text-sm text-zinc-500">No se encontraron cobros</p>
+              </tbody>
+            </table>
           </div>
-        )}
-      </main>
 
-      {/* Modal de Registro */}
-      <ModalRegistroCobro
-        isOpen={modalAbierto}
-        onClose={() => setModalAbierto(false)}
-        onSuccess={() => {
-          setModalAbierto(false)
-          cargarCobros()
-        }}
-      />
+          {/* Footer con total de registros */}
+          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Total: <span className="font-semibold text-gray-900">{cobros.length}</span> registro(s)
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
   )
 }
