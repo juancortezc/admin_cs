@@ -83,52 +83,73 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
   return (
     <>
-      {/* Navbar with Material Design gradient */}
+      {/* Navbar con diseño horizontal compacto */}
       <nav
-        className="sticky top-0 z-50"
+        className="sticky top-0 z-50 bg-white border-b border-gray-200"
         style={{
-          background: 'linear-gradient(120deg, #312E81 0%, #3730A3 50%, #2563EB 100%)',
-          boxShadow: '0 4px 20px rgba(79, 70, 229, 0.25)',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header con logo y tabs principales - usando grid para centrar */}
-          <div className="grid grid-cols-[200px_1fr_200px] items-center h-16">
-            {/* Logo/Título with gradient text effect */}
+          <div className="flex items-center justify-between h-16">
+            {/* Logo/Título */}
             <button
               onClick={() => handleNavegar('/calendario')}
-              className="text-xl font-bold text-white hover:scale-105 transition-all tracking-tight justify-self-start"
+              className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent hover:scale-105 transition-all tracking-tight"
             >
               Casa del Sol
             </button>
 
-            {/* Desktop: Tabs principales en pill grande - centrado absoluto */}
-            <div className="hidden md:flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
-                {(Object.keys(mainTabs) as MainTab[]).map((tab) => (
+            {/* Desktop: Todas las tabs en una fila horizontal */}
+            <div className="hidden md:flex items-center gap-2">
+              {/* Tabs principales */}
+              {(Object.keys(mainTabs) as MainTab[]).map((tab) => {
+                const isActive = activeMainTab === tab
+                return (
                   <button
                     key={tab}
                     onClick={() => handleMainTabClick(tab)}
-                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                      activeMainTab === tab
-                        ? 'bg-white text-indigo-700 shadow-md'
-                        : 'text-white hover:bg-white/10'
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-cyan-100 text-cyan-700'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     {tab}
                   </button>
-                ))}
-              </div>
+                )
+              })}
+
+              {/* Separador visual */}
+              <div className="h-6 w-px bg-gray-300 mx-1"></div>
+
+              {/* Subtabs del tab activo */}
+              {currentSubTabs.map((subtab) => {
+                const isActive = activeTab === subtab.nombre
+                return (
+                  <button
+                    key={subtab.nombre}
+                    onClick={() => handleNavegar(subtab.ruta)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                      isActive
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {subtab.nombre}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Mobile: Hamburguesa */}
             <button
               onClick={() => setMenuAbierto(!menuAbierto)}
-              className="md:hidden p-2 rounded-lg hover:bg-white/10 active:scale-95 transition-all justify-self-end"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 active:scale-95 transition-all"
               aria-label="Menu"
             >
               <svg
-                className="w-6 h-6 text-white"
+                className="w-6 h-6 text-gray-700"
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -143,31 +164,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
                 )}
               </svg>
             </button>
-
-            {/* Espacio vacío en desktop para mantener grid */}
-            <div className="hidden md:block"></div>
           </div>
-
-          {/* Desktop: Subtabs (segunda fila) en pill grande centrado */}
-          {currentSubTabs.length > 0 && (
-            <div className="hidden md:flex items-center justify-center pb-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
-                {currentSubTabs.map((subtab) => (
-                  <button
-                    key={subtab.nombre}
-                    onClick={() => handleNavegar(subtab.ruta)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                      activeTab === subtab.nombre
-                        ? 'bg-white text-indigo-700 shadow-md'
-                        : 'text-white hover:bg-white/10'
-                    }`}
-                  >
-                    {subtab.nombre}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </nav>
 
