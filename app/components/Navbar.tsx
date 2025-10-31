@@ -29,7 +29,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
     const calendarioTabs: SubTab[] = ['Ingresos', 'Egresos']
     const espaciosTabs: SubTab[] = ['Estado de cuenta', 'Arrendatarios', 'Espacios']
     const airbnbTabs: SubTab[] = ['Reservas', 'Huéspedes']
-    const administracionTabs: SubTab[] = ['Estado de cuenta', 'Tickets', 'Inventario']
+    const administracionTabs: SubTab[] = ['Pagos', 'Tickets', 'Inventario']
 
     if (calendarioTabs.includes(activeTab)) return 'Calendario'
     if (espaciosTabs.includes(activeTab)) return 'Espacios'
@@ -59,7 +59,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
       { nombre: 'Espacios', ruta: '/airbnb' },
     ],
     'Administración': [
-      { nombre: 'Estado de cuenta', ruta: '/administracion/estado-cuenta' },
+      { nombre: 'Pagos', ruta: '/administracion/pagos' },
       { nombre: 'Tickets', ruta: '/administracion/tickets' },
       { nombre: 'Inventario', ruta: '/administracion/inventario' },
     ],

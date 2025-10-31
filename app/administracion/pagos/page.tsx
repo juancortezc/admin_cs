@@ -294,14 +294,14 @@ export default function PagosPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Estado de cuenta" />
+      <Navbar activeTab="Pagos" />
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Header con título - Material Design */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Administración - Estado de Cuenta</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Administración - Pagos</h1>
           <p className="text-sm text-gray-600 mt-1">
-            {activeTab === 'all' && `${pagosFiltrados.length} registros encontrados`}
+            {activeTab === 'all' && 'Estado de cuenta de pagos administrativos'}
             {activeTab === 'partial' && 'Pagos con abonos pendientes'}
             {activeTab === 'recurring' && 'Gestión de pagos recurrentes'}
           </p>
