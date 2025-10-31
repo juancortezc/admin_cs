@@ -70,6 +70,15 @@ export default function Navbar({ activeTab }: NavbarProps) {
     router.push(ruta)
   }
 
+  // Manejar clic en tab principal - navegar al primer subtab
+  const handleMainTabClick = (tab: MainTab) => {
+    setActiveMainTab(tab)
+    const subtabs = mainTabs[tab]
+    if (subtabs && subtabs.length > 0) {
+      router.push(subtabs[0].ruta)
+    }
+  }
+
   const currentSubTabs = mainTabs[activeMainTab] || []
 
   return (
@@ -99,7 +108,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
                 {(Object.keys(mainTabs) as MainTab[]).map((tab) => (
                   <button
                     key={tab}
-                    onClick={() => setActiveMainTab(tab)}
+                    onClick={() => handleMainTabClick(tab)}
                     className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
                       activeMainTab === tab
                         ? 'bg-white text-indigo-700 shadow-md'
