@@ -1,6 +1,6 @@
 /**
  * Página de Detalle de Cobro - Casa del Sol
- * Vista detallada de un cobro individual con historial completo
+ * Vista detallada editable de un cobro individual con Material Design
  */
 
 'use client'
@@ -8,7 +8,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
-import Link from 'next/link'
 
 type Cobro = {
   id: string
@@ -28,34 +27,13 @@ type Cobro = {
   estado: string
   observaciones: string | null
   esParcial: boolean
-  createdAt: string
-  updatedAt: string
   espacio: {
-    id: string
     identificador: string
     tipo: string
-    montoPactado: number | null
-    diaPago: number | null
     arrendatario: {
-      id: string
       nombre: string
-      email: string
-      celular: string
     } | null
   }
-  cobroRelacionado: {
-    id: string
-    codigoInterno: string
-    montoPagado: number
-    fechaPago: string
-  } | null
-  pagosParciales: {
-    id: string
-    codigoInterno: string
-    montoPagado: number
-    fechaPago: string
-    estado: string
-  }[]
 }
 
 export default function CobroDetailPage() {
@@ -64,8 +42,21 @@ export default function CobroDetailPage() {
   const [cobro, setCobro] = useState<Cobro | null>(null)
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [modoEdicion, setModoEdicion] = useState(false)
+  const [guardando, setGuardando] = useState(false)
   const [modalEliminar, setModalEliminar] = useState(false)
+  const [confirmacionEliminar, setConfirmacionEliminar] = useState('')
   const [eliminando, setEliminando] = useState(false)
+
+  // Form state para edición
+  const [formData, setFormData] = useState({
+    montoPagado: 0,
+    montoPactado: 0,
+    metodoPago: '',
+    numeroComprobante: '',
+    observaciones: '',
+    estado: '',
+  })
 
   useEffect(() => {
     if (params?.id) {
@@ -85,6 +76,16 @@ export default function CobroDetailPage() {
 
       const data = await response.json()
       setCobro(data)
+
+      // Inicializar form data
+      setFormData({
+        montoPagado: data.montoPagado,
+        montoPactado: data.montoPactado,
+        metodoPago: data.metodoPago,
+        numeroComprobante: data.numeroComprobante || '',
+        observaciones: data.observaciones || '',
+        estado: data.estado,
+      })
     } catch (error) {
       console.error('Error al cargar cobro:', error)
       setError('No se pudo cargar el cobro')
@@ -93,8 +94,42 @@ export default function CobroDetailPage() {
     }
   }
 
+  const handleGuardar = async () => {
+    if (!cobro) return
+
+    try {
+      setGuardando(true)
+      const response = await fetch(`/api/cobros/${cobro.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar cobro')
+      }
+
+      const data = await response.json()
+      setCobro(data)
+      setModoEdicion(false)
+      alert('Cobro actualizado exitosamente')
+    } catch (error) {
+      console.error('Error al guardar:', error)
+      alert('Error al guardar los cambios')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
   const handleEliminar = async () => {
     if (!cobro) return
+
+    if (confirmacionEliminar !== cobro.codigoInterno) {
+      alert('El código ingresado no coincide')
+      return
+    }
 
     try {
       setEliminando(true)
@@ -106,7 +141,8 @@ export default function CobroDetailPage() {
         throw new Error('Error al eliminar cobro')
       }
 
-      router.push('/cobros')
+      alert('Cobro eliminado exitosamente')
+      router.push('/cobros/espacios')
     } catch (error) {
       console.error('Error al eliminar:', error)
       alert('Error al eliminar el cobro')
@@ -116,26 +152,40 @@ export default function CobroDetailPage() {
     }
   }
 
+  const getColorEstado = (estado: string) => {
+    switch (estado) {
+      case 'PAGADO':
+      case 'COBRADO':
+        return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
+      case 'PENDIENTE':
+        return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
+      case 'PARCIAL':
+        return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
+      default:
+        return 'bg-gray-100 text-gray-700'
+    }
+  }
+
   if (cargando) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
         <Navbar activeTab="Estado de cuenta" />
-        <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-sm text-gray-600">Cargando cobro...</p>
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
           </div>
-        </main>
+        </div>
       </div>
     )
   }
 
   if (error || !cobro) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
         <Navbar activeTab="Estado de cuenta" />
-        <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+        <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
             <svg
               className="mx-auto h-12 w-12 text-red-400"
               fill="none"
@@ -152,12 +202,12 @@ export default function CobroDetailPage() {
             <h3 className="mt-2 text-sm font-medium text-gray-900">Cobro no encontrado</h3>
             <p className="mt-1 text-sm text-gray-500">{error}</p>
             <div className="mt-6">
-              <Link
-                href="/cobros"
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              <button
+                onClick={() => router.push('/cobros/espacios')}
+                className="px-6 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all font-semibold"
               >
-                Volver a Cobros
-              </Link>
+                Volver
+              </button>
             </div>
           </div>
         </main>
@@ -165,386 +215,333 @@ export default function CobroDetailPage() {
     )
   }
 
-  const estadoColor =
-    cobro.estado === 'PAGADO'
-      ? 'bg-green-100 text-green-800'
-      : cobro.estado === 'PENDIENTE'
-      ? 'bg-red-100 text-red-800'
-      : 'bg-yellow-100 text-yellow-800'
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab="Estado de cuenta" />
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-          <Link href="/cobros" className="hover:text-gray-700">
-            Cobros
-          </Link>
-          <span>/</span>
-          <span className="text-gray-900 font-medium">{cobro.codigoInterno}</span>
-        </div>
+      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header con Back Button + Título + Acciones */}
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            {/* Left: Back button + Título */}
+            <div className="flex items-center gap-3">
+              {/* Back Button */}
+              <button
+                onClick={() => router.back()}
+                className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-all"
+                title="Volver"
+              >
+                <svg
+                  className="w-5 h-5 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+              </button>
 
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-semibold text-gray-900">{cobro.codigoInterno}</h1>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${estadoColor}`}>
-                  {cobro.estado}
-                </span>
-                {cobro.esParcial && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                    Pago Parcial
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-4 flex items-center gap-6 text-sm">
-                <div>
-                  <span className="text-gray-500">Espacio:</span>{' '}
-                  <Link href={`/espacios/${cobro.espacio.id}`} className="font-medium text-blue-600 hover:text-blue-700">
-                    {cobro.espacio.identificador}
-                  </Link>
-                </div>
-                {cobro.espacio.arrendatario && (
-                  <div>
-                    <span className="text-gray-500">Arrendatario:</span>{' '}
-                    <span className="font-medium text-gray-900">{cobro.espacio.arrendatario.nombre}</span>
-                  </div>
-                )}
-                <div>
-                  <span className="text-gray-500">Concepto:</span>{' '}
-                  <span className="font-medium text-gray-900">
-                    {cobro.concepto === 'OTRO' && cobro.conceptoPersonalizado
-                      ? cobro.conceptoPersonalizado
-                      : cobro.concepto}
-                  </span>
-                </div>
+              {/* Título */}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{cobro.codigoInterno}</h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  {cobro.espacio.identificador} • {cobro.espacio.arrendatario?.nombre || 'Sin arrendatario'}
+                </p>
               </div>
             </div>
 
-            <button
-              onClick={() => setModalEliminar(true)}
-              className="text-red-600 hover:text-red-700 text-sm font-medium"
-            >
-              Eliminar
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Payment Information */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Información de Pago</h2>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Monto Pagado</div>
-                  <div className="text-2xl font-semibold text-green-600">${cobro.montoPagado.toFixed(2)}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Monto Pactado</div>
-                  <div className="text-2xl font-semibold text-gray-900">${cobro.montoPactado.toFixed(2)}</div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Diferencia</div>
-                  <div
-                    className={`text-2xl font-semibold ${
-                      cobro.diferencia > 0
-                        ? 'text-green-600'
-                        : cobro.diferencia < 0
-                        ? 'text-red-600'
-                        : 'text-gray-900'
-                    }`}
-                  >
-                    {cobro.diferencia > 0 ? '+' : ''}${cobro.diferencia.toFixed(2)}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Método de Pago</div>
-                  <div className="text-lg font-medium text-gray-900">{cobro.metodoPago}</div>
-                </div>
+            {/* Right: Botones de acción */}
+            {!modoEdicion ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setModoEdicion(true)}
+                  className="px-6 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all font-semibold flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                  Editar
+                </button>
+                <button
+                  onClick={() => setModalEliminar(true)}
+                  className="px-6 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all font-semibold flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                  Eliminar
+                </button>
               </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-2 gap-6">
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Fecha de Pago</div>
-                  <div className="text-base font-medium text-gray-900">
-                    {new Date(cobro.fechaPago).toLocaleDateString('es-EC', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-gray-500 mb-1">Fecha de Vencimiento</div>
-                  <div className="text-base font-medium text-gray-900">
-                    {new Date(cobro.fechaVencimiento).toLocaleDateString('es-EC', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </div>
-                </div>
-
-                {cobro.diasDiferencia !== null && (
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Días de Diferencia</div>
-                    <div
-                      className={`text-base font-medium ${
-                        cobro.diasDiferencia > 0 ? 'text-red-600' : cobro.diasDiferencia < 0 ? 'text-green-600' : 'text-gray-900'
-                      }`}
-                    >
-                      {cobro.diasDiferencia > 0
-                        ? `${cobro.diasDiferencia} días de retraso`
-                        : cobro.diasDiferencia < 0
-                        ? `${Math.abs(cobro.diasDiferencia)} días anticipado`
-                        : 'A tiempo'}
-                    </div>
-                  </div>
-                )}
-
-                {cobro.periodo && (
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Período</div>
-                    <div className="text-base font-medium text-gray-900">{cobro.periodo}</div>
-                  </div>
-                )}
-              </div>
-
-              {cobro.numeroComprobante && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Número de Comprobante</div>
-                  <div className="text-base font-mono font-medium text-gray-900">{cobro.numeroComprobante}</div>
-                </div>
-              )}
-
-              {cobro.observaciones && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="text-sm text-gray-500 mb-1">Observaciones</div>
-                  <div className="text-base text-gray-900">{cobro.observaciones}</div>
-                </div>
-              )}
-            </div>
-
-            {/* Related Partial Payments */}
-            {(cobro.cobroRelacionado || cobro.pagosParciales.length > 0) && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Pagos Parciales Vinculados</h2>
-
-                {cobro.cobroRelacionado && (
-                  <div className="mb-4">
-                    <div className="text-sm text-gray-500 mb-2">Este pago está vinculado a:</div>
-                    <Link
-                      href={`/cobros/${cobro.cobroRelacionado.id}`}
-                      className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div>
-                        <div className="font-medium text-blue-600">{cobro.cobroRelacionado.codigoInterno}</div>
-                        <div className="text-sm text-gray-600">
-                          {new Date(cobro.cobroRelacionado.fechaPago).toLocaleDateString('es-EC')}
-                        </div>
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        ${cobro.cobroRelacionado.montoPagado.toFixed(2)}
-                      </div>
-                    </Link>
-                  </div>
-                )}
-
-                {cobro.pagosParciales.length > 0 && (
-                  <div>
-                    <div className="text-sm text-gray-500 mb-2">
-                      Pagos vinculados a este ({cobro.pagosParciales.length}):
-                    </div>
-                    <div className="space-y-2">
-                      {cobro.pagosParciales.map((pago) => (
-                        <Link
-                          key={pago.id}
-                          href={`/cobros/${pago.id}`}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="font-medium text-blue-600">{pago.codigoInterno}</div>
-                            <div className="text-sm text-gray-600">
-                              {new Date(pago.fechaPago).toLocaleDateString('es-EC')}
-                            </div>
-                            <span
-                              className={`text-xs px-2 py-1 rounded ${
-                                pago.estado === 'PAGADO'
-                                  ? 'bg-green-100 text-green-800'
-                                  : pago.estado === 'PENDIENTE'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}
-                            >
-                              {pago.estado}
-                            </span>
-                          </div>
-                          <div className="text-lg font-semibold text-gray-900">${pago.montoPagado.toFixed(2)}</div>
-                        </Link>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Total de pagos parciales:</span>
-                        <span className="font-semibold text-gray-900">
-                          ${(cobro.montoPagado + cobro.pagosParciales.reduce((sum, p) => sum + p.montoPagado, 0)).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setModoEdicion(false)
+                    setFormData({
+                      montoPagado: cobro.montoPagado,
+                      montoPactado: cobro.montoPactado,
+                      metodoPago: cobro.metodoPago,
+                      numeroComprobante: cobro.numeroComprobante || '',
+                      observaciones: cobro.observaciones || '',
+                      estado: cobro.estado,
+                    })
+                  }}
+                  className="px-6 py-3 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all font-semibold"
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleGuardar}
+                  disabled={guardando}
+                  className="px-6 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all font-semibold flex items-center gap-2 disabled:opacity-50"
+                >
+                  {guardando ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Guardar Cambios
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Sidebar */}
+        {/* Contenido Principal */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Columna Principal - Información del Cobro */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Card Principal */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-lg font-bold text-gray-900 mb-4">Información del Cobro</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Estado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                  {modoEdicion ? (
+                    <select
+                      value={formData.estado}
+                      onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    >
+                      <option value="PENDIENTE">PENDIENTE</option>
+                      <option value="PAGADO">PAGADO</option>
+                      <option value="COBRADO">COBRADO</option>
+                      <option value="PARCIAL">PARCIAL</option>
+                    </select>
+                  ) : (
+                    <span className={`inline-flex px-4 py-2 rounded-full text-sm font-semibold border ${getColorEstado(cobro.estado)}`}>
+                      {cobro.estado}
+                    </span>
+                  )}
+                </div>
+
+                {/* Concepto */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Concepto</label>
+                  <p className="text-gray-900 py-2">{cobro.concepto}</p>
+                </div>
+
+                {/* Periodo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Periodo</label>
+                  <p className="text-gray-900 py-2">{cobro.periodo || '-'}</p>
+                </div>
+
+                {/* Fecha de Pago */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha de Pago</label>
+                  <p className="text-gray-900 py-2">{new Date(cobro.fechaPago).toLocaleDateString('es-EC')}</p>
+                </div>
+
+                {/* Monto Pactado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Monto Pactado</label>
+                  {modoEdicion ? (
+                    <input
+                      type="number"
+                      value={formData.montoPactado}
+                      onChange={(e) => setFormData({ ...formData, montoPactado: parseFloat(e.target.value) })}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    />
+                  ) : (
+                    <p className="text-2xl font-bold text-gray-900">${cobro.montoPactado.toLocaleString()}</p>
+                  )}
+                </div>
+
+                {/* Monto Pagado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Monto Pagado</label>
+                  {modoEdicion ? (
+                    <input
+                      type="number"
+                      value={formData.montoPagado}
+                      onChange={(e) => setFormData({ ...formData, montoPagado: parseFloat(e.target.value) })}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    />
+                  ) : (
+                    <p className="text-2xl font-bold text-emerald-600">${cobro.montoPagado.toLocaleString()}</p>
+                  )}
+                </div>
+
+                {/* Método de Pago */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                  {modoEdicion ? (
+                    <select
+                      value={formData.metodoPago}
+                      onChange={(e) => setFormData({ ...formData, metodoPago: e.target.value })}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    >
+                      <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+                      <option value="EFECTIVO">EFECTIVO</option>
+                      <option value="CHEQUE">CHEQUE</option>
+                    </select>
+                  ) : (
+                    <p className="text-gray-900 py-2">{cobro.metodoPago}</p>
+                  )}
+                </div>
+
+                {/* Número de Comprobante */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Número de Comprobante</label>
+                  {modoEdicion ? (
+                    <input
+                      type="text"
+                      value={formData.numeroComprobante}
+                      onChange={(e) => setFormData({ ...formData, numeroComprobante: e.target.value })}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                      placeholder="Número de comprobante"
+                    />
+                  ) : (
+                    <p className="text-gray-900 py-2">{cobro.numeroComprobante || '-'}</p>
+                  )}
+                </div>
+
+                {/* Observaciones */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                  {modoEdicion ? (
+                    <textarea
+                      value={formData.observaciones}
+                      onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                      rows={3}
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                      placeholder="Observaciones adicionales"
+                    />
+                  ) : (
+                    <p className="text-gray-900 py-2">{cobro.observaciones || '-'}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Columna Lateral - Info del Espacio */}
           <div className="space-y-6">
-            {/* Space Details */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Información del Espacio</h3>
+            {/* Card del Espacio */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Información del Espacio</h3>
 
               <div className="space-y-3">
                 <div>
-                  <div className="text-sm text-gray-500">Identificador</div>
-                  <Link
-                    href={`/espacios/${cobro.espacio.id}`}
-                    className="text-base font-medium text-blue-600 hover:text-blue-700"
-                  >
-                    {cobro.espacio.identificador}
-                  </Link>
+                  <p className="text-sm text-gray-600">Identificador</p>
+                  <p className="text-lg font-semibold text-indigo-600">{cobro.espacio.identificador}</p>
                 </div>
 
                 <div>
-                  <div className="text-sm text-gray-500">Tipo</div>
-                  <div className="text-base font-medium text-gray-900">{cobro.espacio.tipo}</div>
+                  <p className="text-sm text-gray-600">Tipo</p>
+                  <p className="text-gray-900">{cobro.espacio.tipo}</p>
                 </div>
 
-                {cobro.espacio.montoPactado && (
+                {cobro.espacio.arrendatario && (
                   <div>
-                    <div className="text-sm text-gray-500">Monto Mensual</div>
-                    <div className="text-base font-medium text-gray-900">
-                      ${cobro.espacio.montoPactado.toFixed(2)}
-                    </div>
+                    <p className="text-sm text-gray-600">Arrendatario</p>
+                    <p className="text-gray-900">{cobro.espacio.arrendatario.nombre}</p>
                   </div>
                 )}
 
-                {cobro.espacio.diaPago && (
-                  <div>
-                    <div className="text-sm text-gray-500">Día de Pago</div>
-                    <div className="text-base font-medium text-gray-900">Día {cobro.espacio.diaPago}</div>
-                  </div>
-                )}
-              </div>
-
-              {cobro.espacio.arrendatario && (
-                <>
-                  <div className="my-4 border-t border-gray-200"></div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Arrendatario</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <div className="text-sm text-gray-500">Nombre</div>
-                      <div className="text-base font-medium text-gray-900">{cobro.espacio.arrendatario.nombre}</div>
-                    </div>
-                    {cobro.espacio.arrendatario.email && !cobro.espacio.arrendatario.email.includes('@temp.com') && (
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <a
-                          href={`mailto:${cobro.espacio.arrendatario.email}`}
-                          className="text-sm text-blue-600 hover:text-blue-700"
-                        >
-                          {cobro.espacio.arrendatario.email}
-                        </a>
-                      </div>
-                    )}
-                    {cobro.espacio.arrendatario.celular && (
-                      <div>
-                        <div className="text-sm text-gray-500">Celular</div>
-                        <a
-                          href={`tel:${cobro.espacio.arrendatario.celular}`}
-                          className="text-sm text-blue-600 hover:text-blue-700"
-                        >
-                          {cobro.espacio.arrendatario.celular}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Metadata */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Metadata</h3>
-
-              <div className="space-y-3 text-sm">
-                <div>
-                  <div className="text-gray-500">Creado</div>
-                  <div className="text-gray-900">
-                    {new Date(cobro.createdAt).toLocaleDateString('es-EC', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-gray-500">Última actualización</div>
-                  <div className="text-gray-900">
-                    {new Date(cobro.updatedAt).toLocaleDateString('es-EC', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </div>
-                </div>
+                <button
+                  onClick={() => router.push(`/cobros/historial/${cobro.espacioId}`)}
+                  className="w-full mt-4 px-4 py-2 rounded-xl border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 transition-all font-semibold"
+                >
+                  Ver Historial Completo
+                </button>
               </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Delete Modal */}
+      {/* Modal de Eliminación con Doble Confirmación */}
       {modalEliminar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Eliminar Cobro</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              ¿Estás seguro que deseas eliminar el cobro <strong>{cobro.codigoInterno}</strong>? Esta acción no se
-              puede deshacer.
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 rounded-full bg-red-100">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Confirmar Eliminación</h3>
+            </div>
+
+            <p className="text-gray-600 mb-4">
+              Esta acción no se puede deshacer. Para confirmar, escribe el código del cobro: <span className="font-bold text-gray-900">{cobro.codigoInterno}</span>
             </p>
 
-            <div className="flex gap-3 justify-end">
+            <input
+              type="text"
+              value={confirmacionEliminar}
+              onChange={(e) => setConfirmacionEliminar(e.target.value)}
+              className="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent mb-4"
+              placeholder="Escribe el código aquí"
+            />
+
+            <div className="flex gap-3">
               <button
-                onClick={() => setModalEliminar(false)}
+                onClick={() => {
+                  setModalEliminar(false)
+                  setConfirmacionEliminar('')
+                }}
+                className="flex-1 px-4 py-3 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all font-semibold"
                 disabled={eliminando}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleEliminar}
-                disabled={eliminando}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50"
+                disabled={eliminando || confirmacionEliminar !== cobro.codigoInterno}
+                className="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {eliminando ? 'Eliminando...' : 'Eliminar'}
               </button>
