@@ -22,7 +22,9 @@ export async function GET(request: Request) {
     const firstDay = new Date(year, month - 1, 1)
     const lastDay = new Date(year, month, 0, 23, 59, 59, 999)
 
-    // Get all cobros with fechaVencimiento in the month
+    const bills: any[] = []
+
+    // 1. Get all cobros with fechaVencimiento in the month
     const cobros = await prisma.cobro.findMany({
       where: {
         fechaVencimiento: {
@@ -42,8 +44,8 @@ export async function GET(request: Request) {
       },
     })
 
-    // Transform to calendar bill format
-    const bills = cobros.map((cobro) => ({
+    // Transform existing cobros to calendar bill format
+    bills.push(...cobros.map((cobro) => ({
       id: cobro.id,
       codigoInterno: cobro.codigoInterno,
       espacioId: cobro.espacio.identificador,
@@ -69,7 +71,66 @@ export async function GET(request: Request) {
       observaciones: cobro.observaciones,
       // Partial payment fields
       esPagoParcial: cobro.esParcial,
-    }))
+    })))
+
+    // 2. Generate recurring monthly cobros for active spaces with arrendatarios
+    const espaciosActivos = await prisma.espacio.findMany({
+      where: {
+        activo: true,
+        arrendatarioId: { not: null },
+        diaPago: { not: null },
+      },
+      include: {
+        arrendatario: true,
+      },
+    })
+
+    // For each active space, check if there's a cobro for this month, if not, generate a pending one
+    for (const espacio of espaciosActivos) {
+      const periodoStr = mes // YYYY-MM format
+
+      // Check if a cobro already exists for this space in this period
+      const cobroExistente = cobros.find(
+        (c) => c.espacioId === espacio.id && c.periodo === periodoStr
+      )
+
+      if (!cobroExistente && espacio.diaPago) {
+        // Generate a pending cobro for this month
+        const fechaVencimiento = new Date(year, month - 1, espacio.diaPago)
+
+        // Only add if fechaVencimiento is in the current month range
+        if (fechaVencimiento >= firstDay && fechaVencimiento <= lastDay) {
+          bills.push({
+            id: `generated-${espacio.id}-${periodoStr}`,
+            codigoInterno: `PEND-${espacio.identificador}-${periodoStr}`,
+            espacioId: espacio.identificador,
+            espacioNombre: espacio.identificador,
+            arrendatarioNombre: espacio.arrendatario?.nombre || 'Sin arrendatario',
+            titulo: `${espacio.conceptoCobro || 'RENTA'}`,
+            concepto: espacio.conceptoCobro || 'RENTA',
+            conceptoPersonalizado: null,
+            periodo: periodoStr,
+            monto: espacio.monto || 0,
+            montoPagado: 0,
+            montoPactado: espacio.monto || 0,
+            diferencia: 0,
+            estado: 'PENDIENTE',
+            fechaVencimiento,
+            fechaPago: null,
+            fecha: fechaVencimiento,
+            tipo: 'cobro' as const,
+            formaPago: null,
+            referencia: null,
+            observaciones: null,
+            esPagoParcial: false,
+            isGenerated: true, // Flag to indicate this is auto-generated
+          })
+        }
+      }
+    }
+
+    // Sort by fecha
+    bills.sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
 
     return NextResponse.json(bills)
   } catch (error) {

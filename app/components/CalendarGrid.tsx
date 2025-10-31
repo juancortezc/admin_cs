@@ -95,7 +95,7 @@ export default function CalendarGrid({
   // Get border color only (white bg, black text)
   const getBorderColor = (bill: Bill) => {
     if (bill.estado === 'PAGADO' || bill.estado === 'COBRADO') {
-      return 'border-emerald-500'
+      return 'border-gray-500' // Pagado = Gris
     }
 
     const billDate = new Date(bill.fecha)
@@ -104,10 +104,10 @@ export default function CalendarGrid({
     now.setHours(0, 0, 0, 0)
 
     if (billDate < now) {
-      return 'border-red-500' // Overdue
+      return 'border-red-900' // Vencido = Vino
     }
 
-    return 'border-amber-500' // Pending
+    return 'border-blue-500' // Pendiente = Azul
   }
 
   return (

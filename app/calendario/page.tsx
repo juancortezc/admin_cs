@@ -385,15 +385,15 @@ export default function CalendarioPage() {
                       new Date(bill.fechaVencimiento) < new Date()
 
                     // Determine border color
-                    let borderColor = 'border-amber-500'
-                    if (isPaid) borderColor = 'border-emerald-500'
-                    else if (isOverdue) borderColor = 'border-red-500'
+                    let borderColor = 'border-blue-500' // Pendiente = Azul
+                    if (isPaid) borderColor = 'border-gray-500' // Pagado = Gris
+                    else if (isOverdue) borderColor = 'border-red-900' // Vencido = Vino
 
                     // Determine dot color
-                    let dotColor = 'bg-amber-500'
-                    if (isPaid) dotColor = 'bg-emerald-500'
-                    else if (isOverdue) dotColor = 'bg-red-500'
-                    if (bill.esPagoParcial) dotColor = 'bg-blue-500'
+                    let dotColor = 'bg-blue-500' // Pendiente = Azul
+                    if (isPaid) dotColor = 'bg-gray-500' // Pagado = Gris
+                    else if (isOverdue) dotColor = 'bg-red-900' // Vencido = Vino
+                    if (bill.esPagoParcial) dotColor = 'bg-orange-500' // Parcial = Naranja
 
                     return (
                       <button
