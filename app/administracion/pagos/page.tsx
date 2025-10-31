@@ -85,6 +85,14 @@ export default function AdministracionPagosPage() {
   const [pagosRecurrentes, setPagosRecurrentes] = useState<PagoRecurrente[]>([])
   const [filtroEstado, setFiltroEstado] = useState<string>('true')
 
+  // Nuevos estados para filtros
+  const [mesSeleccionado, setMesSeleccionado] = useState<string>(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('todas')
+  const [categoriaExpandida, setCategoriaExpandida] = useState<string | null>(null)
+
   useEffect(() => {
     if (activeTab === 'estado') {
       cargarEstadoCuenta()
@@ -93,14 +101,22 @@ export default function AdministracionPagosPage() {
     } else if (activeTab === 'recurrentes') {
       cargarPagosRecurrentes()
     }
-  }, [activeTab, filtroEstado])
+  }, [activeTab, filtroEstado, mesSeleccionado])
 
   const cargarEstadoCuenta = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/pagos')
       const data = await res.json()
-      setPagos(data.pagos || [])
+
+      // Filtrar pagos por mes seleccionado
+      const [year, month] = mesSeleccionado.split('-').map(Number)
+      const pagosFiltradosPorMes = (data.pagos || []).filter((pago: Pago) => {
+        const fechaPago = new Date(pago.fecha)
+        return fechaPago.getFullYear() === year && fechaPago.getMonth() + 1 === month
+      })
+
+      setPagos(pagosFiltradosPorMes)
 
       const categorias: CategoriaAgrupada[] = [
         { categoria: 'servicio', nombre: 'Servicios Básicos', gradiente: 'from-blue-500 to-cyan-500', totalPagos: 0, montoTotal: 0, pagos: [] },
@@ -109,7 +125,7 @@ export default function AdministracionPagosPage() {
         { categoria: 'otro', nombre: 'Otros', gradiente: 'from-gray-500 to-slate-500', totalPagos: 0, montoTotal: 0, pagos: [] }
       ]
 
-      data.pagos.forEach((pago: Pago) => {
+      pagosFiltradosPorMes.forEach((pago: Pago) => {
         const cat = categorias.find(c => c.categoria === pago.tipo)
         if (cat) {
           cat.pagos.push(pago)
@@ -159,11 +175,31 @@ export default function AdministracionPagosPage() {
   }
 
   const categoriasFiltradas = categoriasAgrupadas.filter(cat => {
+    // Filtro por categoría
+    if (categoriaSeleccionada !== 'todas' && cat.categoria !== categoriaSeleccionada) {
+      return false
+    }
+    // Filtro por búsqueda
     if (!busqueda) return true
     const search = busqueda.toLowerCase()
     return cat.nombre.toLowerCase().includes(search) ||
            cat.pagos.some(p => p.titulo.toLowerCase().includes(search) || p.descripcion.toLowerCase().includes(search))
   })
+
+  // Generar lista de meses disponibles (últimos 12 meses)
+  const generarMesesDisponibles = () => {
+    const meses = []
+    const now = new Date()
+    for (let i = 0; i < 12; i++) {
+      const fecha = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const value = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`
+      const label = fecha.toLocaleDateString('es-CL', { month: 'long', year: 'numeric' })
+      meses.push({ value, label: label.charAt(0).toUpperCase() + label.slice(1) })
+    }
+    return meses
+  }
+
+  const mesesDisponibles = generarMesesDisponibles()
 
   if (loading) {
     return (
@@ -230,14 +266,48 @@ export default function AdministracionPagosPage() {
 
         {activeTab === 'estado' && (
           <>
-            <div className="mb-6">
+            {/* Filtros */}
+            <div className="mb-6 space-y-4">
+              <div className="flex flex-wrap gap-4">
+                {/* Selector de mes */}
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Mes</label>
+                  <select
+                    value={mesSeleccionado}
+                    onChange={(e) => setMesSeleccionado(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white"
+                  >
+                    {mesesDisponibles.map(mes => (
+                      <option key={mes.value} value={mes.value}>{mes.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Selector de categoría */}
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-xs font-medium text-gray-700 mb-2">Categoría</label>
+                  <select
+                    value={categoriaSeleccionada}
+                    onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white"
+                  >
+                    <option value="todas">Todas las categorías</option>
+                    <option value="servicio">Servicios Básicos</option>
+                    <option value="salario">Salarios</option>
+                    <option value="arriendo">Arriendos</option>
+                    <option value="otro">Otros</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Barra de búsqueda */}
               <div className="relative">
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <input
                   type="text"
-                  placeholder="Buscar por categoría, título, descripción..."
+                  placeholder="Buscar por título, descripción..."
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-gray-400 bg-white"
@@ -249,7 +319,10 @@ export default function AdministracionPagosPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {categoriasFiltradas.map((categoria) => (
                   <div key={categoria.categoria} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all">
-                    <div className={`bg-gradient-to-r ${categoria.gradiente} p-4`}>
+                    <div
+                      className={`bg-gradient-to-r ${categoria.gradiente} p-4 cursor-pointer`}
+                      onClick={() => setCategoriaExpandida(categoriaExpandida === categoria.categoria ? null : categoria.categoria)}
+                    >
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-lg font-bold text-white">{categoria.nombre}</h3>
@@ -257,14 +330,14 @@ export default function AdministracionPagosPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-2xl font-bold text-white">${categoria.montoTotal.toLocaleString()}</p>
-                          <p className="text-xs text-white/80">Total</p>
+                          <p className="text-xs text-white/80">Click para ver detalle</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      {categoria.pagos.slice(0, 2).map((pago) => (
-                        <div key={pago.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
+                    <div className="p-4 space-y-2">
+                      {categoria.pagos.map((pago) => (
+                        <div key={pago.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                           <div className="flex-1">
                             <p className="font-semibold text-gray-900 text-sm">{pago.titulo}</p>
                             <p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{pago.descripcion}</p>
@@ -288,14 +361,6 @@ export default function AdministracionPagosPage() {
                         </div>
                       ))}
                     </div>
-
-                    {categoria.totalPagos > 2 && (
-                      <div className="px-4 pb-4">
-                        <button className="w-full py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors">
-                          Ver todos los {categoria.totalPagos} pagos →
-                        </button>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -305,6 +370,102 @@ export default function AdministracionPagosPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
                 </svg>
                 <p className="text-sm text-gray-500">{busqueda ? 'No se encontraron pagos' : 'No hay pagos registrados'}</p>
+              </div>
+            )}
+
+            {/* Modal estilo Excel */}
+            {categoriaExpandida && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setCategoriaExpandida(null)}>
+                <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                  {(() => {
+                    const categoria = categoriasAgrupadas.find(c => c.categoria === categoriaExpandida)
+                    if (!categoria) return null
+
+                    return (
+                      <>
+                        <div className={`bg-gradient-to-r ${categoria.gradiente} p-6`}>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h2 className="text-2xl font-bold text-white">{categoria.nombre}</h2>
+                              <p className="text-white/90 mt-1">{categoria.totalPagos} pagos • ${categoria.montoTotal.toLocaleString()}</p>
+                            </div>
+                            <button
+                              onClick={() => setCategoriaExpandida(null)}
+                              className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                            >
+                              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="overflow-auto max-h-[calc(90vh-140px)]">
+                          {/* Tabla estilo Excel */}
+                          <table className="w-full">
+                            <thead className="bg-gray-100 sticky top-0">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Fecha</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Título</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Descripción</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Tipo</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Forma de Pago</th>
+                                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 border-b border-gray-300">Monto</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Referencia</th>
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Observaciones</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white">
+                              {categoria.pagos.map((pago, idx) => (
+                                <tr key={pago.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-indigo-50 transition-colors`}>
+                                  <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200 whitespace-nowrap">
+                                    {new Date(pago.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm font-medium text-gray-900 border-b border-gray-200">
+                                    {pago.titulo}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
+                                    {pago.descripcion}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm border-b border-gray-200">
+                                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${pago.esIngreso ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                      {pago.esIngreso ? 'Ingreso' : 'Egreso'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
+                                    {pago.formaPago || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm font-bold text-right border-b border-gray-200">
+                                    <span className={pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}>
+                                      {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
+                                    {pago.referencia || '-'}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
+                                    {pago.observaciones || '-'}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot className="bg-gray-100 sticky bottom-0">
+                              <tr>
+                                <td colSpan={5} className="px-4 py-3 text-sm font-bold text-gray-900 border-t-2 border-gray-300">
+                                  Total ({categoria.totalPagos} pagos)
+                                </td>
+                                <td className="px-4 py-3 text-sm font-bold text-right text-gray-900 border-t-2 border-gray-300">
+                                  ${categoria.montoTotal.toLocaleString()}
+                                </td>
+                                <td colSpan={2} className="border-t-2 border-gray-300"></td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
               </div>
             )}
           </>
