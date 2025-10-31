@@ -11,8 +11,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type MainTab = 'Calendario' | 'Espacios' | 'Airbnb' | 'Mantenimiento'
-type SubTab = 'Ingresos' | 'Egresos' | 'Estado de cuenta' | 'Arrendatarios' | 'Espacios' | 'Reservas' | 'Huéspedes' | 'Pagos' | 'Tickets' | 'Inventario'
+type MainTab = 'Calendario' | 'Espacios' | 'Airbnb' | 'Administración'
+type SubTab = 'Ingresos' | 'Egresos' | 'Estado de cuenta' | 'Arrendatarios' | 'Espacios' | 'Reservas' | 'Huéspedes' | 'Pagos' | 'Tickets' | 'Inventario' | 'Pagos Eventuales'
 
 type NavbarProps = {
   activeTab?: SubTab
@@ -29,12 +29,12 @@ export default function Navbar({ activeTab }: NavbarProps) {
     const calendarioTabs: SubTab[] = ['Ingresos', 'Egresos']
     const espaciosTabs: SubTab[] = ['Estado de cuenta', 'Arrendatarios', 'Espacios']
     const airbnbTabs: SubTab[] = ['Reservas', 'Huéspedes']
-    const mantenimientoTabs: SubTab[] = ['Pagos', 'Tickets', 'Inventario']
+    const administracionTabs: SubTab[] = ['Estado de cuenta', 'Tickets', 'Inventario']
 
     if (calendarioTabs.includes(activeTab)) return 'Calendario'
     if (espaciosTabs.includes(activeTab)) return 'Espacios'
     if (airbnbTabs.includes(activeTab)) return 'Airbnb'
-    if (mantenimientoTabs.includes(activeTab)) return 'Mantenimiento'
+    if (administracionTabs.includes(activeTab)) return 'Administración'
 
     return 'Calendario'
   }
@@ -58,10 +58,10 @@ export default function Navbar({ activeTab }: NavbarProps) {
       { nombre: 'Huéspedes', ruta: '/airbnb' },
       { nombre: 'Espacios', ruta: '/airbnb' },
     ],
-    'Mantenimiento': [
-      { nombre: 'Pagos', ruta: '/pagos' },
-      { nombre: 'Tickets', ruta: '/mantenimiento' },
-      { nombre: 'Inventario', ruta: '/inventario' },
+    'Administración': [
+      { nombre: 'Estado de cuenta', ruta: '/administracion/estado-cuenta' },
+      { nombre: 'Tickets', ruta: '/administracion/tickets' },
+      { nombre: 'Inventario', ruta: '/administracion/inventario' },
     ],
   }
 
