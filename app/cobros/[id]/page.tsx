@@ -119,7 +119,7 @@ export default function CobroDetailPage() {
   if (cargando) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar activeTab="Cobros" />
+        <Navbar activeTab="Estado de cuenta" />
         <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -133,7 +133,7 @@ export default function CobroDetailPage() {
   if (error || !cobro) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar activeTab="Cobros" />
+        <Navbar activeTab="Estado de cuenta" />
         <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <svg
@@ -174,7 +174,7 @@ export default function CobroDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar activeTab="Cobros" />
+      <Navbar activeTab="Estado de cuenta" />
 
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}

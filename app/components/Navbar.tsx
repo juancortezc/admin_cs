@@ -11,8 +11,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type MainTab = 'Espacios' | 'Airbnb' | 'Mantenimiento'
-type SubTab = 'Calendario' | 'Cobros' | 'Arrendatarios' | 'Espacios' | 'Reservas' | 'Huéspedes' | 'Pagos' | 'Tickets' | 'Inventario'
+type MainTab = 'Calendario' | 'Espacios' | 'Airbnb' | 'Mantenimiento'
+type SubTab = 'Ingresos' | 'Egresos' | 'Estado de cuenta' | 'Arrendatarios' | 'Espacios' | 'Reservas' | 'Huéspedes' | 'Pagos' | 'Tickets' | 'Inventario'
 
 type NavbarProps = {
   activeTab?: SubTab
@@ -24,39 +24,44 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
   // Determinar el tab principal activo según el subtab activo
   const getActiveMainTab = (): MainTab => {
-    if (!activeTab) return 'Espacios'
+    if (!activeTab) return 'Calendario'
 
-    const espaciosTabs: SubTab[] = ['Calendario', 'Cobros', 'Arrendatarios', 'Espacios']
+    const calendarioTabs: SubTab[] = ['Ingresos', 'Egresos']
+    const espaciosTabs: SubTab[] = ['Estado de cuenta', 'Arrendatarios', 'Espacios']
     const airbnbTabs: SubTab[] = ['Reservas', 'Huéspedes']
     const mantenimientoTabs: SubTab[] = ['Pagos', 'Tickets', 'Inventario']
 
+    if (calendarioTabs.includes(activeTab)) return 'Calendario'
     if (espaciosTabs.includes(activeTab)) return 'Espacios'
     if (airbnbTabs.includes(activeTab)) return 'Airbnb'
     if (mantenimientoTabs.includes(activeTab)) return 'Mantenimiento'
 
-    return 'Espacios'
+    return 'Calendario'
   }
 
   const [activeMainTab, setActiveMainTab] = useState<MainTab>(getActiveMainTab())
 
-  // Definición de tabs principales y sus subtabs con iconos SVG
-  const mainTabs: Record<MainTab, { nombre: string; ruta: string; icon: string }[]> = {
+  // Definición de tabs principales y sus subtabs
+  const mainTabs: Record<MainTab, { nombre: string; ruta: string }[] | null> = {
+    'Calendario': [
+      { nombre: 'Ingresos', ruta: '/calendario?tipo=ingresos' },
+      { nombre: 'Egresos', ruta: '/calendario?tipo=egresos' },
+    ],
     'Espacios': [
-      { nombre: 'Calendario', ruta: '/calendario', icon: '📅' },
-      { nombre: 'Cobros', ruta: '/cobros', icon: '💰' },
-      { nombre: 'Arrendatarios', ruta: '/arrendatarios', icon: '👥' },
-      { nombre: 'Espacios', ruta: '/espacios', icon: '🏢' },
+      { nombre: 'Estado de cuenta', ruta: '/cobros' },
+      { nombre: 'Arrendatarios', ruta: '/arrendatarios' },
+      { nombre: 'Espacios', ruta: '/espacios' },
     ],
     'Airbnb': [
-      { nombre: 'Calendario', ruta: '/airbnb', icon: '📅' },
-      { nombre: 'Reservas', ruta: '/airbnb', icon: '🏠' },
-      { nombre: 'Huéspedes', ruta: '/airbnb', icon: '👥' },
-      { nombre: 'Espacios', ruta: '/airbnb', icon: '🏢' },
+      { nombre: 'Calendario', ruta: '/airbnb' },
+      { nombre: 'Reservas', ruta: '/airbnb' },
+      { nombre: 'Huéspedes', ruta: '/airbnb' },
+      { nombre: 'Espacios', ruta: '/airbnb' },
     ],
     'Mantenimiento': [
-      { nombre: 'Pagos', ruta: '/pagos', icon: '💳' },
-      { nombre: 'Tickets', ruta: '/mantenimiento', icon: '🔧' },
-      { nombre: 'Inventario', ruta: '/inventario', icon: '📦' },
+      { nombre: 'Pagos', ruta: '/pagos' },
+      { nombre: 'Tickets', ruta: '/mantenimiento' },
+      { nombre: 'Inventario', ruta: '/inventario' },
     ],
   }
 
@@ -65,7 +70,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
     router.push(ruta)
   }
 
-  const currentSubTabs = mainTabs[activeMainTab]
+  const currentSubTabs = mainTabs[activeMainTab] || []
 
   return (
     <>
@@ -78,38 +83,39 @@ export default function Navbar({ activeTab }: NavbarProps) {
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header con logo y tabs principales */}
-          <div className="flex justify-between items-center h-16">
+          {/* Header con logo y tabs principales - usando grid para centrar */}
+          <div className="grid grid-cols-[200px_1fr_200px] items-center h-16">
             {/* Logo/Título with gradient text effect */}
             <button
               onClick={() => handleNavegar('/calendario')}
-              className="text-xl font-bold text-white hover:scale-105 transition-all tracking-tight flex items-center gap-2"
+              className="text-xl font-bold text-white hover:scale-105 transition-all tracking-tight justify-self-start"
             >
-              <span className="text-2xl">🏛️</span>
-              <span className="text-gradient-white">Casa del Sol</span>
+              Casa del Sol
             </button>
 
-            {/* Desktop: Tabs principales */}
-            <div className="hidden md:flex items-center gap-2">
-              {(Object.keys(mainTabs) as MainTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveMainTab(tab)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                    activeMainTab === tab
-                      ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                      : 'text-white/80 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* Desktop: Tabs principales en pill grande - centrado absoluto */}
+            <div className="hidden md:flex items-center justify-center">
+              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
+                {(Object.keys(mainTabs) as MainTab[]).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveMainTab(tab)}
+                    className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                      activeMainTab === tab
+                        ? 'bg-white text-indigo-700 shadow-md'
+                        : 'text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Mobile: Hamburguesa */}
             <button
               onClick={() => setMenuAbierto(!menuAbierto)}
-              className="md:hidden p-2 rounded-lg hover:bg-white/10 active:scale-95 transition-all"
+              className="md:hidden p-2 rounded-lg hover:bg-white/10 active:scale-95 transition-all justify-self-end"
               aria-label="Menu"
             >
               <svg
@@ -128,25 +134,31 @@ export default function Navbar({ activeTab }: NavbarProps) {
                 )}
               </svg>
             </button>
+
+            {/* Espacio vacío en desktop para mantener grid */}
+            <div className="hidden md:block"></div>
           </div>
 
-          {/* Desktop: Subtabs (segunda fila) con glass effect */}
-          <div className="hidden md:flex items-center gap-2 pb-3 overflow-x-auto">
-            {currentSubTabs.map((subtab) => (
-              <button
-                key={subtab.nombre}
-                onClick={() => handleNavegar(subtab.ruta)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === subtab.nombre
-                    ? 'bg-white text-indigo-700 shadow-md transform -translate-y-0.5'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <span className="text-base">{subtab.icon}</span>
-                {subtab.nombre}
-              </button>
-            ))}
-          </div>
+          {/* Desktop: Subtabs (segunda fila) en pill grande centrado */}
+          {currentSubTabs.length > 0 && (
+            <div className="hidden md:flex items-center justify-center pb-3">
+              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
+                {currentSubTabs.map((subtab) => (
+                  <button
+                    key={subtab.nombre}
+                    onClick={() => handleNavegar(subtab.ruta)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap ${
+                      activeTab === subtab.nombre
+                        ? 'bg-white text-indigo-700 shadow-md'
+                        : 'text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {subtab.nombre}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -191,29 +203,38 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
               {/* Links del drawer organizados por sección */}
               <div className="space-y-6">
-                {(Object.keys(mainTabs) as MainTab[]).map((mainTab) => (
-                  <div key={mainTab}>
-                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-3">
-                      {mainTab}
-                    </h3>
-                    <div className="space-y-1">
-                      {mainTabs[mainTab].map((subtab) => (
-                        <button
-                          key={subtab.nombre}
-                          onClick={() => handleNavegar(subtab.ruta)}
-                          className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${
-                            activeTab === subtab.nombre
-                              ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg'
-                              : 'text-gray-700 hover:bg-gray-100 active:scale-95'
-                          }`}
-                        >
-                          <span className="text-lg">{subtab.icon}</span>
-                          {subtab.nombre}
-                        </button>
-                      ))}
+                {(Object.keys(mainTabs) as MainTab[]).map((mainTab) => {
+                  const subtabs = mainTabs[mainTab]
+
+                  // Si no tiene subtabs (por si acaso), no mostrar
+                  if (!subtabs) {
+                    return null
+                  }
+
+                  // Tabs con subtabs
+                  return (
+                    <div key={mainTab}>
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-3">
+                        {mainTab}
+                      </h3>
+                      <div className="space-y-1">
+                        {subtabs.map((subtab) => (
+                          <button
+                            key={subtab.nombre}
+                            onClick={() => handleNavegar(subtab.ruta)}
+                            className={`w-full text-left px-4 py-3 rounded-full text-sm font-medium transition-all ${
+                              activeTab === subtab.nombre
+                                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg'
+                                : 'text-gray-700 hover:bg-gray-100 active:scale-95'
+                            }`}
+                          >
+                            {subtab.nombre}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           </div>

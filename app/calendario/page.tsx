@@ -5,7 +5,8 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
 import CalendarGrid from '@/app/components/CalendarGrid'
 import CalendarWeekView from '@/app/components/CalendarWeekView'
@@ -47,8 +48,11 @@ type Bill = {
   metodoPago?: string
 }
 
-export default function CalendarioPage() {
-  const [activeTab, setActiveTab] = useState<'cobros' | 'pagos'>('cobros')
+function CalendarioContent() {
+  const searchParams = useSearchParams()
+  const tipo = searchParams.get('tipo') || 'ingresos'
+  const activeTab = tipo === 'ingresos' ? 'cobros' : 'pagos'
+
   const [bills, setBills] = useState<Bill[]>([])
   const [loading, setLoading] = useState(true)
   const [filtroEstado, setFiltroEstado] = useState<string>('todos')
@@ -194,7 +198,10 @@ export default function CalendarioPage() {
       })
 
   // Calculate metrics (using all bills, not filtered)
-  const totalBills = bills.length
+  const pendingCobrosBills = activeTab === 'cobros'
+    ? bills.filter((b) => b.estado === 'PENDIENTE')
+    : bills.filter((b) => b.estado === 'PENDIENTE')
+  const totalBills = pendingCobrosBills.length
   const paidBills = bills.filter((b) =>
     activeTab === 'cobros'
       ? b.estado === 'COBRADO' || b.estado === 'PAGADO'
@@ -240,7 +247,7 @@ export default function CalendarioPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Calendario" />
+        <Navbar activeTab={activeTab === 'cobros' ? 'Ingresos' : 'Egresos'} />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -253,42 +260,15 @@ export default function CalendarioPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Calendario" />
+      <Navbar activeTab={activeTab === 'cobros' ? 'Ingresos' : 'Egresos'} />
 
       <main className="max-w-[1800px] mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header with tabs */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Calendario de Facturación</h1>
-
-          {/* Tabs */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setActiveTab('cobros')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                activeTab === 'cobros'
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              Cobros (Ingresos)
-            </button>
-            <button
-              onClick={() => setActiveTab('pagos')}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                activeTab === 'pagos'
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-              }`}
-            >
-              Pagos (Egresos)
-            </button>
-          </div>
-        </div>
-
         {/* Summary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
-            <div className="text-sm text-gray-600 mb-1">Total Facturas</div>
+            <div className="text-sm text-gray-600 mb-1">
+              {activeTab === 'cobros' ? 'Cobros a Realizar' : 'Pagos a Realizar'}
+            </div>
             <div className="text-3xl font-bold text-gray-900">{totalBills}</div>
           </div>
 
@@ -554,5 +534,22 @@ export default function CalendarioPage() {
         />
       )}
     </div>
+  )
+}
+
+export default function CalendarioPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+        <div className="flex items-center justify-center h-96">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Cargando calendario...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <CalendarioContent />
+    </Suspense>
   )
 }
