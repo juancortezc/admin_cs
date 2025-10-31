@@ -1,125 +1,187 @@
 /**
- * Página de Calendario - Vista principal con eventos pendientes
- * Diseño Apple: compacto, minimalista, elegante
+ * Bill Calendar Page - Material Design
+ * Shows Cobros (bills to collect) and Pagos (bills to pay) in calendar view
  */
 
 'use client'
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
+import CalendarGrid from '@/app/components/CalendarGrid'
 import ModalRegistroPago from '@/app/components/ModalRegistroPago'
 import Toast from '@/app/components/Toast'
 
-type Evento = {
+type Bill = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'empleado' | 'pago' | 'airbnb_checkin' | 'airbnb_checkout'
-  titulo: string
-  descripcion: string
-  monto: number | null
-  fecha: string
-  dia: number
-  vencido: boolean
+  codigoInterno?: string
   espacioId?: string
-  servicioId?: string
-  empleadoId?: string
-  pagoId?: string
+  espacioNombre?: string
+  arrendatarioNombre?: string
+  titulo: string
+  concepto?: string
+  conceptoPersonalizado?: string
+  proveedor?: string
   categoria?: string
-  reservaId?: string
-  codigoReserva?: string
+  descripcion?: string
+  periodo?: string
+  monto: number
+  montoPagado?: number
+  montoPactado?: number
+  diferencia?: number
+  estado: string
+  fechaVencimiento?: Date
+  fechaPago?: Date
+  fecha: Date
+  tipo: 'cobro' | 'pago'
+  formaPago?: string
+  referencia?: string
+  observaciones?: string
+  esPagoParcial?: boolean
+  abonos?: any[]
+  esRecurrente?: boolean
+  pagoRecurrenteId?: string
+  pagoRecurrenteNombre?: string
+  frecuencia?: string
+  isCalculated?: boolean
+  metodoPago?: string
 }
 
 export default function CalendarioPage() {
-  const [eventos, setEventos] = useState<Evento[]>([])
+  const [activeTab, setActiveTab] = useState<'cobros' | 'pagos'>('cobros')
+  const [bills, setBills] = useState<Bill[]>([])
   const [loading, setLoading] = useState(true)
-  const [filtroTipo, setFiltroTipo] = useState<string>('todos')
-  const [mesActual, setMesActual] = useState('')
-  const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null)
-  const [mostrarToast, setMostrarToast] = useState(false)
+  const [filtroEstado, setFiltroEstado] = useState<string>('todos')
 
+  // Month/Year controls
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth() + 1) // 1-12
+  const weekStartsOn = 'monday' // Fixed to Monday
+
+  // Modal state
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null)
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+
+  // Load bills
   useEffect(() => {
-    // Obtener mes actual en formato YYYY-MM
-    const now = new Date()
-    const mes = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
-    setMesActual(mes)
-    cargarEventos(mes)
-  }, [])
+    loadBills()
+  }, [activeTab, year, month])
 
-  const cargarEventos = (mes: string) => {
+  const loadBills = async () => {
     setLoading(true)
-    fetch(`/api/calendario/eventos?mes=${mes}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setEventos(data)
-        setLoading(false)
-      })
-      .catch((error) => {
-        console.error('Error:', error)
-        setLoading(false)
-      })
-  }
+    try {
+      const mes = `${year}-${month.toString().padStart(2, '0')}`
+      const endpoint = activeTab === 'cobros' ? '/api/calendario/cobros' : '/api/calendario/pagos'
+      const res = await fetch(`${endpoint}?mes=${mes}`)
+      const data = await res.json()
 
-  const handleSuccess = () => {
-    cargarEventos(mesActual)
-    setMostrarToast(true)
-  }
+      // Convert fecha strings to Date objects
+      const billsWithDates = data.map((bill: any) => ({
+        ...bill,
+        fecha: new Date(bill.fecha),
+        fechaVencimiento: bill.fechaVencimiento ? new Date(bill.fechaVencimiento) : undefined,
+        fechaPago: bill.fechaPago ? new Date(bill.fechaPago) : undefined,
+      }))
 
-  const handleClickEvento = (evento: Evento) => {
-    setEventoSeleccionado(evento)
-  }
-
-  // Filtrar eventos por tipo
-  const eventosFiltrados = filtroTipo === 'todos'
-    ? eventos
-    : eventos.filter(e => e.tipo === filtroTipo)
-
-  // Separar eventos en: Vencen Hoy y Vencidos
-  const hoy = new Date()
-  hoy.setHours(0, 0, 0, 0)
-
-  const eventosHoy = eventosFiltrados.filter(e => {
-    const fechaEvento = new Date(e.fecha)
-    fechaEvento.setHours(0, 0, 0, 0)
-    return fechaEvento.getTime() === hoy.getTime()
-  })
-
-  const eventosVencidos = eventosFiltrados.filter(e => {
-    const fechaEvento = new Date(e.fecha)
-    fechaEvento.setHours(0, 0, 0, 0)
-    return fechaEvento.getTime() < hoy.getTime()
-  })
-
-  const getColorTipo = (tipo: string) => {
-    switch (tipo) {
-      case 'arriendo': return 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20'
-      case 'servicio': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
-      case 'empleado': return 'bg-[#AF52DE]/10 text-[#AF52DE] border-[#AF52DE]/20'
-      case 'pago': return 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20'
-      case 'airbnb_checkin': return 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20'
-      case 'airbnb_checkout': return 'bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/20'
-      default: return 'bg-zinc-100 text-zinc-800 border-zinc-200'
+      setBills(billsWithDates)
+    } catch (error) {
+      console.error('Error loading bills:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getTipoLabel = (tipo: string) => {
-    switch (tipo) {
-      case 'arriendo': return 'Arriendo'
-      case 'servicio': return 'Servicio'
-      case 'empleado': return 'Salario'
-      case 'pago': return 'Pago'
-      case 'airbnb_checkin': return 'Check-in'
-      case 'airbnb_checkout': return 'Check-out'
-      default: return tipo
+  // Navigation
+  const goToPreviousMonth = () => {
+    if (month === 1) {
+      setMonth(12)
+      setYear(year - 1)
+    } else {
+      setMonth(month - 1)
     }
   }
+
+  const goToNextMonth = () => {
+    if (month === 12) {
+      setMonth(1)
+      setYear(year + 1)
+    } else {
+      setMonth(month + 1)
+    }
+  }
+
+  const goToToday = () => {
+    setYear(today.getFullYear())
+    setMonth(today.getMonth() + 1)
+  }
+
+  // Filter bills by estado
+  const billsFiltrados = filtroEstado === 'todos'
+    ? bills
+    : bills.filter((b) => {
+        if (filtroEstado === 'pendiente') return b.estado === 'PENDIENTE'
+        if (filtroEstado === 'vencido') {
+          const isOverdue = b.fechaVencimiento && new Date(b.fechaVencimiento) < new Date()
+          return b.estado === 'PENDIENTE' && isOverdue
+        }
+        if (filtroEstado === 'cobrado') return b.estado === 'COBRADO' || b.estado === 'PAGADO'
+        if (filtroEstado === 'parcial') return b.esPagoParcial
+        return true
+      })
+
+  // Calculate metrics (using all bills, not filtered)
+  const totalBills = bills.length
+  const paidBills = bills.filter((b) =>
+    activeTab === 'cobros'
+      ? b.estado === 'COBRADO' || b.estado === 'PAGADO'
+      : b.estado === 'PAGADO'
+  )
+  const totalPaid = paidBills.reduce((sum, b) => sum + (b.montoPagado || b.monto), 0)
+  const totalPending = bills
+    .filter((b) => b.estado === 'PENDIENTE')
+    .reduce((sum, b) => sum + b.monto, 0)
+  const totalAmount = bills.reduce((sum, b) => sum + (b.montoPactado || b.monto), 0)
+  const paymentPercentage = totalAmount > 0 ? (totalPaid / totalAmount) * 100 : 0
+
+  // Handle bill click
+  const handleBillClick = (bill: Bill) => {
+    setSelectedBill(bill)
+  }
+
+  // Handle mark as paid (quick action)
+  const handleMarkAsPaid = async (billId: string) => {
+    // This would call an API to mark the bill as paid
+    // For now, we'll just reload
+    setToastMessage('Pago registrado')
+    setShowToast(true)
+    loadBills()
+  }
+
+  // Month name
+  const monthNames = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ]
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
         <Navbar activeTab="Calendario" />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-zinc-600">Cargando...</p>
+            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm text-gray-600 font-medium">Cargando calendario...</p>
           </div>
         </div>
       </div>
@@ -127,155 +189,270 @@ export default function CalendarioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab="Calendario" />
 
-      <main className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        {/* Header compacto */}
-        <div className="mb-4">
-          <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">Calendario</h1>
-          <p className="text-sm text-zinc-600 mt-0.5">
-            {eventos.length} evento{eventos.length !== 1 ? 's' : ''}
-            {eventosHoy.length > 0 && (
-              <span className="ml-2 text-[#FF9500] font-medium">
-                · {eventosHoy.length} hoy
-              </span>
-            )}
-            {eventosVencidos.length > 0 && (
-              <span className="ml-2 text-[#FF3B30] font-medium">
-                · {eventosVencidos.length} vencido{eventosVencidos.length !== 1 ? 's' : ''}
-              </span>
-            )}
-          </p>
+      <main className="max-w-[1800px] mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header with tabs */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Calendario de Facturación</h1>
+
+          {/* Tabs */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab('cobros')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                activeTab === 'cobros'
+                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              Cobros (Ingresos)
+            </button>
+            <button
+              onClick={() => setActiveTab('pagos')}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                activeTab === 'pagos'
+                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+              }`}
+            >
+              Pagos (Egresos)
+            </button>
+          </div>
         </div>
 
-        {/* Filtros compactos */}
-        <div className="mb-4 flex flex-wrap gap-2">
-          {['todos', 'arriendo', 'servicio', 'empleado', 'pago'].map((tipo) => {
-            const count = tipo === 'todos' ? eventos.length : eventos.filter(e => e.tipo === tipo).length
-            const isActive = filtroTipo === tipo
+        {/* Summary Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
+            <div className="text-sm text-gray-600 mb-1">Total Facturas</div>
+            <div className="text-3xl font-bold text-gray-900">{totalBills}</div>
+          </div>
 
-            return (
-              <button
-                key={tipo}
-                onClick={() => setFiltroTipo(tipo)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-[#007AFF] text-white shadow-sm'
-                    : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-200'
-                }`}
-              >
-                {tipo === 'todos' ? 'Todos' : getTipoLabel(tipo)}
-                <span className={`ml-1.5 text-xs ${isActive ? 'opacity-90' : 'opacity-60'}`}>
-                  {count}
-                </span>
-              </button>
-            )
-          })}
+          <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
+            <div className="text-sm text-gray-600 mb-1">Monto Pagado</div>
+            <div className="text-3xl font-bold text-emerald-600">
+              ${totalPaid.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
+            <div className="text-sm text-gray-600 mb-1">Monto Pendiente</div>
+            <div className="text-3xl font-bold text-amber-600">
+              ${totalPending.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
+            <div className="text-sm text-gray-600 mb-1">Porcentaje Pagado</div>
+            <div className="flex items-center gap-3">
+              <div className="text-3xl font-bold text-indigo-600">
+                {paymentPercentage.toFixed(0)}%
+              </div>
+              <div className="flex-1">
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className="bg-gradient-to-r from-indigo-600 to-blue-600 h-2.5 rounded-full transition-all duration-500"
+                    style={{ width: `${paymentPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Eventos que Vencen Hoy */}
-        {eventosHoy.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-base font-semibold text-[#FF9500] mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-              </svg>
-              Vencen Hoy ({eventosHoy.length})
-            </h2>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {eventosHoy.map((evento) => (
+        {/* Main content: Calendar + Bill List */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar Grid */}
+          <div className="lg:col-span-2">
+            {/* Month/Year Controls */}
+            <div className="card-elevated bg-white rounded-2xl p-4 mb-4">
+              <div className="flex items-center justify-center gap-2">
                 <button
-                  key={evento.id}
-                  onClick={() => handleClickEvento(evento)}
-                  className="bg-white rounded-xl border border-[#FF9500]/30 p-3 shadow-sm hover:shadow-md transition-all text-left w-full"
+                  onClick={goToPreviousMonth}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-zinc-900 text-sm truncate">{evento.titulo}</h3>
-                      <p className="text-xs text-zinc-600 mt-0.5 truncate">{evento.descripcion}</p>
-                    </div>
-                    <span className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-md border flex-shrink-0 ${getColorTipo(evento.tipo)}`}>
-                      {getTipoLabel(evento.tipo)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-zinc-100">
-                    <span className="text-[#FF9500] font-medium">Hoy</span>
-                    {evento.monto && (
-                      <span className="text-zinc-900 font-semibold">${evento.monto.toLocaleString()}</span>
-                    )}
-                  </div>
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
                 </button>
-              ))}
+
+                <div className="text-xl font-bold text-gray-900 min-w-[200px] text-center">
+                  {monthNames[month - 1]} {year}
+                </div>
+
+                <button
+                  onClick={goToNextMonth}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                <button
+                  onClick={goToToday}
+                  className="px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100 transition-colors cursor-pointer"
+                >
+                  Hoy
+                </button>
+              </div>
+            </div>
+
+            {/* Calendar */}
+            <CalendarGrid
+              year={year}
+              month={month}
+              bills={bills}
+              weekStartsOn={weekStartsOn}
+              onBillClick={handleBillClick}
+            />
+          </div>
+
+          {/* Bill List Side Panel */}
+          <div className="lg:col-span-1">
+            <div className="card-elevated bg-white rounded-2xl p-6 sticky top-24 max-h-[calc(100vh-150px)] overflow-y-auto">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Detalle de {activeTab === 'cobros' ? 'Cobros' : 'Pagos'}
+              </h3>
+
+              {/* Status Filters */}
+              <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-gray-200">
+                {['todos', 'pendiente', 'vencido', 'cobrado', 'parcial'].map((filtro) => (
+                  <button
+                    key={filtro}
+                    onClick={() => setFiltroEstado(filtro)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                      filtroEstado === filtro
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {filtro.charAt(0).toUpperCase() + filtro.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {billsFiltrados.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg
+                    className="w-16 h-16 text-gray-300 mx-auto mb-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <p className="text-sm text-gray-500">
+                    No hay {activeTab === 'cobros' ? 'cobros' : 'pagos'} para este mes
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {billsFiltrados.map((bill) => {
+                    const isPaid =
+                      activeTab === 'cobros'
+                        ? bill.estado === 'COBRADO' || bill.estado === 'PAGADO'
+                        : bill.estado === 'PAGADO'
+                    const isOverdue =
+                      !isPaid &&
+                      bill.fechaVencimiento &&
+                      new Date(bill.fechaVencimiento) < new Date()
+
+                    // Determine border color
+                    let borderColor = 'border-amber-500'
+                    if (isPaid) borderColor = 'border-emerald-500'
+                    else if (isOverdue) borderColor = 'border-red-500'
+
+                    // Determine dot color
+                    let dotColor = 'bg-amber-500'
+                    if (isPaid) dotColor = 'bg-emerald-500'
+                    else if (isOverdue) dotColor = 'bg-red-500'
+                    if (bill.esPagoParcial) dotColor = 'bg-blue-500'
+
+                    return (
+                      <button
+                        key={bill.id}
+                        onClick={() => handleBillClick(bill)}
+                        className={`w-full text-left p-3 rounded-lg border-2 bg-white transition-all hover:shadow-md cursor-pointer ${borderColor}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          {/* Left: Dot + ID */}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotColor}`}></div>
+                            <span className="font-semibold text-black text-sm truncate">
+                              {bill.codigoInterno || bill.id.substring(0, 8)}
+                            </span>
+                          </div>
+
+                          {/* Right: Amount */}
+                          <div className="font-bold text-black text-sm ml-2 flex-shrink-0">
+                            ${bill.monto.toLocaleString()}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        {/* Eventos Vencidos */}
-        {eventosVencidos.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-base font-semibold text-[#FF3B30] mb-3 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              Vencidos ({eventosVencidos.length})
-            </h2>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {eventosVencidos.map((evento) => (
-                <button
-                  key={evento.id}
-                  onClick={() => handleClickEvento(evento)}
-                  className="bg-white rounded-xl border border-[#FF3B30]/20 p-3 shadow-sm hover:shadow-md transition-all text-left w-full"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-zinc-900 text-sm truncate">{evento.titulo}</h3>
-                      <p className="text-xs text-zinc-600 mt-0.5 truncate">{evento.descripcion}</p>
-                    </div>
-                    <span className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-md border flex-shrink-0 ${getColorTipo(evento.tipo)}`}>
-                      {getTipoLabel(evento.tipo)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-zinc-100">
-                    <span className="text-[#FF3B30] font-medium">Día {evento.dia}</span>
-                    {evento.monto && (
-                      <span className="text-zinc-900 font-semibold">${evento.monto.toLocaleString()}</span>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Mensaje vacío */}
-        {eventosHoy.length === 0 && eventosVencidos.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-            <svg className="w-12 h-12 text-zinc-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-zinc-500">
-              {filtroTipo === 'todos'
-                ? 'No hay eventos pendientes para este mes'
-                : `No hay eventos de tipo "${getTipoLabel(filtroTipo)}" pendientes`}
-            </p>
-          </div>
-        )}
+        </div>
       </main>
 
-      {/* Modal de Registro */}
-      <ModalRegistroPago
-        evento={eventoSeleccionado}
-        onClose={() => setEventoSeleccionado(null)}
-        onSuccess={handleSuccess}
-      />
+      {/* Modal for bill details (reuse existing ModalRegistroPago for now) */}
+      {selectedBill && (
+        <ModalRegistroPago
+          evento={{
+            id: selectedBill.id,
+            tipo: activeTab === 'cobros' ? 'arriendo' : 'pago',
+            titulo: selectedBill.titulo,
+            descripcion: selectedBill.descripcion || selectedBill.arrendatarioNombre || '',
+            monto: selectedBill.monto,
+            dia: new Date(selectedBill.fecha).getDate(),
+            espacioId: selectedBill.espacioId,
+          }}
+          onClose={() => setSelectedBill(null)}
+          onSuccess={() => {
+            setToastMessage('Pago registrado exitosamente')
+            setShowToast(true)
+            loadBills()
+            setSelectedBill(null)
+          }}
+        />
+      )}
 
-      {/* Toast de confirmación */}
-      {mostrarToast && (
+      {/* Toast */}
+      {showToast && (
         <Toast
-          message="Pago registrado exitosamente"
+          message={toastMessage}
           tipo="success"
-          onClose={() => setMostrarToast(false)}
+          onClose={() => setShowToast(false)}
         />
       )}
     </div>
