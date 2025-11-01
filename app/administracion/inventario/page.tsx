@@ -23,36 +23,46 @@ export default function InventarioPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar activeTab="Inventario" />
 
-      <main className="max-w-6xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">Inventario</h1>
-          <p className="text-sm text-zinc-600 mt-1">
-            Gestión de stock, movimientos y control kardex
-          </p>
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header con gradiente */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg p-8 mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">Inventario</h1>
+              <p className="text-white/80 text-lg">
+                Gestión de stock, movimientos y control kardex
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
+                <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-zinc-200 mb-6">
-          <nav className="flex gap-6">
+        {/* Tabs con Material Design */}
+        <div className="bg-white rounded-2xl shadow-md mb-6 overflow-hidden">
+          <nav className="flex">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setTabActivo(tab.id as any)}
-                className={`pb-3 px-1 text-sm font-medium transition-colors relative ${
+                className={`flex-1 px-6 py-4 text-sm font-semibold transition-all relative ${
                   tabActivo === tab.id
-                    ? 'text-[#007AFF]'
-                    : 'text-zinc-600 hover:text-zinc-900'
+                    ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <span className="mr-2">{tab.icono}</span>
-                {tab.nombre}
-                {tabActivo === tab.id && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#007AFF]" />
-                )}
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-xl">{tab.icono}</span>
+                  <span>{tab.nombre}</span>
+                </div>
               </button>
             ))}
           </nav>
