@@ -20,6 +20,7 @@ type Pago = {
   formaPago: 'TRANSFERENCIA' | 'EFECTIVO' | 'CHEQUE' | null
   referencia: string | null
   observaciones: string | null
+  categoria?: string // Para OtrosPagos
 }
 
 type CategoriaAgrupada = {
@@ -30,6 +31,8 @@ type CategoriaAgrupada = {
   montoTotal: number
   pagos: Pago[]
 }
+
+type Categoria = 'SERVICIOS_PUBLICOS' | 'SERVICIOS_PERSONALES' | 'MANTENIMIENTO' | 'LIMPIEZA' | 'HONORARIOS' | 'IMPUESTOS' | 'OTROS' | 'ARRIENDO' | 'SERVICIO' | 'SALARIO'
 
 type Abono = {
   id: string
@@ -118,27 +121,74 @@ export default function AdministracionPagosPage() {
 
       setPagos(pagosFiltradosPorMes)
 
-      const categorias: CategoriaAgrupada[] = [
-        { categoria: 'servicio', nombre: 'Servicios Básicos', gradiente: 'from-blue-500 to-cyan-500', totalPagos: 0, montoTotal: 0, pagos: [] },
-        { categoria: 'salario', nombre: 'Salarios', gradiente: 'from-purple-500 to-pink-500', totalPagos: 0, montoTotal: 0, pagos: [] },
-        { categoria: 'arriendo', nombre: 'Arriendos', gradiente: 'from-emerald-500 to-teal-500', totalPagos: 0, montoTotal: 0, pagos: [] },
-        { categoria: 'otro', nombre: 'Otros', gradiente: 'from-gray-500 to-slate-500', totalPagos: 0, montoTotal: 0, pagos: [] }
-      ]
+      // Definir categorías basadas en el campo categoria de OtrosPagos
+      const categoriasMap = new Map<string, CategoriaAgrupada>()
+
+      // Categorías predefinidas para tipos especiales
+      const categoriasEspeciales: Record<string, {nombre: string, gradiente: string}> = {
+        'arriendo': { nombre: 'Arriendos', gradiente: 'from-emerald-500 to-teal-500' },
+        'servicio': { nombre: 'Servicios Básicos (BD)', gradiente: 'from-blue-500 to-cyan-500' },
+        'salario': { nombre: 'Salarios', gradiente: 'from-purple-500 to-pink-500' },
+        'SERVICIOS_PUBLICOS': { nombre: 'Servicios Públicos', gradiente: 'from-blue-500 to-cyan-500' },
+        'SERVICIOS_PERSONALES': { nombre: 'Servicios Personales', gradiente: 'from-indigo-500 to-purple-500' },
+        'MANTENIMIENTO': { nombre: 'Mantenimiento', gradiente: 'from-orange-500 to-amber-500' },
+        'LIMPIEZA': { nombre: 'Limpieza', gradiente: 'from-teal-500 to-emerald-500' },
+        'HONORARIOS': { nombre: 'Honorarios', gradiente: 'from-violet-500 to-purple-500' },
+        'IMPUESTOS': { nombre: 'Impuestos', gradiente: 'from-red-500 to-rose-500' },
+        'OTROS': { nombre: 'Otros', gradiente: 'from-gray-500 to-slate-500' }
+      }
 
       pagosFiltradosPorMes.forEach((pago: Pago) => {
-        const cat = categorias.find(c => c.categoria === pago.tipo)
-        if (cat) {
-          cat.pagos.push(pago)
-          cat.totalPagos++
-          cat.montoTotal += pago.monto
+        // Determinar la categoría
+        let categoriaKey: string
+        let categoriaNombre: string
+        let categoriaGradiente: string
+
+        if (pago.tipo === 'arriendo' || pago.tipo === 'servicio' || pago.tipo === 'salario') {
+          // Usar el tipo como categoría
+          categoriaKey = pago.tipo
+          categoriaNombre = categoriasEspeciales[pago.tipo]?.nombre || pago.tipoLabel
+          categoriaGradiente = categoriasEspeciales[pago.tipo]?.gradiente || 'from-gray-500 to-slate-500'
+        } else if (pago.categoria && categoriasEspeciales[pago.categoria]) {
+          // Usar la categoría específica de OtrosPagos
+          categoriaKey = pago.categoria
+          categoriaNombre = categoriasEspeciales[pago.categoria].nombre
+          categoriaGradiente = categoriasEspeciales[pago.categoria].gradiente
+        } else {
+          // Fallback a OTROS
+          categoriaKey = 'OTROS'
+          categoriaNombre = 'Otros'
+          categoriaGradiente = 'from-gray-500 to-slate-500'
         }
+
+        // Obtener o crear categoría
+        if (!categoriasMap.has(categoriaKey)) {
+          categoriasMap.set(categoriaKey, {
+            categoria: categoriaKey,
+            nombre: categoriaNombre,
+            gradiente: categoriaGradiente,
+            totalPagos: 0,
+            montoTotal: 0,
+            pagos: []
+          })
+        }
+
+        const cat = categoriasMap.get(categoriaKey)!
+        cat.pagos.push(pago)
+        cat.totalPagos++
+        cat.montoTotal += pago.monto
       })
 
-      categorias.forEach(cat => {
+      // Ordenar pagos dentro de cada categoría
+      categoriasMap.forEach(cat => {
         cat.pagos.sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
       })
 
-      setCategoriasAgrupadas(categorias.filter(c => c.totalPagos > 0))
+      // Convertir a array y ordenar por monto total descendente
+      const categoriasArray = Array.from(categoriasMap.values())
+        .sort((a, b) => b.montoTotal - a.montoTotal)
+
+      setCategoriasAgrupadas(categoriasArray)
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -221,15 +271,6 @@ export default function AdministracionPagosPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Administración - Pagos</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            {activeTab === 'estado' && 'Estado de cuenta de pagos administrativos'}
-            {activeTab === 'eventuales' && 'Pagos con abonos pendientes'}
-            {activeTab === 'recurrentes' && 'Gestión de pagos recurrentes'}
-          </p>
-        </div>
-
-        <div className="mb-6">
           <div className="inline-flex bg-white/60 backdrop-blur-sm rounded-xl p-1 gap-1 shadow-sm border border-gray-200">
             <button
               onClick={() => setActiveTab('estado')}
@@ -292,10 +333,16 @@ export default function AdministracionPagosPage() {
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white"
                   >
                     <option value="todas">Todas las categorías</option>
-                    <option value="servicio">Servicios Básicos</option>
-                    <option value="salario">Salarios</option>
                     <option value="arriendo">Arriendos</option>
-                    <option value="otro">Otros</option>
+                    <option value="servicio">Servicios Básicos (BD)</option>
+                    <option value="salario">Salarios</option>
+                    <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
+                    <option value="SERVICIOS_PERSONALES">Servicios Personales</option>
+                    <option value="MANTENIMIENTO">Mantenimiento</option>
+                    <option value="LIMPIEZA">Limpieza</option>
+                    <option value="HONORARIOS">Honorarios</option>
+                    <option value="IMPUESTOS">Impuestos</option>
+                    <option value="OTROS">Otros</option>
                   </select>
                 </div>
               </div>
