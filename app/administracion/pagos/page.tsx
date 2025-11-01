@@ -96,6 +96,11 @@ export default function AdministracionPagosPage() {
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('todas')
   const [categoriaExpandida, setCategoriaExpandida] = useState<string | null>(null)
 
+  // Estados para edición y eliminación
+  const [pagoEditando, setPagoEditando] = useState<Pago | null>(null)
+  const [pagoEliminando, setPagoEliminando] = useState<Pago | null>(null)
+  const [guardando, setGuardando] = useState(false)
+
   useEffect(() => {
     if (activeTab === 'estado') {
       cargarEstadoCuenta()
@@ -251,6 +256,113 @@ export default function AdministracionPagosPage() {
 
   const mesesDisponibles = generarMesesDisponibles()
 
+  // Función para eliminar pago
+  const eliminarPago = async (pago: Pago) => {
+    if (!pagoEliminando) return
+
+    setGuardando(true)
+    try {
+      let url = ''
+
+      // Determinar la URL según el tipo de pago
+      if (pago.tipo === 'otro') {
+        url = `/api/otros-pagos/${pago.id}`
+      } else if (pago.tipo === 'servicio') {
+        url = `/api/pagos/servicios/${pago.id}`
+      } else if (pago.tipo === 'salario') {
+        url = `/api/pagos/salarios/${pago.id}`
+      } else if (pago.tipo === 'arriendo') {
+        url = `/api/cobros/${pago.id}`
+      }
+
+      const res = await fetch(url, { method: 'DELETE' })
+
+      if (!res.ok) throw new Error('Error al eliminar')
+
+      // Recargar datos
+      await cargarEstadoCuenta()
+      setPagoEliminando(null)
+    } catch (error) {
+      console.error('Error al eliminar pago:', error)
+      alert('Error al eliminar el pago')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  // Función para guardar edición de pago
+  const guardarEdicionPago = async () => {
+    if (!pagoEditando) return
+
+    setGuardando(true)
+    try {
+      let url = ''
+      let body: any = {}
+
+      // Determinar URL y body según el tipo
+      if (pagoEditando.tipo === 'otro') {
+        url = `/api/otros-pagos/${pagoEditando.id}`
+        body = {
+          proveedor: pagoEditando.titulo,
+          descripcion: pagoEditando.descripcion,
+          monto: pagoEditando.monto,
+          fechaPago: pagoEditando.fecha,
+          metodoPago: pagoEditando.formaPago,
+          numeroDocumento: pagoEditando.referencia,
+          observaciones: pagoEditando.observaciones,
+          categoria: pagoEditando.categoria || 'OTROS',
+          // Campos requeridos adicionales
+          periodo: new Date(pagoEditando.fecha).toISOString().slice(0, 7),
+          estado: 'PAGADO'
+        }
+      } else if (pagoEditando.tipo === 'servicio') {
+        url = `/api/pagos/servicios/${pagoEditando.id}`
+        body = {
+          monto: pagoEditando.monto,
+          fechaPago: pagoEditando.fecha,
+          formaPago: pagoEditando.formaPago,
+          referencia: pagoEditando.referencia,
+          observaciones: pagoEditando.observaciones
+        }
+      } else if (pagoEditando.tipo === 'salario') {
+        url = `/api/pagos/salarios/${pagoEditando.id}`
+        body = {
+          total: pagoEditando.monto,
+          fechaPago: pagoEditando.fecha,
+          formaPago: pagoEditando.formaPago,
+          referencia: pagoEditando.referencia,
+          observaciones: pagoEditando.observaciones
+        }
+      } else if (pagoEditando.tipo === 'arriendo') {
+        url = `/api/cobros/${pagoEditando.id}`
+        body = {
+          monto: pagoEditando.monto,
+          fechaCobro: pagoEditando.fecha,
+          formaPago: pagoEditando.formaPago,
+          referencia: pagoEditando.referencia,
+          observaciones: pagoEditando.observaciones
+        }
+      }
+
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      if (!res.ok) throw new Error('Error al guardar')
+
+      // Recargar datos
+      await cargarEstadoCuenta()
+      setPagoEditando(null)
+    } catch (error) {
+      console.error('Error al guardar pago:', error)
+      alert('Error al guardar los cambios')
+    } finally {
+      setGuardando(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
@@ -384,7 +496,7 @@ export default function AdministracionPagosPage() {
 
                     <div className="p-4 space-y-2">
                       {categoria.pagos.map((pago) => (
-                        <div key={pago.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        <div key={pago.id} className="group flex items-start justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                           <div className="flex-1">
                             <p className="font-semibold text-gray-900 text-sm">{pago.titulo}</p>
                             <p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{pago.descripcion}</p>
@@ -400,10 +512,39 @@ export default function AdministracionPagosPage() {
                               )}
                             </div>
                           </div>
-                          <div className="text-right ml-3">
-                            <p className={`text-sm font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
-                              {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
-                            </p>
+                          <div className="flex items-center gap-2 ml-3">
+                            <div className="text-right">
+                              <p className={`text-sm font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
+                                {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
+                              </p>
+                            </div>
+                            {/* Botones de acción */}
+                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setPagoEditando(pago)
+                                }}
+                                className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors"
+                                title="Editar"
+                              >
+                                <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setPagoEliminando(pago)
+                                }}
+                                className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                                title="Eliminar"
+                              >
+                                <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -460,6 +601,7 @@ export default function AdministracionPagosPage() {
                                 <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 border-b border-gray-300">Monto</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Referencia</th>
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 border-b border-gray-300">Observaciones</th>
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 border-b border-gray-300">Acciones</th>
                               </tr>
                             </thead>
                             <tbody className="bg-white">
@@ -493,6 +635,34 @@ export default function AdministracionPagosPage() {
                                   <td className="px-4 py-3 text-sm text-gray-700 border-b border-gray-200">
                                     {pago.observaciones || '-'}
                                   </td>
+                                  <td className="px-4 py-3 border-b border-gray-200">
+                                    <div className="flex gap-1 justify-center">
+                                      <button
+                                        onClick={() => {
+                                          setPagoEditando(pago)
+                                          setCategoriaExpandida(null)
+                                        }}
+                                        className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors"
+                                        title="Editar"
+                                      >
+                                        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setPagoEliminando(pago)
+                                          setCategoriaExpandida(null)
+                                        }}
+                                        className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                                        title="Eliminar"
+                                      >
+                                        <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -504,7 +674,7 @@ export default function AdministracionPagosPage() {
                                 <td className="px-4 py-3 text-sm font-bold text-right text-gray-900 border-t-2 border-gray-300">
                                   ${categoria.montoTotal.toLocaleString()}
                                 </td>
-                                <td colSpan={2} className="border-t-2 border-gray-300"></td>
+                                <td colSpan={3} className="border-t-2 border-gray-300"></td>
                               </tr>
                             </tfoot>
                           </table>
@@ -648,6 +818,191 @@ export default function AdministracionPagosPage() {
               </div>
             )}
           </>
+        )}
+
+        {/* Modal de Edición */}
+        {pagoEditando && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPagoEditando(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Editar Pago</h2>
+                  <button
+                    onClick={() => setPagoEditando(null)}
+                    className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                  >
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Título / Proveedor</label>
+                  <input
+                    type="text"
+                    value={pagoEditando.titulo}
+                    onChange={(e) => setPagoEditando({ ...pagoEditando, titulo: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    disabled={pagoEditando.tipo === 'arriendo' || pagoEditando.tipo === 'servicio'}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                  <input
+                    type="text"
+                    value={pagoEditando.descripcion}
+                    onChange={(e) => setPagoEditando({ ...pagoEditando, descripcion: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+                    <input
+                      type="number"
+                      value={pagoEditando.monto}
+                      onChange={(e) => setPagoEditando({ ...pagoEditando, monto: parseFloat(e.target.value) })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                    <input
+                      type="date"
+                      value={pagoEditando.fecha.split('T')[0]}
+                      onChange={(e) => setPagoEditando({ ...pagoEditando, fecha: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Forma de Pago</label>
+                  <select
+                    value={pagoEditando.formaPago || ''}
+                    onChange={(e) => setPagoEditando({ ...pagoEditando, formaPago: e.target.value as any })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  >
+                    <option value="">Seleccionar</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="CHEQUE">Cheque</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Referencia / Nº Documento</label>
+                  <input
+                    type="text"
+                    value={pagoEditando.referencia || ''}
+                    onChange={(e) => setPagoEditando({ ...pagoEditando, referencia: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                  <textarea
+                    value={pagoEditando.observaciones || ''}
+                    onChange={(e) => setPagoEditando({ ...pagoEditando, observaciones: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+
+                {pagoEditando.tipo === 'otro' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                    <select
+                      value={pagoEditando.categoria || 'OTROS'}
+                      onChange={(e) => setPagoEditando({ ...pagoEditando, categoria: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
+                      <option value="SERVICIOS_PERSONALES">Servicios Personales</option>
+                      <option value="MANTENIMIENTO">Mantenimiento</option>
+                      <option value="LIMPIEZA">Limpieza</option>
+                      <option value="HONORARIOS">Honorarios</option>
+                      <option value="IMPUESTOS">Impuestos</option>
+                      <option value="OTROS">Otros</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 pb-6 flex gap-3 justify-end">
+                <button
+                  onClick={() => setPagoEditando(null)}
+                  className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={guardarEdicionPago}
+                  disabled={guardando}
+                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {guardando ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Confirmación de Eliminación */}
+        {pagoEliminando && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPagoEliminando(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-gradient-to-r from-red-600 to-rose-600 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Confirmar Eliminación</h2>
+                    <p className="text-white/90 text-sm mt-1">Esta acción no se puede deshacer</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <p className="text-gray-700 mb-2">¿Estás seguro que deseas eliminar este pago?</p>
+                <div className="bg-gray-50 rounded-lg p-4 mt-4">
+                  <p className="font-semibold text-gray-900 text-sm">{pagoEliminando.titulo}</p>
+                  <p className="text-xs text-gray-600 mt-1">{pagoEliminando.descripcion}</p>
+                  <p className="text-sm font-bold text-red-600 mt-2">
+                    ${pagoEliminando.monto.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 flex gap-3 justify-end">
+                <button
+                  onClick={() => setPagoEliminando(null)}
+                  className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  disabled={guardando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => eliminarPago(pagoEliminando)}
+                  disabled={guardando}
+                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-colors disabled:opacity-50"
+                >
+                  {guardando ? 'Eliminando...' : 'Eliminar Pago'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>
