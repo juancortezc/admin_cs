@@ -51,34 +51,39 @@ export async function GET(request: Request) {
       if (!grupos[key]) {
         grupos[key] = {
           espacioId: cobro.espacioId,
-          espacio: cobro.espacio,
-          periodo: cobro.periodo,
+          espacioIdentificador: cobro.espacio.identificador,
+          arrendatarioNombre: cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
+          periodo: cobro.periodo || 'Sin período',
           montoPactado: cobro.montoPactado,
           totalPagado: 0,
-          totalPendiente: 0,
-          porcentajePagado: 0,
-          cobros: [],
+          saldoPendiente: 0,
+          cantidadPagos: 0,
+          pagos: [],
         }
       }
 
-      grupos[key].cobros.push(cobro)
       grupos[key].totalPagado += cobro.montoPagado
+      grupos[key].cantidadPagos += 1
+      grupos[key].pagos.push({
+        id: cobro.id,
+        codigoInterno: cobro.codigoInterno,
+        montoPagado: cobro.montoPagado,
+        fechaPago: cobro.fechaPago,
+        metodoPago: cobro.metodoPago,
+        observaciones: cobro.observaciones,
+      })
     })
 
-    // Calcular totales y porcentajes
+    // Calcular saldos pendientes
     Object.keys(grupos).forEach((key) => {
       const grupo = grupos[key]
-      grupo.totalPendiente = grupo.montoPactado - grupo.totalPagado
-      grupo.porcentajePagado = (grupo.totalPagado / grupo.montoPactado) * 100
+      grupo.saldoPendiente = grupo.montoPactado - grupo.totalPagado
     })
 
-    // Convertir a array
+    // Convertir a array y retornar directamente
     const gruposArray = Object.values(grupos)
 
-    return NextResponse.json({
-      grupos: gruposArray,
-      total: gruposArray.length,
-    })
+    return NextResponse.json(gruposArray)
   } catch (error) {
     console.error('Error al obtener pagos parciales:', error)
     return NextResponse.json({ error: 'Error al obtener pagos parciales' }, { status: 500 })
