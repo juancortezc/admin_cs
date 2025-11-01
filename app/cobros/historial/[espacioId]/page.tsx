@@ -58,21 +58,15 @@ export default function HistorialEspacioPage({
     try {
       setLoading(true)
 
-      // Cargar información del espacio
-      const espacioRes = await fetch(`/api/espacios/${resolvedParams.espacioId}`)
-      const espacioData = await espacioRes.json()
-      setEspacio(espacioData)
+      // Cargar historial completo (incluye espacio, cobros y estadísticas)
+      const historialRes = await fetch(`/api/cobros/historial/${resolvedParams.espacioId}`)
+      const historialData = await historialRes.json()
 
-      // Cargar cobros del espacio
-      const cobrosRes = await fetch(`/api/cobros/historial/${resolvedParams.espacioId}`)
-      const cobrosData = await cobrosRes.json()
+      // Extraer espacio y cobros del resultado
+      setEspacio(historialData.espacio)
 
-      // Ordenar por fecha descendente
-      const cobrosOrdenados = cobrosData.sort((a: Cobro, b: Cobro) => {
-        return new Date(b.fechaPago).getTime() - new Date(a.fechaPago).getTime()
-      })
-
-      setCobros(cobrosOrdenados)
+      // Los cobros ya vienen ordenados desde el API
+      setCobros(historialData.cobros || [])
     } catch (error) {
       console.error('Error al cargar datos:', error)
     } finally {
