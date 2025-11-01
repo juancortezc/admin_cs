@@ -8,7 +8,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 type MainTab = 'Calendario' | 'Espacios' | 'Airbnb' | 'Administración'
@@ -40,6 +40,14 @@ export default function Navbar({ activeTab }: NavbarProps) {
   }
 
   const [activeMainTab, setActiveMainTab] = useState<MainTab>(getActiveMainTab())
+
+  // Actualizar activeMainTab cuando cambia el prop activeTab
+  useEffect(() => {
+    setActiveMainTab(getActiveMainTab())
+  }, [activeTab])
+
+  // Orden fijo de tabs principales
+  const mainTabsOrder: MainTab[] = ['Calendario', 'Espacios', 'Airbnb', 'Administración']
 
   // Definición de tabs principales y sus subtabs
   const mainTabs: Record<MainTab, { nombre: string; ruta: string }[] | null> = {
@@ -105,7 +113,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
             {/* Desktop: Tabs principales en barra contenedora - centrado absoluto */}
             <div className="hidden md:flex items-center justify-center">
               <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
-                {(Object.keys(mainTabs) as MainTab[]).map((tab) => (
+                {mainTabsOrder.map((tab) => (
                   <button
                     key={tab}
                     onClick={() => handleMainTabClick(tab)}
@@ -212,7 +220,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
 
               {/* Links del drawer organizados por sección */}
               <div className="space-y-6">
-                {(Object.keys(mainTabs) as MainTab[]).map((mainTab) => {
+                {mainTabsOrder.map((mainTab) => {
                   const subtabs = mainTabs[mainTab]
 
                   // Si no tiene subtabs (por si acaso), no mostrar
