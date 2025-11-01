@@ -62,6 +62,8 @@ type PagoRecurrente = {
   codigoInterno: string
   nombre: string
   proveedor: string
+  ruc: string | null
+  cuentaDestino: string | null
   categoria: string
   descripcion: string
   montoFijo: number | null
@@ -100,6 +102,14 @@ export default function AdministracionPagosPage() {
   const [pagoEditando, setPagoEditando] = useState<Pago | null>(null)
   const [pagoEliminando, setPagoEliminando] = useState<Pago | null>(null)
   const [guardando, setGuardando] = useState(false)
+
+  // Estados para modales de creación
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
+  const [selectedRecurring, setSelectedRecurring] = useState<PagoRecurrente | null>(null)
+  const [showPartialModal, setShowPartialModal] = useState(false)
+
+  // Estado para filtro de categoría
+  const [categoriaFiltrada, setCategoriaFiltrada] = useState<string | null>(null)
 
   useEffect(() => {
     if (activeTab === 'estado') {
@@ -240,6 +250,10 @@ export default function AdministracionPagosPage() {
     return cat.nombre.toLowerCase().includes(search) ||
            cat.pagos.some(p => p.titulo.toLowerCase().includes(search) || p.descripcion.toLowerCase().includes(search))
   })
+
+  // Calcular totales para el resumen
+  const montoTotalMes = categoriasAgrupadas.reduce((sum, cat) => sum + cat.montoTotal, 0)
+  const totalPagosMes = categoriasAgrupadas.reduce((sum, cat) => sum + cat.totalPagos, 0)
 
   // Generar lista de meses disponibles (últimos 12 meses)
   const generarMesesDisponibles = () => {
@@ -382,7 +396,7 @@ export default function AdministracionPagosPage() {
       <Navbar activeTab="Pagos" />
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between gap-4">
           <div className="inline-flex bg-white/60 backdrop-blur-sm rounded-xl p-1 gap-1 shadow-sm border border-gray-200">
             <button
               onClick={() => setActiveTab('estado')}
@@ -415,51 +429,82 @@ export default function AdministracionPagosPage() {
               Pagos recurrentes
             </button>
           </div>
+
+          {/* Selector de Mes - Solo visible en tab Estado */}
+          {activeTab === 'estado' && (
+            <div className="min-w-[200px]">
+              <select
+                value={mesSeleccionado}
+                onChange={(e) => setMesSeleccionado(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm"
+              >
+                {mesesDisponibles.map(mes => (
+                  <option key={mes.value} value={mes.value}>{mes.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {activeTab === 'estado' && (
           <>
-            {/* Filtros */}
-            <div className="mb-6 space-y-4">
-              <div className="flex flex-wrap gap-4">
-                {/* Selector de mes */}
-                <div className="flex-1 min-w-[200px]">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Mes</label>
-                  <select
-                    value={mesSeleccionado}
-                    onChange={(e) => setMesSeleccionado(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white"
-                  >
-                    {mesesDisponibles.map(mes => (
-                      <option key={mes.value} value={mes.value}>{mes.label}</option>
-                    ))}
-                  </select>
+            {/* Resumen del Mes */}
+            <div className="mb-6">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">Resumen del Mes</h3>
+                      <p className="text-white/80 text-sm mt-1">
+                        {mesesDisponibles.find(m => m.value === mesSeleccionado)?.label}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-white">${montoTotalMes.toLocaleString()}</p>
+                      <p className="text-white/80 text-sm mt-1">{totalPagosMes} pago{totalPagosMes !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Selector de categoría */}
-                <div className="flex-1 min-w-[200px]">
-                  <label className="block text-xs font-medium text-gray-700 mb-2">Categoría</label>
-                  <select
-                    value={categoriaSeleccionada}
-                    onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white"
-                  >
-                    <option value="todas">Todas las categorías</option>
-                    <option value="arriendo">Arriendos</option>
-                    <option value="servicio">Servicios Básicos (BD)</option>
-                    <option value="salario">Salarios</option>
-                    <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
-                    <option value="SERVICIOS_PERSONALES">Servicios Personales</option>
-                    <option value="MANTENIMIENTO">Mantenimiento</option>
-                    <option value="LIMPIEZA">Limpieza</option>
-                    <option value="HONORARIOS">Honorarios</option>
-                    <option value="IMPUESTOS">Impuestos</option>
-                    <option value="OTROS">Otros</option>
-                  </select>
+                {/* Desglose por categorías */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700">
+                      {categoriaFiltrada ? 'Categoría seleccionada' : 'Desglose por Categoría'}
+                    </h4>
+                    {categoriaFiltrada && (
+                      <button
+                        onClick={() => setCategoriaFiltrada(null)}
+                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+                      >
+                        Mostrar todas
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {categoriasAgrupadas.map((categoria) => (
+                      <div
+                        key={categoria.categoria}
+                        onClick={() => setCategoriaFiltrada(categoriaFiltrada === categoria.categoria ? null : categoria.categoria)}
+                        className={`flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                          categoriaFiltrada === categoria.categoria ? 'scale-110 ring-2 ring-indigo-500' : ''
+                        }`}
+                      >
+                        <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${categoria.gradiente}`}></div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-gray-900 truncate">{categoria.nombre}</p>
+                          <p className="text-sm font-bold text-gray-900">${categoria.montoTotal.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">{categoria.totalPagos} pago{categoria.totalPagos !== 1 ? 's' : ''}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Barra de búsqueda */}
+            {/* Barra de búsqueda */}
+            <div className="mb-6">
               <div className="relative">
                 <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -476,7 +521,9 @@ export default function AdministracionPagosPage() {
 
             {categoriasFiltradas.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoriasFiltradas.map((categoria) => (
+                {categoriasFiltradas
+                  .filter(cat => !categoriaFiltrada || cat.categoria === categoriaFiltrada)
+                  .map((categoria) => (
                   <div key={categoria.categoria} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all">
                     <div
                       className={`bg-gradient-to-r ${categoria.gradiente} p-4 cursor-pointer`}
@@ -690,7 +737,18 @@ export default function AdministracionPagosPage() {
 
         {activeTab === 'eventuales' && (
           <>
-            <p className="text-sm text-gray-600 mb-4">{cuentasParciales.length} cuenta{cuentasParciales.length !== 1 ? 's' : ''} con pago parcial</p>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-sm text-gray-600">{cuentasParciales.length} cuenta{cuentasParciales.length !== 1 ? 's' : ''} con pago parcial</p>
+              <button
+                onClick={() => setShowPartialModal(true)}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Crear Pago Parcial
+              </button>
+            </div>
 
             {cuentasParciales.length > 0 ? (
               <div className="space-y-3">
@@ -755,9 +813,10 @@ export default function AdministracionPagosPage() {
 
         {activeTab === 'recurrentes' && (
           <>
-            <div className="mb-4">
-              <p className="text-xs text-gray-600 mb-2 font-medium">Estado</p>
-              <div className="flex gap-2">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-xs text-gray-600 mb-2 font-medium">Estado</p>
+                <div className="flex gap-2">
                 {[{ value: 'true', label: 'Activos' }, { value: 'false', label: 'Inactivos' }, { value: 'todos', label: 'Todos' }].map((estado) => (
                   <button
                     key={estado.value}
@@ -771,13 +830,26 @@ export default function AdministracionPagosPage() {
                     {estado.label}
                   </button>
                 ))}
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  setSelectedRecurring(null)
+                  setShowRecurringModal(true)
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Crear Pago Recurrente
+              </button>
             </div>
 
             {pagosRecurrentes.length > 0 ? (
               <div className="space-y-3">
                 {pagosRecurrentes.map((pago) => (
-                  <div key={pago.id} className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all">
+                  <div key={pago.id} className="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all">
                     <div className="flex justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -797,13 +869,48 @@ export default function AdministracionPagosPage() {
                         </div>
                         {pago.observaciones && <p className="text-xs text-gray-500 mt-2 italic">{pago.observaciones}</p>}
                       </div>
-                      <div className="text-right ml-4">
-                        {pago.esMontoVariable ? (
-                          <p className="text-sm font-bold text-orange-600">Variable</p>
-                        ) : (
-                          <p className="text-sm font-bold text-gray-900">${pago.montoFijo?.toLocaleString()}</p>
-                        )}
-                        <p className="text-xs text-gray-500 mt-0.5">{pago.codigoInterno}</p>
+                      <div className="flex items-start gap-3 ml-4">
+                        <div className="text-right">
+                          {pago.esMontoVariable ? (
+                            <p className="text-sm font-bold text-orange-600">Variable</p>
+                          ) : (
+                            <p className="text-sm font-bold text-gray-900">${pago.montoFijo?.toLocaleString()}</p>
+                          )}
+                          <p className="text-xs text-gray-500 mt-0.5">{pago.codigoInterno}</p>
+                        </div>
+                        {/* Botones de acción */}
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => {
+                              setSelectedRecurring(pago)
+                              setShowRecurringModal(true)
+                            }}
+                            className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`¿Eliminar el pago recurrente "${pago.nombre}"?`)) return
+                              try {
+                                const res = await fetch(`/api/pagos-recurrentes/${pago.id}`, { method: 'DELETE' })
+                                if (!res.ok) throw new Error('Error al eliminar')
+                                cargarPagosRecurrentes()
+                              } catch (error) {
+                                alert('Error al eliminar pago recurrente')
+                              }
+                            }}
+                            className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1000,6 +1107,48 @@ export default function AdministracionPagosPage() {
                 >
                   {guardando ? 'Eliminando...' : 'Eliminar Pago'}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Crear/Editar Pago Recurrente */}
+        {showRecurringModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}}>
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-white">{selectedRecurring ? 'Editar Pago Recurrente' : 'Nuevo Pago Recurrente'}</h2>
+                  <button onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <form onSubmit={async (e) => {e.preventDefault(); const formData = new FormData(e.currentTarget); const esMontoVariable = formData.get('esMontoVariable') === 'true'; try { const body = {nombre: formData.get('nombre'), proveedor: formData.get('proveedor'), ruc: formData.get('ruc') || null, cuentaDestino: formData.get('cuentaDestino') || null, categoria: formData.get('categoria'), descripcion: formData.get('descripcion'), esMontoVariable, montoFijo: esMontoVariable ? null : formData.get('montoFijo'), metodoPago: formData.get('metodoPago'), frecuencia: formData.get('frecuencia'), diaPago: formData.get('diaPago') || null, fechaInicio: formData.get('fechaInicio'), fechaFin: formData.get('fechaFin') || null, activo: formData.get('activo') === 'true', observaciones: formData.get('observaciones') || null}; const url = selectedRecurring ? `/api/pagos-recurrentes/${selectedRecurring.id}` : '/api/pagos-recurrentes'; const method = selectedRecurring ? 'PUT' : 'POST'; const res = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}); if (!res.ok) throw new Error('Error al guardar'); setShowRecurringModal(false); setSelectedRecurring(null); cargarPagosRecurrentes(); } catch (error) { alert('Error al guardar pago recurrente'); }}} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Pago *</label><input type="text" name="nombre" required defaultValue={selectedRecurring?.nombre} placeholder="Ej: Agua potable mensual" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label><input type="text" name="proveedor" required defaultValue={selectedRecurring?.proveedor} placeholder="Nombre del proveedor" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">RUC</label><input type="text" name="ruc" defaultValue={selectedRecurring?.ruc || ''} placeholder="RUC del proveedor" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label><input type="text" name="cuentaDestino" defaultValue={selectedRecurring?.cuentaDestino || ''} placeholder="Número de cuenta para transferencia" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label><select name="categoria" required defaultValue={selectedRecurring?.categoria} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="SERVICIOS_BASICOS">Servicios Básicos</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="SEGUROS">Seguros</option><option value="IMPUESTOS">Impuestos</option><option value="NOMINA">Nómina</option><option value="OTROS">Otros</option></select></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Monto *</label><select name="esMontoVariable" required defaultValue={selectedRecurring?.esMontoVariable ? 'true' : 'false'} onChange={(e) => {const montoInput = document.getElementById('montoFijo') as HTMLInputElement; if (montoInput) {montoInput.disabled = e.target.value === 'true'; if (e.target.value === 'true') montoInput.value = '';}}} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="false">Monto Fijo</option><option value="true">Monto Variable</option></select></div>
+                    <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Monto Fijo</label><input type="number" id="montoFijo" name="montoFijo" min="0" step="0.01" defaultValue={selectedRecurring?.montoFijo || ''} disabled={selectedRecurring?.esMontoVariable} placeholder="Ej: 150000" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia *</label><select name="frecuencia" required defaultValue={selectedRecurring?.frecuencia} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="MENSUAL">Mensual</option><option value="BIMENSUAL">Bimensual</option><option value="TRIMESTRAL">Trimestral</option><option value="SEMESTRAL">Semestral</option><option value="ANUAL">Anual</option></select></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Día de Pago</label><input type="number" name="diaPago" min="1" max="31" defaultValue={selectedRecurring?.diaPago || ''} placeholder="Día del mes (1-31)" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Método de Pago *</label><select name="metodoPago" required defaultValue={selectedRecurring?.metodoPago} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="TRANSFERENCIA">Transferencia</option><option value="EFECTIVO">Efectivo</option><option value="CHEQUE">Cheque</option><option value="DEBITO_AUTOMATICO">Débito Automático</option></select></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Estado *</label><select name="activo" required defaultValue={selectedRecurring?.activo ? 'true' : 'false'} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="true">Activo</option><option value="false">Inactivo</option></select></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio *</label><input type="date" name="fechaInicio" required defaultValue={selectedRecurring ? new Date(selectedRecurring.fechaInicio).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Fecha Fin (opcional)</label><input type="date" name="fechaFin" defaultValue={selectedRecurring?.fechaFin ? new Date(selectedRecurring.fechaFin).toISOString().split('T')[0] : ''} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label><input type="text" name="descripcion" required defaultValue={selectedRecurring?.descripcion} placeholder="Descripción breve del pago" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
+                    <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label><textarea name="observaciones" rows={3} defaultValue={selectedRecurring?.observaciones || ''} placeholder="Notas adicionales..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" /></div>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button type="button" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">Cancelar</button>
+                    <button type="submit" className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors">{selectedRecurring ? 'Actualizar' : 'Crear'} Pago Recurrente</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
