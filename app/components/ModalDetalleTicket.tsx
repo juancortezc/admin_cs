@@ -104,106 +104,124 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
     }
   }
 
-  const getPrioridadColor = (prioridad: string) => {
+  const getPrioridadGradient = (prioridad: string) => {
     switch (prioridad) {
-      case 'URGENTE': return 'text-red-600 bg-red-50'
-      case 'ALTA': return 'text-orange-600 bg-orange-50'
-      case 'MEDIA': return 'text-yellow-600 bg-yellow-50'
-      case 'BAJA': return 'text-green-600 bg-green-50'
-      default: return 'text-gray-600 bg-gray-50'
+      case 'URGENTE': return 'from-red-600 to-rose-600'
+      case 'ALTA': return 'from-orange-600 to-amber-600'
+      case 'MEDIA': return 'from-yellow-600 to-amber-600'
+      case 'BAJA': return 'from-green-600 to-emerald-600'
+      default: return 'from-gray-600 to-gray-700'
     }
   }
 
-  const getEstadoColor = (estado: string) => {
+  const getEstadoGradient = (estado: string) => {
     switch (estado) {
-      case 'COMPLETADO': return 'text-green-600 bg-green-50'
-      case 'EN_PROCESO': return 'text-blue-600 bg-blue-50'
-      case 'EN_ESPERA': return 'text-yellow-600 bg-yellow-50'
-      case 'PENDIENTE': return 'text-gray-600 bg-gray-50'
-      case 'CANCELADO': return 'text-red-600 bg-red-50'
-      default: return 'text-gray-600 bg-gray-50'
+      case 'COMPLETADO': return 'from-green-600 to-emerald-600'
+      case 'EN_PROCESO': return 'from-blue-600 to-indigo-600'
+      case 'EN_ESPERA': return 'from-yellow-600 to-amber-600'
+      case 'PENDIENTE': return 'from-gray-600 to-gray-700'
+      case 'CANCELADO': return 'from-red-600 to-rose-600'
+      default: return 'from-gray-600 to-gray-700'
     }
   }
 
-  const getTipoNovedadColor = (tipo: string) => {
+  const getTipoNovedadGradient = (tipo: string) => {
     switch (tipo) {
-      case 'SOLUCION': return 'text-green-600 bg-green-50'
-      case 'PROBLEMA': return 'text-red-600 bg-red-50'
-      case 'COSTO_ADICIONAL': return 'text-orange-600 bg-orange-50'
-      case 'CAMBIO_ESTADO': return 'text-blue-600 bg-blue-50'
-      default: return 'text-gray-600 bg-gray-50'
+      case 'SOLUCION': return 'from-green-600 to-emerald-600'
+      case 'PROBLEMA': return 'from-red-600 to-rose-600'
+      case 'COSTO_ADICIONAL': return 'from-orange-600 to-amber-600'
+      case 'CAMBIO_ESTADO': return 'from-blue-600 to-indigo-600'
+      case 'ACTUALIZACION': return 'from-purple-600 to-indigo-600'
+      default: return 'from-gray-600 to-gray-700'
     }
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-[#D2D2D7] px-6 py-4 flex justify-between items-center rounded-t-2xl">
-          <div>
-            <h2 className="text-xl font-semibold text-[#1D1D1F]">{ticket.titulo}</h2>
-            <p className="text-sm text-[#86868B] mt-1">{ticket.numeroTicket}</p>
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+    >
+      <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+        {/* Header con gradiente según estado */}
+        <div className={`sticky top-0 bg-gradient-to-r ${getEstadoGradient(ticket.estado)} p-6 rounded-t-2xl shadow-lg z-10`}>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-3xl font-bold text-white">{ticket.numeroTicket}</h2>
+                <span className={`px-3 py-1 text-xs font-bold rounded-lg bg-gradient-to-r ${getPrioridadGradient(ticket.prioridad)} text-white shadow-md`}>
+                  {ticket.prioridad}
+                </span>
+                <span className="px-3 py-1 text-xs font-bold rounded-lg bg-white/20 backdrop-blur-sm text-white">
+                  {ticket.categoria.replace(/_/g, ' ')}
+                </span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-1">{ticket.titulo}</h3>
+              <p className="text-white/80">{ticket.descripcion}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="bg-white/20 backdrop-blur-sm p-2 rounded-xl hover:bg-white/30 transition-all"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-[#86868B] hover:text-[#1D1D1F] transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
         <div className="p-6">
-          {/* Badges de estado y prioridad */}
-          <div className="flex gap-2 mb-6">
-            <span className={`px-3 py-1 text-xs font-medium rounded-md ${getEstadoColor(ticket.estado)}`}>
-              {ticket.estado.replace(/_/g, ' ')}
-            </span>
-            <span className={`px-3 py-1 text-xs font-medium rounded-md ${getPrioridadColor(ticket.prioridad)}`}>
-              {ticket.prioridad}
-            </span>
-            <span className="px-3 py-1 text-xs font-medium rounded-md text-gray-600 bg-gray-50">
-              {ticket.categoria.replace(/_/g, ' ')}
-            </span>
-          </div>
-
           {/* Grid de información */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* Descripción */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-medium text-[#86868B] mb-1">Descripción</label>
-              <p className="text-sm text-[#1D1D1F]">{ticket.descripcion}</p>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Espacio */}
             {ticket.espacio && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Espacio</label>
-                <p className="text-sm text-[#1D1D1F]">{ticket.espacio.identificador}</p>
+              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-indigo-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span className="text-sm font-semibold text-indigo-900">Espacio</span>
+                </div>
+                <p className="text-lg font-bold text-indigo-700">{ticket.espacio.identificador}</p>
               </div>
             )}
 
             {/* Asignado a */}
             {ticket.asignadoA && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Asignado a</label>
-                <p className="text-sm text-[#1D1D1F]">{ticket.asignadoA}</p>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-purple-900">Asignado a</span>
+                </div>
+                <p className="text-lg font-bold text-purple-700">{ticket.asignadoA}</p>
               </div>
             )}
 
             {/* Proveedor */}
             {ticket.proveedor && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Proveedor</label>
-                <p className="text-sm text-[#1D1D1F]">{ticket.proveedor.nombre}</p>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-300">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span className="text-sm font-semibold text-gray-900">Proveedor</span>
+                </div>
+                <p className="text-lg font-bold text-gray-700">{ticket.proveedor.nombre}</p>
               </div>
             )}
 
             {/* Fecha de creación */}
-            <div>
-              <label className="block text-xs font-medium text-[#86868B] mb-1">Fecha de Creación</label>
-              <p className="text-sm text-[#1D1D1F]">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-300">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span className="text-sm font-semibold text-gray-900">Fecha de Creación</span>
+              </div>
+              <p className="text-lg font-bold text-gray-700">
                 {new Date(ticket.fechaCreacion).toLocaleDateString('es-ES', {
                   year: 'numeric',
                   month: 'long',
@@ -214,9 +232,14 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha de inicio */}
             {ticket.fechaInicio && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Fecha de Inicio</label>
-                <p className="text-sm text-[#1D1D1F]">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-blue-900">Fecha de Inicio</span>
+                </div>
+                <p className="text-lg font-bold text-blue-700">
                   {new Date(ticket.fechaInicio).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -228,9 +251,14 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha estimada */}
             {ticket.fechaEstimada && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Fecha Estimada</label>
-                <p className="text-sm text-[#1D1D1F]">
+              <div className="bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-xl border border-yellow-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-yellow-900">Fecha Estimada</span>
+                </div>
+                <p className="text-lg font-bold text-yellow-700">
                   {new Date(ticket.fechaEstimada).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -242,9 +270,14 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha de completado */}
             {ticket.fechaCompletado && (
-              <div>
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Fecha de Finalización</label>
-                <p className="text-sm text-[#1D1D1F]">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-sm font-semibold text-green-900">Fecha de Finalización</span>
+                </div>
+                <p className="text-lg font-bold text-green-700">
                   {new Date(ticket.fechaCompletado).toLocaleDateString('es-ES', {
                     year: 'numeric',
                     month: 'long',
@@ -254,51 +287,71 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
               </div>
             )}
 
-            {/* Costos */}
-            <div>
-              <label className="block text-xs font-medium text-[#86868B] mb-1">Costo Estimado</label>
-              <p className="text-sm text-[#1D1D1F]">${ticket.costoEstimado.toLocaleString()}</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-[#86868B] mb-1">Costo Real</label>
-              <p className="text-sm font-semibold text-[#1D1D1F]">${ticket.costoReal.toLocaleString()}</p>
-            </div>
-
-            {/* Observaciones */}
-            {ticket.observaciones && (
-              <div className="md:col-span-2">
-                <label className="block text-xs font-medium text-[#86868B] mb-1">Observaciones</label>
-                <p className="text-sm text-[#1D1D1F]">{ticket.observaciones}</p>
+            {/* Costo Estimado */}
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <span className="text-sm font-semibold text-indigo-900">Costo Estimado</span>
               </div>
-            )}
+              <p className="text-2xl font-bold text-indigo-700">${ticket.costoEstimado.toLocaleString()}</p>
+            </div>
+
+            {/* Costo Real */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-semibold text-green-900">Costo Real</span>
+              </div>
+              <p className="text-2xl font-bold text-green-700">${ticket.costoReal.toLocaleString()}</p>
+            </div>
           </div>
 
+          {/* Observaciones */}
+          {ticket.observaciones && (
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-200 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                <span className="text-sm font-semibold text-amber-900">Observaciones</span>
+              </div>
+              <p className="text-sm text-amber-900">{ticket.observaciones}</p>
+            </div>
+          )}
+
           {/* Sección de novedades */}
-          <div className="border-t border-[#D2D2D7] pt-6 mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-[#1D1D1F]">
+          <div className="border-t-2 border-gray-200 pt-6 mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900">
                 Novedades ({novedades.length})
               </h3>
               <button
                 onClick={() => setMostrarFormNovedad(!mostrarFormNovedad)}
-                className="px-4 py-2 bg-[#0071E3] text-white text-sm font-medium rounded-full hover:bg-[#0077ED] transition-all"
+                className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg flex items-center gap-2"
               >
-                + Agregar Novedad
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Agregar Novedad
               </button>
             </div>
 
             {/* Formulario para agregar novedad */}
             {mostrarFormNovedad && (
-              <form onSubmit={handleSubmitNovedad} className="bg-[#F5F5F7] rounded-xl p-4 mb-4">
+              <form onSubmit={handleSubmitNovedad} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6 border-2 border-gray-200 shadow-md">
+                <h4 className="text-lg font-bold text-gray-900 mb-4">Nueva Novedad</h4>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#1D1D1F] mb-2">Tipo</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Tipo</label>
                       <select
                         value={formNovedad.tipo}
                         onChange={(e) => setFormNovedad({ ...formNovedad, tipo: e.target.value })}
-                        className="w-full px-4 py-2 border border-[#D2D2D7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0071E3] bg-white"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all"
                       >
                         <option value="ACTUALIZACION">Actualización</option>
                         <option value="CAMBIO_ESTADO">Cambio de Estado</option>
@@ -309,50 +362,50 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1D1D1F] mb-2">Costo Asociado</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Costo Asociado</label>
                       <input
                         type="number"
                         step="0.01"
                         value={formNovedad.costoAsociado}
                         onChange={(e) => setFormNovedad({ ...formNovedad, costoAsociado: Number(e.target.value) })}
-                        className="w-full px-4 py-2 border border-[#D2D2D7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0071E3] bg-white"
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all"
                         placeholder="0.00"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#1D1D1F] mb-2">Descripción</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Descripción</label>
                     <textarea
                       required
                       value={formNovedad.descripcion}
                       onChange={(e) => setFormNovedad({ ...formNovedad, descripcion: e.target.value })}
                       rows={3}
-                      className="w-full px-4 py-2 border border-[#D2D2D7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0071E3] bg-white resize-none"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white resize-none transition-all"
                       placeholder="Describe la novedad..."
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#1D1D1F] mb-2">Registrado por</label>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">Registrado por</label>
                     <input
                       type="text"
                       value={formNovedad.registradoPor}
                       onChange={(e) => setFormNovedad({ ...formNovedad, registradoPor: e.target.value })}
-                      className="w-full px-4 py-2 border border-[#D2D2D7] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0071E3] bg-white"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white transition-all"
                       placeholder="Tu nombre"
                     />
                   </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => setMostrarFormNovedad(false)}
-                      className="px-4 py-2 border border-[#D2D2D7] text-[#1D1D1F] text-sm font-medium rounded-full hover:bg-white transition-all"
+                      className="px-5 py-2.5 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-4 py-2 bg-[#0071E3] text-white text-sm font-medium rounded-full hover:bg-[#0077ED] transition-all disabled:opacity-50"
+                      className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg disabled:opacity-50"
                     >
                       {loading ? 'Guardando...' : 'Guardar Novedad'}
                     </button>
@@ -362,37 +415,60 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
             )}
 
             {/* Lista de novedades */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               {loadingNovedades ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0071E3] mx-auto"></div>
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-4">Cargando novedades...</p>
                 </div>
               ) : novedades.length === 0 ? (
-                <p className="text-sm text-[#86868B] text-center py-8">No hay novedades registradas</p>
+                <div className="text-center py-12 bg-gray-50 rounded-xl">
+                  <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-lg">No hay novedades registradas</p>
+                  <p className="text-sm text-gray-400 mt-1">Agrega la primera novedad para dar seguimiento al ticket</p>
+                </div>
               ) : (
                 novedades.map((novedad) => (
-                  <div key={novedad.id} className="bg-[#F5F5F7] rounded-xl p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-md ${getTipoNovedadColor(novedad.tipo)}`}>
+                  <div key={novedad.id} className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex justify-between items-start mb-3">
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r ${getTipoNovedadGradient(novedad.tipo)} text-white shadow-md`}>
                         {novedad.tipo.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-xs text-[#86868B]">
-                        {new Date(novedad.createdAt).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
+                      <div className="text-right">
+                        <span className="text-sm text-gray-600">
+                          {new Date(novedad.createdAt).toLocaleDateString('es-ES', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                        <span className="text-xs text-gray-500 block">
+                          {new Date(novedad.createdAt).toLocaleTimeString('es-ES', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-[#1D1D1F] mb-2">{novedad.descripcion}</p>
-                    <div className="flex justify-between items-center text-xs">
+                    <p className="text-base text-gray-900 mb-3 leading-relaxed">{novedad.descripcion}</p>
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                       {novedad.registradoPor && (
-                        <span className="text-[#86868B]">Por: {novedad.registradoPor}</span>
+                        <span className="text-sm text-gray-600 flex items-center gap-2">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          {novedad.registradoPor}
+                        </span>
                       )}
                       {novedad.costoAsociado > 0 && (
-                        <span className="font-medium text-[#FF3B30]">
+                        <span className="text-base font-bold text-red-600 flex items-center gap-1">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
                           +${novedad.costoAsociado.toLocaleString()}
                         </span>
                       )}
@@ -405,10 +481,10 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-[#D2D2D7] px-6 py-4 rounded-b-2xl">
+        <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-gray-100 border-t-2 border-gray-300 px-6 py-4 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="w-full px-6 py-2.5 bg-[#0071E3] text-white text-sm font-medium rounded-full hover:bg-[#0077ED] transition-all"
+            className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-bold text-lg shadow-lg"
           >
             Cerrar
           </button>
