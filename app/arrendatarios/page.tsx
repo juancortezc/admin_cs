@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
+import { UsersIcon } from '@/app/components/icons'
 
 type Arrendatario = {
   id: string
@@ -132,8 +133,8 @@ export default function ArrendatariosPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Navbar activeTab="Arrendatarios" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+        <Navbar activeTab="Espacios" />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
             <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
@@ -145,30 +146,47 @@ export default function ArrendatariosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar activeTab="Arrendatarios" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+      <Navbar activeTab="Espacios" />
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header con estadísticas y botón */}
+        {/* Header con Material Design 3 */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                <UsersIcon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Arrendatarios</h1>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  Gestión y registro de arrendatarios
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={abrirModalNuevo}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Nuevo Arrendatario
+            </button>
+          </div>
+        </div>
+
+        {/* Search and Stats */}
         <div className="mb-6">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Arrendatarios</h1>
-                  <p className="text-white/80 text-sm mt-1">
+                  <h2 className="text-xl font-bold text-gray-900">Lista de Arrendatarios</h2>
+                  <p className="text-gray-600 text-sm mt-1">
                     {arrendatariosFiltrados.length} de {arrendatarios.length} registrados
                   </p>
                 </div>
-                <button
-                  onClick={abrirModalNuevo}
-                  className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all font-semibold flex items-center gap-2 border border-white/20 shadow-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Nuevo Arrendatario
-                </button>
               </div>
             </div>
 

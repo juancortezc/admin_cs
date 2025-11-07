@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Navbar from '@/app/components/Navbar'
+import { WrenchIcon } from '@/app/components/icons'
 import ModalTicket from '@/app/components/ModalTicket'
 import ModalDetalleTicket from '@/app/components/ModalDetalleTicket'
 
@@ -107,55 +108,70 @@ export default function MantenimientoPage() {
   const ticketsFiltrados = tickets
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar activeTab="Tickets" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+      <Navbar activeTab="Administración" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header con gradiente */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl shadow-lg p-8 mb-8">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">Tickets de Mantenimiento</h1>
-              <p className="text-white/80 text-lg">Gestiona y da seguimiento a todas las solicitudes</p>
-              <div className="mt-4 flex flex-wrap gap-4">
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                  <span className="text-white/70 text-sm">Total:</span>
-                  <span className="text-white text-2xl font-bold ml-2">{estadisticas.total}</span>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                  <span className="text-white/70 text-sm">Pendientes:</span>
-                  <span className="text-white text-2xl font-bold ml-2">{estadisticas.pendientes}</span>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                  <span className="text-white/70 text-sm">En Proceso:</span>
-                  <span className="text-white text-2xl font-bold ml-2">{estadisticas.enProceso}</span>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                  <span className="text-white/70 text-sm">Completados:</span>
-                  <span className="text-white text-2xl font-bold ml-2">{estadisticas.completados}</span>
-                </div>
-                {estadisticas.urgentes > 0 && (
-                  <div className="bg-red-500/30 backdrop-blur-sm px-4 py-2 rounded-xl border-2 border-red-300/50">
-                    <span className="text-white/90 text-sm">Urgentes:</span>
-                    <span className="text-white text-2xl font-bold ml-2">{estadisticas.urgentes}</span>
-                  </div>
-                )}
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header con Material Design 3 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+              <WrenchIcon className="w-6 h-6 text-white" />
             </div>
-            <button
-              onClick={() => {
-                setTicketSeleccionado(null)
-                setMostrarModal(true)
-              }}
-              className="px-6 py-3 bg-white text-indigo-600 rounded-xl hover:bg-gray-50 transition-all font-semibold text-sm shadow-lg flex items-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Nuevo Ticket
-            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Tickets de Mantenimiento</h1>
+              <p className="text-sm text-gray-600 mt-0.5">
+                Gestiona y da seguimiento a todas las solicitudes
+              </p>
+            </div>
           </div>
         </div>
+
+        {/* Estadísticas Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-4">
+              <p className="text-sm font-medium text-white/80">Total</p>
+              <p className="text-3xl font-bold text-white mt-1">{estadisticas.total}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-4">
+              <p className="text-sm font-medium text-white/80">Pendientes</p>
+              <p className="text-3xl font-bold text-white mt-1">{estadisticas.pendientes}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4">
+              <p className="text-sm font-medium text-white/80">En Proceso</p>
+              <p className="text-3xl font-bold text-white mt-1">{estadisticas.enProceso}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4">
+              <p className="text-sm font-medium text-white/80">Completados</p>
+              <p className="text-3xl font-bold text-white mt-1">{estadisticas.completados}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mb-6 flex justify-between items-center">
+          <div></div>
+          <button
+            onClick={() => {
+              setTicketSeleccionado(null)
+              setMostrarModal(true)
+            }}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Ticket
+          </button>
+        </div>
+
 
         {/* Alerta de tickets urgentes */}
         {estadisticas.urgentes > 0 && (

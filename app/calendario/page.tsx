@@ -6,8 +6,10 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
+import TabsPill from '@/app/components/TabsPill'
+import { CalendarIcon, TrendingUpIcon, TrendingDownIcon } from '@/app/components/icons'
 import CalendarGrid from '@/app/components/CalendarGrid'
 import CalendarWeekView from '@/app/components/CalendarWeekView'
 import ModalRegistroPago from '@/app/components/ModalRegistroPago'
@@ -50,9 +52,15 @@ type Bill = {
 }
 
 function CalendarioContent() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const tipo = searchParams.get('tipo') || 'ingresos'
   const activeTab = tipo === 'ingresos' ? 'cobros' : 'pagos'
+
+  const handleTabChange = (tabId: string) => {
+    const newTipo = tabId === 'ingresos' ? 'ingresos' : 'egresos'
+    router.push(`/calendario?tipo=${newTipo}`)
+  }
 
   const [bills, setBills] = useState<Bill[]>([])
   const [loading, setLoading] = useState(true)
@@ -248,7 +256,7 @@ function CalendarioContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab={activeTab === 'cobros' ? 'Ingresos' : 'Egresos'} />
+        <Navbar activeTab="Calendario" />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -261,9 +269,36 @@ function CalendarioContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab={activeTab === 'cobros' ? 'Ingresos' : 'Egresos'} />
+      <Navbar activeTab="Calendario" />
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header con Material Design 3 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+              <CalendarIcon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Calendario</h1>
+              <p className="text-sm text-gray-600 mt-0.5">
+                Gestión de ingresos y egresos en vista calendario
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs Ingresos/Egresos */}
+        <div className="mb-6">
+          <TabsPill
+            tabs={[
+              { id: 'ingresos', nombre: 'Ingresos', icon: <TrendingUpIcon /> },
+              { id: 'egresos', nombre: 'Egresos', icon: <TrendingDownIcon /> },
+            ]}
+            activeTab={tipo}
+            onTabChange={handleTabChange}
+          />
+        </div>
+
         {/* Summary Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="card-elevated bg-white rounded-2xl p-5 hover:shadow-lg transition-shadow">
