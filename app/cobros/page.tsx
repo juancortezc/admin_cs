@@ -363,15 +363,14 @@ export default function CobrosPage() {
       </main>
 
       {/* Modal Nuevo Cobro */}
-      {showModalNuevo && (
-        <ModalRegistroCobro
-          onClose={() => setShowModalNuevo(false)}
-          onSuccess={() => {
-            setShowModalNuevo(false)
-            cargarCobros()
-          }}
-        />
-      )}
+      <ModalRegistroCobro
+        isOpen={showModalNuevo}
+        onClose={() => setShowModalNuevo(false)}
+        onSuccess={() => {
+          setShowModalNuevo(false)
+          cargarCobros()
+        }}
+      />
     </div>
   )
 }
