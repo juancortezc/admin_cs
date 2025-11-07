@@ -58,7 +58,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
       id: 'Espacios' as MainTab,
       nombre: 'Espacios',
       icon: <HomeIcon />,
-      ruta: '/arrendatarios'
+      ruta: '/espacios-admin'
     },
     {
       id: 'Airbnb' as MainTab,
@@ -70,7 +70,7 @@ export default function Navbar({ activeTab }: NavbarProps) {
       id: 'Administración' as MainTab,
       nombre: 'Administración',
       icon: <SettingsIcon />,
-      ruta: '/administracion/pagos'
+      ruta: '/administracion'
     },
   ]
 

@@ -6,8 +6,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
-import { UsersIcon } from '@/app/components/icons'
+import TabsPill from '@/app/components/TabsPill'
+import { UsersIcon, HomeIcon, ClipboardListIcon } from '@/app/components/icons'
 
 type Arrendatario = {
   id: string
@@ -20,6 +22,7 @@ type Arrendatario = {
 }
 
 export default function ArrendatariosPage() {
+  const router = useRouter()
   const [arrendatarios, setArrendatarios] = useState<Arrendatario[]>([])
   const [loading, setLoading] = useState(true)
   const [modalAbierto, setModalAbierto] = useState(false)
@@ -174,6 +177,22 @@ export default function ArrendatariosPage() {
               Nuevo Arrendatario
             </button>
           </div>
+        </div>
+
+        {/* Tabs Navigation */}
+        <div className="mb-6">
+          <TabsPill
+            tabs={[
+              { id: 'arrendatarios', nombre: 'Arrendatarios', icon: <UsersIcon /> },
+              { id: 'espacios', nombre: 'Espacios', icon: <HomeIcon /> },
+              { id: 'cobros', nombre: 'Cobros', icon: <ClipboardListIcon /> },
+            ]}
+            activeTab="arrendatarios"
+            onTabChange={(tabId) => {
+              if (tabId === 'espacios') router.push('/espacios')
+              else if (tabId === 'cobros') router.push('/cobros')
+            }}
+          />
         </div>
 
         {/* Search and Stats */}

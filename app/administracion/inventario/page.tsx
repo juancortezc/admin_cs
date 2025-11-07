@@ -7,15 +7,17 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
 import TabsPill from '@/app/components/TabsPill'
-import { BoxIcon, ArrowsExchangeIcon, ChartBarIcon, GiftIcon } from '@/app/components/icons'
+import { BoxIcon, ArrowsExchangeIcon, ChartBarIcon, GiftIcon, CoinsIcon, WrenchIcon } from '@/app/components/icons'
 import ItemsTab from '@/app/components/inventario/ItemsTab'
 import MovimientosTab from '@/app/components/inventario/MovimientosTab'
 import KardexTab from '@/app/components/inventario/KardexTab'
 import KitsTab from '@/app/components/inventario/KitsTab'
 
 export default function InventarioPage() {
+  const router = useRouter()
   const [tabActivo, setTabActivo] = useState<'items' | 'movimientos' | 'kardex' | 'kits'>('items')
 
   const tabs = [
@@ -43,6 +45,22 @@ export default function InventarioPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Navigation Tabs - Administración */}
+        <div className="mb-6">
+          <TabsPill
+            tabs={[
+              { id: 'pagos', nombre: 'Pagos', icon: <CoinsIcon /> },
+              { id: 'tickets', nombre: 'Tickets', icon: <WrenchIcon /> },
+              { id: 'inventario', nombre: 'Inventario', icon: <BoxIcon /> },
+            ]}
+            activeTab="inventario"
+            onTabChange={(tabId) => {
+              if (tabId === 'pagos') router.push('/administracion/pagos')
+              else if (tabId === 'tickets') router.push('/administracion/tickets')
+            }}
+          />
         </div>
 
         {/* Tabs con Material Design 3 - Pill Style */}

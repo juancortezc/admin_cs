@@ -11,6 +11,8 @@ import Navbar from '@/app/components/Navbar'
 import TabsPill from '@/app/components/TabsPill'
 import { ClipboardListIcon, CoinsIcon, BuildingIcon } from '@/app/components/icons'
 import ModalRegistroCobro from '@/app/components/ModalRegistroCobro'
+import ParcialesContent from '@/app/components/cobros/ParcialesContent'
+import EspaciosContent from '@/app/components/cobros/EspaciosContent'
 
 type Cobro = {
   id: string
@@ -326,23 +328,9 @@ export default function CobrosPage() {
           </div>
         )}
 
-        {activeView === 'parciales' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">Vista de Pagos Parciales</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Esta vista mostrará los cobros con pagos parciales. Será implementada con el mismo diseño.
-            </p>
-          </div>
-        )}
+        {activeView === 'parciales' && <ParcialesContent />}
 
-        {activeView === 'espacios' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <p className="text-gray-600">Vista Por Espacio</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Esta vista mostrará los cobros agrupados por espacio. Será implementada con el mismo diseño.
-            </p>
-          </div>
-        )}
+        {activeView === 'espacios' && <EspaciosContent />}
       </main>
 
       {/* Modal Nuevo Cobro */}

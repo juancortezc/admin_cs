@@ -7,9 +7,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
 import TabsPill from '@/app/components/TabsPill'
-import { CreditCardIcon, CashIcon, RefreshIcon } from '@/app/components/icons'
+import { CreditCardIcon, CashIcon, RefreshIcon, CoinsIcon, WrenchIcon, BoxIcon } from '@/app/components/icons'
 
 type Pago = {
   id: string
@@ -84,6 +85,7 @@ type PagoRecurrente = {
 }
 
 export default function AdministracionPagosPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'estado' | 'eventuales' | 'recurrentes'>('estado')
   const [pagos, setPagos] = useState<Pago[]>([])
   const [categoriasAgrupadas, setCategoriasAgrupadas] = useState<CategoriaAgrupada[]>([])
@@ -418,6 +420,22 @@ export default function AdministracionPagosPage() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* Navigation Tabs - Administración */}
+        <div className="mb-6">
+          <TabsPill
+            tabs={[
+              { id: 'pagos', nombre: 'Pagos', icon: <CoinsIcon /> },
+              { id: 'tickets', nombre: 'Tickets', icon: <WrenchIcon /> },
+              { id: 'inventario', nombre: 'Inventario', icon: <BoxIcon /> },
+            ]}
+            activeTab="pagos"
+            onTabChange={(tabId) => {
+              if (tabId === 'tickets') router.push('/administracion/tickets')
+              else if (tabId === 'inventario') router.push('/administracion/inventario')
+            }}
+          />
         </div>
 
         {/* Tabs y Filtros */}

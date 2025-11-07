@@ -6,8 +6,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Navbar from '@/app/components/Navbar'
-import { OfficeBuildingIcon } from '@/app/components/icons'
+import TabsPill from '@/app/components/TabsPill'
+import { UsersIcon, HomeIcon, ClipboardListIcon } from '@/app/components/icons'
 
 // Tipo de datos de Espacio
 type Espacio = {
@@ -35,6 +37,7 @@ type Arrendatario = {
 }
 
 export default function EspaciosPage() {
+  const router = useRouter()
   const [espacios, setEspacios] = useState<Espacio[]>([])
   const [arrendatarios, setArrendatarios] = useState<Arrendatario[]>([])
   const [loading, setLoading] = useState(true)
@@ -204,7 +207,7 @@ export default function EspaciosPage() {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-                <OfficeBuildingIcon className="w-6 h-6 text-white" />
+                <HomeIcon className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Espacios</h1>
@@ -223,6 +226,22 @@ export default function EspaciosPage() {
               Nuevo Espacio
             </button>
           </div>
+        </div>
+
+        {/* Tabs Navigation */}
+        <div className="mb-6">
+          <TabsPill
+            tabs={[
+              { id: 'arrendatarios', nombre: 'Arrendatarios', icon: <UsersIcon /> },
+              { id: 'espacios', nombre: 'Espacios', icon: <HomeIcon /> },
+              { id: 'cobros', nombre: 'Cobros', icon: <ClipboardListIcon /> },
+            ]}
+            activeTab="espacios"
+            onTabChange={(tabId) => {
+              if (tabId === 'arrendatarios') router.push('/arrendatarios')
+              else if (tabId === 'cobros') router.push('/cobros')
+            }}
+          />
         </div>
 
         {/* Stats and Search */}
