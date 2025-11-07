@@ -411,9 +411,19 @@ function CalendarioContent() {
           {/* Bill List Side Panel */}
           <div className="lg:col-span-1">
             <div className="card-elevated bg-white rounded-2xl p-6 sticky top-24 max-h-[calc(100vh-150px)] overflow-y-auto">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Detalle de {activeTab === 'cobros' ? 'Cobros' : 'Pagos'}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900">
+                  Detalle de {activeTab === 'cobros' ? 'Cobros' : 'Pagos'}
+                </h3>
+                {activeTab === 'pagos' && (
+                  <a
+                    href="/administracion/pagos?tab=eventuales"
+                    className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    Crear Pago
+                  </a>
+                )}
+              </div>
 
               {/* Status Filters */}
               <div className="flex flex-wrap gap-2 mb-4 pb-4 border-b border-gray-200">
@@ -485,7 +495,7 @@ function CalendarioContent() {
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${dotColor}`}></div>
                             <span className="font-semibold text-black text-sm truncate">
-                              {bill.codigoInterno || bill.id.substring(0, 8)}
+                              {bill.espacioIdentificador || bill.id.substring(0, 8)}
                             </span>
                           </div>
 

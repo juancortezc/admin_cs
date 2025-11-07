@@ -436,7 +436,7 @@ export default function AdministracionPagosPage() {
               <select
                 value={mesSeleccionado}
                 onChange={(e) => setMesSeleccionado(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm"
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm"
               >
                 {mesesDisponibles.map(mes => (
                   <option key={mes.value} value={mes.value}>{mes.label}</option>

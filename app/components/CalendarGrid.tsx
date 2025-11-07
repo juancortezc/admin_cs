@@ -9,6 +9,7 @@ type Bill = {
   id: string
   codigoInterno?: string
   espacioId?: string
+  espacioIdentificador?: string
   proveedor?: string
   titulo: string
   monto: number
@@ -169,7 +170,7 @@ export default function CalendarGrid({
                           <div className="truncate">
                             {bill.tipo === 'pago'
                               ? bill.proveedor || bill.titulo
-                              : bill.codigoInterno || bill.id.substring(0, 8)
+                              : bill.espacioIdentificador || bill.id.substring(0, 8)
                             }
                           </div>
                         </button>
