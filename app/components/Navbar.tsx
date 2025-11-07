@@ -1,15 +1,15 @@
 /**
- * Navbar Material Design con gradientes y efectos modernos
- * - Gradient hero background
- * - Glass morphism effects
- * - Smooth animations
- * - Elevated design
+ * Navbar Material Design 3 con Pill Style
+ * - Solo tabs principales (Fila 1) con pill style buttons
+ * - Subtabs movidos a cada página individual
+ * - Iconos SVG para cada tab principal
  */
 
 'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { CalendarIcon, HomeIcon, AirbnbIcon, SettingsIcon } from './icons'
 
 type MainTab = 'Calendario' | 'Espacios' | 'Airbnb' | 'Administración'
 type SubTab = 'Ingresos' | 'Egresos' | 'Estado de cuenta' | 'Arrendatarios' | 'Espacios' | 'Reservas' | 'Huéspedes' | 'Pagos' | 'Tickets' | 'Inventario' | 'Pagos Eventuales'
@@ -46,25 +46,50 @@ export default function Navbar({ activeTab }: NavbarProps) {
     setActiveMainTab(getActiveMainTab())
   }, [activeTab])
 
+  // Tabs principales con iconos y rutas
+  const mainTabsConfig = [
+    {
+      id: 'Calendario' as MainTab,
+      nombre: 'Calendario',
+      icon: <CalendarIcon />,
+      ruta: '/calendario'
+    },
+    {
+      id: 'Espacios' as MainTab,
+      nombre: 'Espacios',
+      icon: <HomeIcon />,
+      ruta: '/arrendatarios'
+    },
+    {
+      id: 'Airbnb' as MainTab,
+      nombre: 'Airbnb',
+      icon: <AirbnbIcon />,
+      ruta: '/airbnb'
+    },
+    {
+      id: 'Administración' as MainTab,
+      nombre: 'Administración',
+      icon: <SettingsIcon />,
+      ruta: '/administracion/pagos'
+    },
+  ]
+
   // Orden fijo de tabs principales
   const mainTabsOrder: MainTab[] = ['Calendario', 'Espacios', 'Airbnb', 'Administración']
 
-  // Definición de tabs principales y sus subtabs
+  // Definición de subtabs para el drawer mobile
   const mainTabs: Record<MainTab, { nombre: string; ruta: string }[] | null> = {
     'Calendario': [
       { nombre: 'Ingresos', ruta: '/calendario?tipo=ingresos' },
       { nombre: 'Egresos', ruta: '/calendario?tipo=egresos' },
     ],
     'Espacios': [
-      { nombre: 'Estado de cuenta', ruta: '/cobros/espacios' },
       { nombre: 'Arrendatarios', ruta: '/arrendatarios' },
       { nombre: 'Espacios', ruta: '/espacios' },
+      { nombre: 'Cobros', ruta: '/cobros' },
     ],
     'Airbnb': [
-      { nombre: 'Calendario', ruta: '/airbnb' },
-      { nombre: 'Reservas', ruta: '/airbnb' },
-      { nombre: 'Huéspedes', ruta: '/airbnb' },
-      { nombre: 'Espacios', ruta: '/airbnb' },
+      { nombre: 'Airbnb', ruta: '/airbnb' },
     ],
     'Administración': [
       { nombre: 'Pagos', ruta: '/administracion/pagos' },
@@ -78,20 +103,18 @@ export default function Navbar({ activeTab }: NavbarProps) {
     router.push(ruta)
   }
 
-  // Manejar clic en tab principal - navegar al primer subtab
+  // Manejar clic en tab principal - navegar directamente a la ruta principal
   const handleMainTabClick = (tab: MainTab) => {
     setActiveMainTab(tab)
-    const subtabs = mainTabs[tab]
-    if (subtabs && subtabs.length > 0) {
-      router.push(subtabs[0].ruta)
+    const tabConfig = mainTabsConfig.find(t => t.id === tab)
+    if (tabConfig) {
+      router.push(tabConfig.ruta)
     }
   }
 
-  const currentSubTabs = mainTabs[activeMainTab] || []
-
   return (
     <>
-      {/* Navbar with Material Design gradient - 2 filas */}
+      {/* Navbar with Material Design 3 - Solo Fila 1 con Pill Style */}
       <nav
         className="sticky top-0 z-50"
         style={{
@@ -100,9 +123,9 @@ export default function Navbar({ activeTab }: NavbarProps) {
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          {/* Header con logo y tabs principales - usando grid para centrar */}
+          {/* Header con logo y tabs principales pill style */}
           <div className="grid grid-cols-[200px_1fr_200px] items-center h-16">
-            {/* Logo/Título with gradient text effect */}
+            {/* Logo/Título */}
             <button
               onClick={() => handleNavegar('/calendario')}
               className="text-xl font-bold text-white hover:scale-105 transition-all tracking-tight justify-self-start"
@@ -110,20 +133,23 @@ export default function Navbar({ activeTab }: NavbarProps) {
               Casa del Sol
             </button>
 
-            {/* Desktop: Tabs principales en barra contenedora - centrado absoluto */}
+            {/* Desktop: Tabs principales con pill style y iconos SVG */}
             <div className="hidden md:flex items-center justify-center">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
-                {mainTabsOrder.map((tab) => (
+              <div className="card-elevated bg-white rounded-2xl p-2 inline-flex gap-1">
+                {mainTabsConfig.map((tab) => (
                   <button
-                    key={tab}
-                    onClick={() => handleMainTabClick(tab)}
-                    className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                      activeMainTab === tab
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'text-white bg-white/10 hover:bg-white/20'
-                    }`}
+                    key={tab.id}
+                    onClick={() => handleMainTabClick(tab.id)}
+                    className={`
+                      px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2
+                      ${activeMainTab === tab.id
+                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
+                        : 'text-gray-700 hover:bg-gray-50'
+                      }
+                    `}
                   >
-                    {tab}
+                    {tab.icon}
+                    <span>{tab.nombre}</span>
                   </button>
                 ))}
               </div>
@@ -155,27 +181,6 @@ export default function Navbar({ activeTab }: NavbarProps) {
             {/* Espacio vacío en desktop para mantener grid */}
             <div className="hidden md:block"></div>
           </div>
-
-          {/* Desktop: Subtabs (segunda fila) en barra contenedora centrada */}
-          {currentSubTabs.length > 0 && (
-            <div className="hidden md:flex items-center justify-center pb-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-full p-1 flex gap-1">
-                {currentSubTabs.map((subtab) => (
-                  <button
-                    key={subtab.nombre}
-                    onClick={() => handleNavegar(subtab.ruta)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap ${
-                      activeTab === subtab.nombre
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'text-white bg-white/10 hover:bg-white/20'
-                    }`}
-                  >
-                    {subtab.nombre}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </nav>
 

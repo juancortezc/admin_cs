@@ -1,12 +1,15 @@
 /**
  * Administración - Pagos
  * Vista con 3 tabs: Estado de cuenta (cards por categoría), Pagos eventuales, Pagos recurrentes
+ * Material Design 3 con tabs pill style
  */
 
 'use client'
 
 import { useEffect, useState } from 'react'
 import Navbar from '@/app/components/Navbar'
+import TabsPill from '@/app/components/TabsPill'
+import { CreditCardIcon, CashIcon, RefreshIcon } from '@/app/components/icons'
 
 type Pago = {
   id: string
@@ -391,44 +394,39 @@ export default function AdministracionPagosPage() {
     )
   }
 
+  const tabs = [
+    { id: 'estado', nombre: 'Estado de cuenta', icon: <CreditCardIcon /> },
+    { id: 'eventuales', nombre: 'Pagos Eventuales', icon: <CashIcon /> },
+    { id: 'recurrentes', nombre: 'Pagos Recurrentes', icon: <RefreshIcon /> },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
       <Navbar activeTab="Pagos" />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="inline-flex bg-white/60 backdrop-blur-sm rounded-xl p-1 gap-1 shadow-sm border border-gray-200">
-            <button
-              onClick={() => setActiveTab('estado')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                activeTab === 'estado'
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-white/80'
-              }`}
-            >
-              Estado de cuenta
-            </button>
-            <button
-              onClick={() => setActiveTab('eventuales')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                activeTab === 'eventuales'
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-white/80'
-              }`}
-            >
-              Pagos eventuales
-            </button>
-            <button
-              onClick={() => setActiveTab('recurrentes')}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                activeTab === 'recurrentes'
-                  ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
-                  : 'text-gray-700 hover:bg-white/80'
-              }`}
-            >
-              Pagos recurrentes
-            </button>
+      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header con Material Design 3 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+              <CreditCardIcon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Administración de Pagos</h1>
+              <p className="text-sm text-gray-600 mt-0.5">
+                Gestión de pagos eventuales, recurrentes y estado de cuenta
+              </p>
+            </div>
           </div>
+        </div>
+
+        {/* Tabs y Filtros */}
+        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
+          <TabsPill
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as any)}
+          />
 
           {/* Selector de Mes - Solo visible en tab Estado */}
           {activeTab === 'estado' && (
