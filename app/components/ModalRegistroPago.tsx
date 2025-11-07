@@ -51,6 +51,9 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('=== FORM SUBMITTED ===')
+    console.log('Evento:', evento)
+    console.log('Fecha:', fecha, 'Monto:', monto, 'Forma Pago:', formaPago)
     setGuardando(true)
 
     try {
@@ -61,6 +64,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
         formaPago,
         referencia: referencia || undefined,
       }
+      console.log('Body inicial:', body)
 
       // Determinar endpoint y campos específicos según tipo
       if (evento.tipo === 'arriendo') {
@@ -91,17 +95,24 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
             observaciones: observaciones || cobroData.observaciones,
           }
 
+          console.log('Enviando PUT a:', endpoint)
+          console.log('Update body:', updateBody)
+
           const res = await fetch(endpoint, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updateBody),
           })
 
+          console.log('Respuesta status:', res.status)
+
           if (res.ok) {
+            console.log('Pago registrado exitosamente')
             onSuccess()
             onClose()
           } else {
             const error = await res.json()
+            console.error('Error response:', error)
             alert(error.error || 'Error al registrar pago')
           }
           setGuardando(false)
