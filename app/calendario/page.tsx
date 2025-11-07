@@ -256,7 +256,7 @@ function CalendarioContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Calendario" />
+        <Navbar />
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -269,7 +269,7 @@ function CalendarioContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Calendario" />
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Header con Material Design 3 */}
