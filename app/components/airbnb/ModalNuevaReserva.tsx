@@ -179,19 +179,50 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
               <label className="block text-sm font-medium text-zinc-900 mb-2">
                 Huésped <span className="text-red-500">*</span>
               </label>
-              <select
-                required
-                value={formData.huespedId}
-                onChange={(e) => setFormData({ ...formData, huespedId: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
-              >
-                <option value="">Selecciona un huésped</option>
-                {huespedes.map((huesped) => (
-                  <option key={huesped.id} value={huesped.id}>
-                    {huesped.nombre}
-                  </option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  required
+                  value={formData.huespedId}
+                  onChange={(e) => setFormData({ ...formData, huespedId: e.target.value })}
+                  className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                >
+                  <option value="">Selecciona un huésped</option>
+                  {huespedes.map((huesped) => (
+                    <option key={huesped.id} value={huesped.id}>
+                      {huesped.nombre}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nombre = prompt('Nombre completo del huésped:')
+                    if (nombre) {
+                      // Crear huésped rápido
+                      fetch('/api/airbnb/huespedes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre }),
+                      })
+                        .then((res) => res.json())
+                        .then((nuevoHuesped) => {
+                          cargarHuespedes()
+                          setFormData({ ...formData, huespedId: nuevoHuesped.id })
+                        })
+                        .catch((error) => {
+                          console.error('Error al crear huésped:', error)
+                          alert('Error al crear el huésped')
+                        })
+                    }
+                  }}
+                  className="px-3 py-2 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+                  title="Crear nuevo huésped rápido"
+                >
+                  <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 

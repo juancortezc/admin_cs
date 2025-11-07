@@ -48,7 +48,8 @@ export async function GET(request: Request) {
     bills.push(...cobros.map((cobro) => ({
       id: cobro.id,
       codigoInterno: cobro.codigoInterno,
-      espacioId: cobro.espacio.identificador,
+      espacioId: cobro.espacioId, // UUID for API calls
+      espacioIdentificador: cobro.espacio.identificador, // Display identifier like "CS1"
       espacioNombre: cobro.espacio.identificador,
       arrendatarioNombre: cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
       titulo: `${cobro.concepto}${
@@ -103,7 +104,8 @@ export async function GET(request: Request) {
           bills.push({
             id: `generated-${espacio.id}-${periodoStr}`,
             codigoInterno: `PEND-${espacio.identificador}-${periodoStr}`,
-            espacioId: espacio.identificador,
+            espacioId: espacio.id, // UUID for API calls
+            espacioIdentificador: espacio.identificador, // Display identifier like "CS1"
             espacioNombre: espacio.identificador,
             arrendatarioNombre: espacio.arrendatario?.nombre || 'Sin arrendatario',
             titulo: `${espacio.conceptoCobro || 'RENTA'}`,

@@ -64,25 +64,69 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
 
       // Determinar endpoint y campos específicos según tipo
       if (evento.tipo === 'arriendo') {
-        // Usar el nuevo modelo de Cobros
-        endpoint = '/api/cobros'
-        body.espacioId = evento.espacioId
-        body.fechaPago = fecha
-        body.montoPagado = parseFloat(monto)
-        body.montoPactado = parseFloat(monto) // Asumimos que paga exacto
-        body.concepto = 'RENTA' // Por defecto
-        body.metodoPago = formaPago
+        // Check if this is an existing cobro (real ID) or a generated one
+        const isExistingCobro = !evento.id.startsWith('generated-')
 
-        // Calcular fecha de vencimiento
-        const fechaVencimiento = new Date()
-        fechaVencimiento.setDate(evento.dia)
-        body.fechaVencimiento = fechaVencimiento.toISOString().split('T')[0]
+        if (isExistingCobro) {
+          // Update existing cobro
+          endpoint = `/api/cobros/${evento.id}`
 
-        // Período actual (YYYY-MM)
-        const now = new Date()
-        body.periodo = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
-        body.estado = 'PAGADO'
-        body.numeroComprobante = referencia
+          // First get the existing cobro data
+          const cobroRes = await fetch(endpoint)
+          if (!cobroRes.ok) {
+            alert('Error al obtener datos del cobro')
+            setGuardando(false)
+            return
+          }
+          const cobroData = await cobroRes.json()
+
+          // Update with payment info
+          const updateBody = {
+            ...cobroData,
+            estado: 'PAGADO',
+            fechaPago: fecha,
+            montoPagado: parseFloat(monto),
+            metodoPago: formaPago,
+            numeroComprobante: referencia || cobroData.numeroComprobante,
+            observaciones: observaciones || cobroData.observaciones,
+          }
+
+          const res = await fetch(endpoint, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateBody),
+          })
+
+          if (res.ok) {
+            onSuccess()
+            onClose()
+          } else {
+            const error = await res.json()
+            alert(error.error || 'Error al registrar pago')
+          }
+          setGuardando(false)
+          return
+        } else {
+          // Create new cobro for generated/pending event
+          endpoint = '/api/cobros'
+          body.espacioId = evento.espacioId
+          body.fechaPago = fecha
+          body.montoPagado = parseFloat(monto)
+          body.montoPactado = parseFloat(monto) // Asumimos que paga exacto
+          body.concepto = 'RENTA' // Por defecto
+          body.metodoPago = formaPago
+
+          // Calcular fecha de vencimiento
+          const fechaVencimiento = new Date()
+          fechaVencimiento.setDate(evento.dia)
+          body.fechaVencimiento = fechaVencimiento.toISOString().split('T')[0]
+
+          // Período actual (YYYY-MM)
+          const now = new Date()
+          body.periodo = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+          body.estado = 'PAGADO'
+          body.numeroComprobante = referencia
+        }
       } else if (evento.tipo === 'servicio') {
         endpoint = '/api/pagos/servicios'
         body.servicioBasicoId = evento.servicioId

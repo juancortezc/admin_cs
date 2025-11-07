@@ -16,7 +16,8 @@ import Toast from '@/app/components/Toast'
 type Bill = {
   id: string
   codigoInterno?: string
-  espacioId?: string
+  espacioId?: string // UUID for API calls
+  espacioIdentificador?: string // Display identifier like "CS1"
   espacioNombre?: string
   arrendatarioNombre?: string
   titulo: string

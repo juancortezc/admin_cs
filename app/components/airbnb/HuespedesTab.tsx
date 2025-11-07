@@ -6,6 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ModalNuevoHuesped from './ModalNuevoHuesped'
 
 type HuespedAirbnb = {
   id: string
@@ -25,6 +26,7 @@ export default function HuespedesTab() {
   const [huespedes, setHuespedes] = useState<HuespedAirbnb[]>([])
   const [loading, setLoading] = useState(true)
   const [busqueda, setBusqueda] = useState('')
+  const [showModalNuevo, setShowModalNuevo] = useState(false)
 
   useEffect(() => {
     cargarHuespedes()
@@ -81,6 +83,15 @@ export default function HuespedesTab() {
             <h2 className="text-lg font-semibold text-zinc-900">Huéspedes</h2>
             <p className="text-sm text-zinc-600 mt-1">{huespedes.length} huéspedes registrados</p>
           </div>
+          <button
+            onClick={() => setShowModalNuevo(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Huésped
+          </button>
         </div>
 
         <div className="relative">
@@ -186,6 +197,17 @@ export default function HuespedesTab() {
             {busqueda ? 'No se encontraron huéspedes' : 'No hay huéspedes registrados'}
           </p>
         </div>
+      )}
+
+      {/* Modal Nuevo Huésped */}
+      {showModalNuevo && (
+        <ModalNuevoHuesped
+          onClose={() => setShowModalNuevo(false)}
+          onGuardar={() => {
+            setShowModalNuevo(false)
+            cargarHuespedes()
+          }}
+        />
       )}
     </div>
   )
