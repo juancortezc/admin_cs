@@ -64,23 +64,23 @@ export default function ReservasTab() {
 
   const getEstadoColor = (estado: string) => {
     const colores: any = {
-      PENDIENTE: 'bg-zinc-100 text-zinc-700 border-zinc-200',
-      CONFIRMADA: 'bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20',
-      EN_CURSO: 'bg-[#34C759]/10 text-[#34C759] border-[#34C759]/20',
-      COMPLETADA: 'bg-zinc-100 text-zinc-600 border-zinc-200',
-      CANCELADA: 'bg-[#FF3B30]/10 text-[#FF3B30] border-[#FF3B30]/20',
+      PENDIENTE: 'bg-gray-100 text-gray-700 border-gray-300',
+      CONFIRMADA: 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-300',
+      EN_CURSO: 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-300',
+      COMPLETADA: 'bg-gray-100 text-gray-600 border-gray-200',
+      CANCELADA: 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-red-300',
     }
-    return colores[estado] || 'bg-zinc-100 text-zinc-700'
+    return colores[estado] || 'bg-gray-100 text-gray-700 border-gray-200'
   }
 
   const getEstadoPagoColor = (estado: string) => {
     const colores: any = {
-      PENDIENTE: 'text-[#FF3B30]',
-      PARCIAL: 'text-[#FF9500]',
-      PAGADO: 'text-[#34C759]',
-      REEMBOLSADO: 'text-zinc-500',
+      PENDIENTE: 'text-red-600 font-bold',
+      PARCIAL: 'text-orange-600 font-bold',
+      PAGADO: 'text-green-600 font-bold',
+      REEMBOLSADO: 'text-gray-500 font-semibold',
     }
-    return colores[estado] || 'text-zinc-700'
+    return colores[estado] || 'text-gray-700'
   }
 
   const formatearFecha = (fecha: string) => {
@@ -94,36 +94,39 @@ export default function ReservasTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="w-8 h-8 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
   return (
     <div>
-      {/* Header con filtros */}
+      {/* Header con filtros - Material Design 3 */}
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-5">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-900">Reservas</h2>
-            <p className="text-sm text-zinc-600 mt-1">{reservas.length} reservas</p>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Reservas</h2>
+            <p className="text-sm text-gray-600 mt-1">{reservas.length} reservas</p>
           </div>
           <button
             onClick={() => setMostrarModal(true)}
-            className="px-4 py-2 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200"
           >
-            + Nueva Reserva
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nueva Reserva
           </button>
         </div>
 
-        {/* Filtros */}
-        <div className="flex gap-3 flex-wrap">
+        {/* Filtros - Material Design 3 */}
+        <div className="flex gap-4 flex-wrap">
           <div>
-            <label className="text-xs text-zinc-600 mb-1 block">Estado de reserva</label>
+            <label className="text-xs font-semibold text-gray-700 mb-2 block">Estado de reserva</label>
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 font-medium"
             >
               <option value="todos">Todos</option>
               <option value="PENDIENTE">Pendiente</option>
@@ -135,11 +138,11 @@ export default function ReservasTab() {
           </div>
 
           <div>
-            <label className="text-xs text-zinc-600 mb-1 block">Estado de pago</label>
+            <label className="text-xs font-semibold text-gray-700 mb-2 block">Estado de pago</label>
             <select
               value={filtroEstadoPago}
               onChange={(e) => setFiltroEstadoPago(e.target.value)}
-              className="px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="px-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 font-medium"
             >
               <option value="todos">Todos</option>
               <option value="PENDIENTE">Pendiente</option>
@@ -151,30 +154,43 @@ export default function ReservasTab() {
         </div>
       </div>
 
-      {/* Lista de reservas */}
-      <div className="space-y-3">
+      {/* Lista de reservas - Material Design 3 Cards */}
+      <div className="space-y-4">
         {reservas.map((reserva) => (
           <div
             key={reserva.id}
-            className="bg-white rounded-xl border border-zinc-200 p-5 hover:shadow-md transition-all"
+            className="card-elevated bg-white rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group"
           >
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-5">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-zinc-900">{reserva.codigoReserva}</h3>
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{reserva.codigoReserva}</h3>
                   <span
-                    className={`px-2 py-0.5 text-xs font-medium rounded-md border ${getEstadoColor(
+                    className={`px-3 py-1 text-xs font-bold rounded-full border-2 ${getEstadoColor(
                       reserva.estadoReserva
                     )}`}
                   >
                     {reserva.estadoReserva.replace('_', ' ')}
                   </span>
                 </div>
-                <div className="text-sm text-zinc-600">
-                  <div className="font-medium text-zinc-900">{reserva.espacio.nombre}</div>
-                  <div>{reserva.huesped.nombre}</div>
+                <div className="text-sm space-y-1">
+                  <div className="font-semibold text-gray-900 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    {reserva.espacio.nombre}
+                  </div>
+                  <div className="text-gray-600 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {reserva.huesped.nombre}
+                  </div>
                   {reserva.codigoConfirmacion && (
-                    <div className="text-xs text-zinc-500 mt-1">
+                    <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                      </svg>
                       Código: {reserva.codigoConfirmacion}
                     </div>
                   )}
@@ -182,66 +198,66 @@ export default function ReservasTab() {
               </div>
 
               <div className="text-right">
-                <div className="text-lg font-semibold text-zinc-900">
+                <div className="text-2xl font-bold text-indigo-600 mb-1">
                   ${reserva.precioTotal.toFixed(2)}
                 </div>
-                <div className={`text-sm font-medium ${getEstadoPagoColor(reserva.estadoPago)}`}>
+                <div className={`text-sm ${getEstadoPagoColor(reserva.estadoPago)}`}>
                   {reserva.estadoPago}
                 </div>
                 {reserva.balancePendiente > 0 && (
-                  <div className="text-xs text-[#FF3B30] mt-1">
+                  <div className="text-xs text-red-600 font-bold mt-2 px-2 py-1 bg-red-50 rounded-lg">
                     Pendiente: ${reserva.balancePendiente.toFixed(2)}
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-4 border-t border-zinc-100 pt-3">
-              <div>
-                <div className="text-xs text-zinc-500">Check-in</div>
-                <div className="text-sm font-medium text-zinc-900">
+            <div className="grid grid-cols-4 gap-4 border-t-2 border-gray-100 pt-4 mb-4">
+              <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                <div className="text-xs text-green-700 font-semibold mb-1">Check-in</div>
+                <div className="text-sm font-bold text-gray-900">
                   {formatearFecha(reserva.checkIn)}
                 </div>
               </div>
-              <div>
-                <div className="text-xs text-zinc-500">Check-out</div>
-                <div className="text-sm font-medium text-zinc-900">
+              <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
+                <div className="text-xs text-blue-700 font-semibold mb-1">Check-out</div>
+                <div className="text-sm font-bold text-gray-900">
                   {formatearFecha(reserva.checkOut)}
                 </div>
               </div>
-              <div>
-                <div className="text-xs text-zinc-500">Noches</div>
-                <div className="text-sm font-medium text-zinc-900">{reserva.noches}</div>
+              <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                <div className="text-xs text-purple-700 font-semibold mb-1">Noches</div>
+                <div className="text-xl font-bold text-gray-900">{reserva.noches}</div>
               </div>
-              <div>
-                <div className="text-xs text-zinc-500">Huéspedes</div>
-                <div className="text-sm font-medium text-zinc-900">{reserva.numHuespedes}</div>
+              <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl">
+                <div className="text-xs text-indigo-700 font-semibold mb-1">Huéspedes</div>
+                <div className="text-xl font-bold text-gray-900">{reserva.numHuespedes}</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-100">
+            <div className="flex items-center justify-between pt-4 border-t-2 border-gray-100">
               <div className="flex gap-2 text-xs">
-                <span className="px-2 py-1 bg-zinc-100 text-zinc-700 rounded">
+                <span className="px-3 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg font-semibold">
                   {reserva.canalReserva}
                 </span>
                 {reserva._count && reserva._count.abonos > 0 && (
-                  <span className="px-2 py-1 bg-[#007AFF]/10 text-[#007AFF] rounded">
+                  <span className="px-3 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-indigo-700 rounded-lg font-semibold">
                     {reserva._count.abonos} abono(s)
                   </span>
                 )}
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="text-sm text-zinc-500">
+                <div className="text-sm font-semibold text-gray-700 px-3 py-1.5 bg-green-50 rounded-lg">
                   Pagado: ${reserva.montoPagado.toFixed(2)}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-2">
                   <button
                     onClick={() => {
                       // TODO: Implement edit functionality
                       alert('Funcionalidad de edición en desarrollo')
                     }}
-                    className="p-1.5 text-[#007AFF] hover:bg-[#007AFF]/10 rounded-lg transition-colors"
+                    className="p-2.5 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all"
                     title="Editar reserva"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -267,7 +283,7 @@ export default function ReservasTab() {
                         }
                       }
                     }}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2.5 text-red-600 hover:bg-red-100 rounded-xl transition-all"
                     title="Eliminar reserva"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,13 +297,20 @@ export default function ReservasTab() {
         ))}
       </div>
 
-      {/* Mensaje vacío */}
+      {/* Mensaje vacío - Material Design 3 */}
       {reservas.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-          <svg className="w-12 h-12 text-zinc-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <p className="text-sm text-zinc-500">No se encontraron reservas con los filtros aplicados</p>
+        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-indigo-50 rounded-2xl border-2 border-dashed border-indigo-200">
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">No se encontraron reservas</h3>
+          <p className="text-sm text-gray-600">
+            {filtroEstado !== 'todos' || filtroEstadoPago !== 'todos'
+              ? 'Intenta ajustar los filtros'
+              : 'Comienza agregando tu primera reserva'}
+          </p>
         </div>
       )}
 

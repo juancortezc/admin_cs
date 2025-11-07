@@ -81,44 +81,47 @@ export default function EspaciosTab() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="w-8 h-8 border-2 border-[#007AFF] border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
   return (
     <div>
-      {/* Header con botón agregar */}
+      {/* Header con botón agregar - Material Design 3 */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-zinc-900">Espacios Airbnb</h2>
-          <p className="text-sm text-zinc-600 mt-1">{espacios.length} propiedades registradas</p>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Espacios Airbnb</h2>
+          <p className="text-sm text-gray-600 mt-1">{espacios.length} propiedades registradas</p>
         </div>
         <button
           onClick={() => {
             setEspacioEditando(null)
             setModalAbierto(true)
           }}
-          className="px-4 py-2 bg-[#007AFF] text-white rounded-lg text-sm font-medium hover:bg-[#0056b3] transition-colors"
+          className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
         >
-          + Agregar Espacio
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Agregar Espacio
         </button>
       </div>
 
-      {/* Lista de espacios */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Lista de espacios - Material Design 3 Cards */}
+      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {espacios.map((espacio) => (
           <div
             key={espacio.id}
-            className="bg-white rounded-xl border border-zinc-200 p-5 hover:shadow-md transition-all"
+            className="card-elevated bg-white rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group"
           >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-zinc-900">{espacio.nombre}</h3>
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{espacio.nombre}</h3>
               <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-md ${
+                className={`px-3 py-1 text-xs font-semibold rounded-full ${
                   espacio.activo
-                    ? 'bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20'
-                    : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
+                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200'
                 }`}
               >
                 {espacio.activo ? 'Activo' : 'Inactivo'}
@@ -126,39 +129,42 @@ export default function EspaciosTab() {
             </div>
 
             {espacio.descripcion && (
-              <p className="text-sm text-zinc-600 mb-3 line-clamp-2">{espacio.descripcion}</p>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{espacio.descripcion}</p>
             )}
 
-            <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
-              <div className="text-center">
-                <div className="text-zinc-500 text-xs">Huéspedes</div>
-                <div className="font-semibold text-zinc-900">{espacio.capacidadHuespedes}</div>
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl">
+                <div className="text-indigo-600 text-xs font-medium mb-1">Huéspedes</div>
+                <div className="text-xl font-bold text-gray-900">{espacio.capacidadHuespedes}</div>
               </div>
-              <div className="text-center">
-                <div className="text-zinc-500 text-xs">Camas</div>
-                <div className="font-semibold text-zinc-900">{espacio.numCamas}</div>
+              <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                <div className="text-purple-600 text-xs font-medium mb-1">Camas</div>
+                <div className="text-xl font-bold text-gray-900">{espacio.numCamas}</div>
               </div>
-              <div className="text-center">
-                <div className="text-zinc-500 text-xs">Baños</div>
-                <div className="font-semibold text-zinc-900">{espacio.numBanos}</div>
+              <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
+                <div className="text-blue-600 text-xs font-medium mb-1">Baños</div>
+                <div className="text-xl font-bold text-gray-900">{espacio.numBanos}</div>
               </div>
             </div>
 
-            <div className="border-t border-zinc-100 pt-3 mb-3">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-zinc-600">Precio/noche</span>
-                <span className="font-semibold text-zinc-900">${espacio.precioBaseNoche}</span>
+            <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-gray-600 font-medium">Precio/noche</span>
+                <span className="text-lg font-bold text-indigo-600">${espacio.precioBaseNoche}</span>
               </div>
               {espacio.precioLimpieza > 0 && (
-                <div className="flex justify-between items-center text-sm mt-1">
-                  <span className="text-zinc-600">Limpieza</span>
-                  <span className="font-semibold text-zinc-900">${espacio.precioLimpieza}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 font-medium">Limpieza</span>
+                  <span className="text-base font-semibold text-gray-900">${espacio.precioLimpieza}</span>
                 </div>
               )}
             </div>
 
             {espacio._count && (
-              <div className="text-xs text-zinc-500 mb-3">
+              <div className="text-xs text-gray-500 mb-4 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
                 {espacio._count.reservas} reserva(s) registrada(s)
               </div>
             )}
@@ -169,8 +175,11 @@ export default function EspaciosTab() {
                   setEspacioEditando(espacio)
                   setModalAbierto(true)
                 }}
-                className="flex-1 px-3 py-2 text-sm text-[#007AFF] hover:bg-[#007AFF]/5 rounded-lg transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
                 Editar
               </button>
               <button
@@ -192,7 +201,7 @@ export default function EspaciosTab() {
                     }
                   }
                 }}
-                className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors font-medium"
+                className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg"
                 title="Eliminar espacio"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,49 +213,65 @@ export default function EspaciosTab() {
         ))}
       </div>
 
-      {/* Mensaje vacío */}
+      {/* Mensaje vacío - Material Design 3 */}
       {espacios.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl border border-zinc-200">
-          <svg className="w-12 h-12 text-zinc-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          <p className="text-sm text-zinc-500 mb-4">No hay espacios registrados</p>
+        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-indigo-50 rounded-2xl border-2 border-dashed border-indigo-200">
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">No hay espacios registrados</h3>
+          <p className="text-sm text-gray-600 mb-6">Comienza agregando tu primer espacio de alquiler</p>
           <button
             onClick={() => setModalAbierto(true)}
-            className="px-4 py-2 bg-[#007AFF] text-white rounded-lg text-sm font-medium hover:bg-[#0056b3] transition-colors"
+            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200"
           >
             Agregar primer espacio
           </button>
         </div>
       )}
 
-      {/* Modal de formulario */}
+      {/* Modal de formulario - Material Design 3 */}
       {modalAbierto && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-zinc-200 px-6 py-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-zinc-900">
-                  {espacioEditando ? 'Editar Espacio' : 'Nuevo Espacio'}
-                </h3>
-                <button
-                  onClick={() => {
-                    setModalAbierto(false)
-                    setEspacioEditando(null)
-                  }}
-                  className="text-zinc-400 hover:text-zinc-600"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+            onClick={() => {
+              setModalAbierto(false)
+              setEspacioEditando(null)
+            }}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+            <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl pointer-events-auto animate-in zoom-in-95 duration-200">
+              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-5 rounded-t-3xl">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {espacioEditando ? 'Editar Espacio' : 'Nuevo Espacio'}
+                    </h3>
+                    <p className="text-indigo-100 text-sm mt-1">
+                      {espacioEditando ? 'Actualiza la información del espacio' : 'Completa los datos del nuevo espacio'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setModalAbierto(false)
+                      setEspacioEditando(null)
+                    }}
+                    className="p-2 rounded-xl hover:bg-white/20 transition-colors"
+                  >
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
 
             <form onSubmit={handleSubmit} className="p-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Nombre del espacio *
                   </label>
                   <input
@@ -254,26 +279,26 @@ export default function EspaciosTab() {
                     name="nombre"
                     required
                     defaultValue={espacioEditando?.nombre || ''}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                     placeholder="Ej: Apartamento Centro"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Descripción
                   </label>
                   <textarea
                     name="descripcion"
                     rows={3}
                     defaultValue={espacioEditando?.descripcion || ''}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 resize-none"
                     placeholder="Descripción breve del espacio..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Capacidad de huéspedes *
                   </label>
                   <input
@@ -282,12 +307,12 @@ export default function EspaciosTab() {
                     required
                     min="1"
                     defaultValue={espacioEditando?.capacidadHuespedes || 2}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Número de camas *
                   </label>
                   <input
@@ -296,12 +321,12 @@ export default function EspaciosTab() {
                     required
                     min="1"
                     defaultValue={espacioEditando?.numCamas || 1}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Número de baños *
                   </label>
                   <input
@@ -310,12 +335,12 @@ export default function EspaciosTab() {
                     required
                     min="1"
                     defaultValue={espacioEditando?.numBanos || 1}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Precio base/noche *
                   </label>
                   <input
@@ -325,13 +350,13 @@ export default function EspaciosTab() {
                     min="0"
                     step="0.01"
                     defaultValue={espacioEditando?.precioBaseNoche || ''}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Precio de limpieza
                   </label>
                   <input
@@ -340,19 +365,19 @@ export default function EspaciosTab() {
                     min="0"
                     step="0.01"
                     defaultValue={espacioEditando?.precioLimpieza || 0}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                     placeholder="0.00"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-sm font-medium text-zinc-700 mb-2">
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
                     Estado
                   </label>
                   <select
                     name="activo"
                     defaultValue={espacioEditando?.activo !== false ? 'true' : 'false'}
-                    className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
                   >
                     <option value="true">Activo</option>
                     <option value="false">Inactivo</option>
@@ -360,20 +385,20 @@ export default function EspaciosTab() {
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
                 <button
                   type="button"
                   onClick={() => {
                     setModalAbierto(false)
                     setEspacioEditando(null)
                   }}
-                  className="flex-1 px-4 py-2 border border-zinc-300 text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors font-medium"
+                  className="flex-1 px-5 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-[#007AFF] text-white rounded-lg hover:bg-[#0056b3] transition-colors font-medium"
+                  className="flex-1 px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all font-semibold shadow-lg shadow-indigo-200"
                 >
                   {espacioEditando ? 'Actualizar' : 'Crear'}
                 </button>
@@ -381,6 +406,7 @@ export default function EspaciosTab() {
             </form>
           </div>
         </div>
+        </>
       )}
     </div>
   )
