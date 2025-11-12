@@ -14,7 +14,7 @@ import { CreditCardIcon, CashIcon, RefreshIcon, CoinsIcon, WrenchIcon, BoxIcon }
 
 type Pago = {
   id: string
-  tipo: 'arriendo' | 'servicio' | 'salario' | 'otro'
+  tipo: 'arriendo' | 'servicio' | 'salario' | 'otro' | 'airbnb'
   tipoLabel: string
   esIngreso: boolean
   titulo: string
@@ -25,6 +25,7 @@ type Pago = {
   referencia: string | null
   observaciones: string | null
   categoria?: string // Para OtrosPagos
+  reservaId?: string // Para Airbnb
 }
 
 type CategoriaAgrupada = {
@@ -150,6 +151,7 @@ export default function AdministracionPagosPage() {
       // Categorías predefinidas para tipos especiales
       const categoriasEspeciales: Record<string, {nombre: string, gradiente: string}> = {
         'arriendo': { nombre: 'Arriendos', gradiente: 'from-emerald-500 to-teal-500' },
+        'airbnb': { nombre: 'Airbnb', gradiente: 'from-pink-500 to-rose-500' },
         'servicio': { nombre: 'Servicios Básicos (BD)', gradiente: 'from-blue-500 to-cyan-500' },
         'salario': { nombre: 'Salarios', gradiente: 'from-purple-500 to-pink-500' },
         'SERVICIOS_PUBLICOS': { nombre: 'Servicios Públicos', gradiente: 'from-blue-500 to-cyan-500' },
@@ -167,7 +169,7 @@ export default function AdministracionPagosPage() {
         let categoriaNombre: string
         let categoriaGradiente: string
 
-        if (pago.tipo === 'arriendo' || pago.tipo === 'servicio' || pago.tipo === 'salario') {
+        if (pago.tipo === 'arriendo' || pago.tipo === 'servicio' || pago.tipo === 'salario' || pago.tipo === 'airbnb') {
           // Usar el tipo como categoría
           categoriaKey = pago.tipo
           categoriaNombre = categoriasEspeciales[pago.tipo]?.nombre || pago.tipoLabel
@@ -282,6 +284,13 @@ export default function AdministracionPagosPage() {
   const eliminarPago = async (pago: Pago) => {
     if (!pagoEliminando) return
 
+    // No permitir eliminar pagos de Airbnb desde aquí
+    if (pago.tipo === 'airbnb') {
+      alert('Los pagos de Airbnb deben gestionarse desde el módulo de Airbnb')
+      setPagoEliminando(null)
+      return
+    }
+
     setGuardando(true)
     try {
       let url = ''
@@ -315,6 +324,13 @@ export default function AdministracionPagosPage() {
   // Función para guardar edición de pago
   const guardarEdicionPago = async () => {
     if (!pagoEditando) return
+
+    // No permitir editar pagos de Airbnb desde aquí
+    if (pagoEditando.tipo === 'airbnb') {
+      alert('Los pagos de Airbnb deben gestionarse desde el módulo de Airbnb')
+      setPagoEditando(null)
+      return
+    }
 
     setGuardando(true)
     try {

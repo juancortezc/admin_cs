@@ -91,6 +91,29 @@ export async function GET(request: Request) {
       },
     })
 
+    // Obtener abonos de Airbnb (ingresos)
+    const abonosAirbnb = await prisma.abonoReserva.findMany({
+      where: {
+        ...(fechaInicio && fechaFin && {
+          fechaPago: {
+            gte: new Date(fechaInicio),
+            lte: new Date(fechaFin),
+          },
+        }),
+      },
+      include: {
+        reserva: {
+          include: {
+            espacio: true,
+            huesped: true,
+          },
+        },
+      },
+      orderBy: {
+        fechaPago: 'desc',
+      },
+    })
+
     // Normalizar todos los pagos a un formato unificado
     const pagosUnificados: any[] = []
 
@@ -174,6 +197,27 @@ export async function GET(request: Request) {
           categoria: pago.categoria,
           numeroFactura: pago.numeroFactura,
           createdAt: pago.createdAt,
+        })
+      })
+    }
+
+    // Abonos de Airbnb (ingresos)
+    if (!tipo || tipo === 'todos' || tipo === 'airbnb') {
+      abonosAirbnb.forEach((abono) => {
+        pagosUnificados.push({
+          id: abono.id,
+          tipo: 'airbnb',
+          tipoLabel: 'Airbnb',
+          esIngreso: true,
+          titulo: `Reserva ${abono.reserva.codigoReserva} - ${abono.reserva.espacio.nombre}`,
+          descripcion: `Huésped: ${abono.reserva.huesped.nombre}`,
+          monto: abono.monto,
+          fecha: abono.fechaPago,
+          formaPago: abono.metodoPago,
+          referencia: abono.referencia,
+          observaciones: abono.observaciones,
+          reservaId: abono.reservaId,
+          createdAt: abono.createdAt,
         })
       })
     }
