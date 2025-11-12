@@ -116,6 +116,8 @@ export default function AdministracionPagosPage() {
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState<CuentaParcial | null>(null)
   const [showPagoEventualModal, setShowPagoEventualModal] = useState(false)
   const [showPagoParcialModal, setShowPagoParcialModal] = useState(false)
+  const [showRegistrarPagoRecurrenteModal, setShowRegistrarPagoRecurrenteModal] = useState(false)
+  const [pagoRecurrenteParaRegistrar, setPagoRecurrenteParaRegistrar] = useState<PagoRecurrente | null>(null)
 
   // Estado para filtro de categoría
   const [categoriaFiltrada, setCategoriaFiltrada] = useState<string | null>(null)
@@ -935,6 +937,18 @@ export default function AdministracionPagosPage() {
                           )}
                           <p className="text-xs text-gray-500 mt-0.5">{pago.codigoInterno}</p>
                         </div>
+                        {/* Botón visible de registrar pago */}
+                        {pago.activo && (
+                          <button
+                            onClick={() => {
+                              setPagoRecurrenteParaRegistrar(pago)
+                              setShowRegistrarPagoRecurrenteModal(true)
+                            }}
+                            className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-xs font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all shadow-sm"
+                          >
+                            Registrar Pago
+                          </button>
+                        )}
                         {/* Botones de acción */}
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
@@ -1444,6 +1458,128 @@ export default function AdministracionPagosPage() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Registrar Pago desde Pago Recurrente */}
+        {showRegistrarPagoRecurrenteModal && pagoRecurrenteParaRegistrar && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}}>
+            <div className="bg-white rounded-2xl max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-gradient-to-r from-emerald-600 to-green-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Registrar Pago</h2>
+                    <p className="text-sm text-white/90 mt-1">{pagoRecurrenteParaRegistrar.nombre}</p>
+                  </div>
+                  <button onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                setGuardando(true)
+
+                try {
+                  const body = {
+                    proveedor: pagoRecurrenteParaRegistrar.proveedor,
+                    ruc: pagoRecurrenteParaRegistrar.ruc,
+                    cuentaDestino: pagoRecurrenteParaRegistrar.cuentaDestino,
+                    fechaPago: formData.get('fechaPago'),
+                    periodo: (formData.get('fechaPago') as string).substring(0, 7),
+                    categoria: pagoRecurrenteParaRegistrar.categoria,
+                    monto: parseFloat(formData.get('monto') as string),
+                    descripcion: pagoRecurrenteParaRegistrar.descripcion,
+                    numeroDocumento: formData.get('numeroDocumento') || null,
+                    metodoPago: pagoRecurrenteParaRegistrar.metodoPago,
+                    estado: 'PAGADO',
+                    observaciones: formData.get('observaciones') || null,
+                    pagoRecurrenteId: pagoRecurrenteParaRegistrar.id,
+                  }
+
+                  const res = await fetch('/api/otros-pagos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                  })
+
+                  if (!res.ok) {
+                    const error = await res.json()
+                    alert(error.error || 'Error al registrar pago')
+                    return
+                  }
+
+                  setShowRegistrarPagoRecurrenteModal(false)
+                  setPagoRecurrenteParaRegistrar(null)
+                  cargarPagosRecurrentes()
+                  alert('Pago registrado exitosamente')
+                } catch (error) {
+                  console.error('Error:', error)
+                  alert('Error al registrar pago')
+                } finally {
+                  setGuardando(false)
+                }
+              }} className="p-6 space-y-4">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-700">Proveedor:</span>
+                    <span className="font-medium text-gray-900">{pagoRecurrenteParaRegistrar.proveedor}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-1">
+                    <span className="text-gray-700">Categoría:</span>
+                    <span className="font-medium text-gray-900">{pagoRecurrenteParaRegistrar.categoria.replace('_', ' ')}</span>
+                  </div>
+                  {!pagoRecurrenteParaRegistrar.esMontoVariable && pagoRecurrenteParaRegistrar.montoFijo && (
+                    <div className="flex justify-between text-sm mt-1">
+                      <span className="text-gray-700">Monto sugerido:</span>
+                      <span className="font-bold text-indigo-600">${pagoRecurrenteParaRegistrar.montoFijo.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Monto {pagoRecurrenteParaRegistrar.esMontoVariable && '(variable)'} *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      name="monto"
+                      step="0.01"
+                      min="0"
+                      required
+                      defaultValue={pagoRecurrenteParaRegistrar.esMontoVariable ? '' : pagoRecurrenteParaRegistrar.montoFijo?.toString()}
+                      className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Puedes modificar el monto si es necesario</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+                  <input type="date" name="fechaPago" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento/Referencia</label>
+                  <input type="text" name="numeroDocumento" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Nº de transacción o referencia" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                  <textarea name="observaciones" rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" placeholder="Notas adicionales..." />
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                  <button type="button" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors disabled:opacity-50">{guardando ? 'Registrando...' : 'Registrar Pago'}</button>
+                </div>
+              </form>
             </div>
           </div>
         )}
