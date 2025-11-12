@@ -1197,13 +1197,62 @@ export default function AdministracionPagosPage() {
               </div>
 
               <div className="p-6">
-                <form onSubmit={async (e) => {e.preventDefault(); const formData = new FormData(e.currentTarget); const esMontoVariable = formData.get('esMontoVariable') === 'true'; try { const body = {nombre: formData.get('nombre'), proveedor: formData.get('proveedor'), ruc: formData.get('ruc') || null, cuentaDestino: formData.get('cuentaDestino') || null, categoria: formData.get('categoria'), descripcion: formData.get('descripcion'), esMontoVariable, montoFijo: esMontoVariable ? null : formData.get('montoFijo'), metodoPago: formData.get('metodoPago'), frecuencia: formData.get('frecuencia'), diaPago: formData.get('diaPago') || null, fechaInicio: formData.get('fechaInicio'), fechaFin: formData.get('fechaFin') || null, activo: formData.get('activo') === 'true', observaciones: formData.get('observaciones') || null}; const url = selectedRecurring ? `/api/pagos-recurrentes/${selectedRecurring.id}` : '/api/pagos-recurrentes'; const method = selectedRecurring ? 'PUT' : 'POST'; const res = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)}); if (!res.ok) throw new Error('Error al guardar'); setShowRecurringModal(false); setSelectedRecurring(null); cargarPagosRecurrentes(); } catch (error) { alert('Error al guardar pago recurrente'); }}} className="space-y-4">
+                <form onSubmit={async (e) => {
+                  e.preventDefault()
+                  const formData = new FormData(e.currentTarget)
+                  const esMontoVariable = formData.get('esMontoVariable') === 'true'
+
+                  setGuardando(true)
+                  try {
+                    const body = {
+                      nombre: formData.get('nombre'),
+                      proveedor: formData.get('proveedor'),
+                      ruc: formData.get('ruc') || null,
+                      cuentaDestino: formData.get('cuentaDestino') || null,
+                      categoria: formData.get('categoria'),
+                      descripcion: formData.get('descripcion'),
+                      esMontoVariable,
+                      montoFijo: esMontoVariable ? null : formData.get('montoFijo'),
+                      metodoPago: formData.get('metodoPago'),
+                      frecuencia: formData.get('frecuencia'),
+                      diaPago: formData.get('diaPago') || null,
+                      fechaInicio: formData.get('fechaInicio'),
+                      fechaFin: formData.get('fechaFin') || null,
+                      activo: formData.get('activo') === 'true',
+                      observaciones: formData.get('observaciones') || null
+                    }
+
+                    const url = selectedRecurring ? `/api/pagos-recurrentes/${selectedRecurring.id}` : '/api/pagos-recurrentes'
+                    const method = selectedRecurring ? 'PUT' : 'POST'
+
+                    const res = await fetch(url, {
+                      method,
+                      headers: {'Content-Type': 'application/json'},
+                      body: JSON.stringify(body)
+                    })
+
+                    if (!res.ok) {
+                      const error = await res.json()
+                      throw new Error(error.error || 'Error al guardar')
+                    }
+
+                    setShowRecurringModal(false)
+                    setSelectedRecurring(null)
+                    cargarPagosRecurrentes()
+                    alert(selectedRecurring ? 'Pago recurrente actualizado exitosamente' : 'Pago recurrente creado exitosamente')
+                  } catch (error: any) {
+                    console.error('Error:', error)
+                    alert(error.message || 'Error al guardar pago recurrente')
+                  } finally {
+                    setGuardando(false)
+                  }
+                }} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Pago *</label><input type="text" name="nombre" required defaultValue={selectedRecurring?.nombre} placeholder="Ej: Agua potable mensual" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
                     <div><label className="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label><input type="text" name="proveedor" required defaultValue={selectedRecurring?.proveedor} placeholder="Nombre del proveedor" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
                     <div><label className="block text-sm font-medium text-gray-700 mb-1">RUC</label><input type="text" name="ruc" defaultValue={selectedRecurring?.ruc || ''} placeholder="RUC del proveedor" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
                     <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label><input type="text" name="cuentaDestino" defaultValue={selectedRecurring?.cuentaDestino || ''} placeholder="Número de cuenta para transferencia" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" /></div>
-                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label><select name="categoria" required defaultValue={selectedRecurring?.categoria} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="SERVICIOS_BASICOS">Servicios Básicos</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="SEGUROS">Seguros</option><option value="IMPUESTOS">Impuestos</option><option value="NOMINA">Nómina</option><option value="OTROS">Otros</option></select></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label><select name="categoria" required defaultValue={selectedRecurring?.categoria} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="SERVICIOS_PUBLICOS">Servicios Públicos</option><option value="SERVICIOS_PERSONALES">Servicios Personales</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="LIMPIEZA">Limpieza</option><option value="HONORARIOS">Honorarios</option><option value="IMPUESTOS">Impuestos</option><option value="NOMINA">Nómina</option><option value="OTROS">Otros</option></select></div>
                     <div><label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Monto *</label><select name="esMontoVariable" required defaultValue={selectedRecurring?.esMontoVariable ? 'true' : 'false'} onChange={(e) => {const montoInput = document.getElementById('montoFijo') as HTMLInputElement; if (montoInput) {montoInput.disabled = e.target.value === 'true'; if (e.target.value === 'true') montoInput.value = '';}}} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="false">Monto Fijo</option><option value="true">Monto Variable</option></select></div>
                     <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Monto Fijo</label><input type="number" id="montoFijo" name="montoFijo" min="0" step="0.01" defaultValue={selectedRecurring?.montoFijo || ''} disabled={selectedRecurring?.esMontoVariable} placeholder="Ej: 150000" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:bg-gray-100" /></div>
                     <div><label className="block text-sm font-medium text-gray-700 mb-1">Frecuencia *</label><select name="frecuencia" required defaultValue={selectedRecurring?.frecuencia} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"><option value="">Seleccione...</option><option value="QUINCENAL">Quincena (día 15)</option><option value="MENSUAL">Mensual</option><option value="BIMENSUAL">Bimensual</option><option value="TRIMESTRAL">Trimestral</option><option value="SEMESTRAL">Semestral</option><option value="ANUAL">Anual</option></select></div>
@@ -1216,8 +1265,8 @@ export default function AdministracionPagosPage() {
                     <div className="col-span-2"><label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label><textarea name="observaciones" rows={3} defaultValue={selectedRecurring?.observaciones || ''} placeholder="Notas adicionales..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" /></div>
                   </div>
                   <div className="flex gap-2 pt-2">
-                    <button type="button" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">Cancelar</button>
-                    <button type="submit" className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors">{selectedRecurring ? 'Actualizar' : 'Crear'} Pago Recurrente</button>
+                    <button type="button" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
+                    <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : (selectedRecurring ? 'Actualizar' : 'Crear') + ' Pago Recurrente'}</button>
                   </div>
                 </form>
               </div>
