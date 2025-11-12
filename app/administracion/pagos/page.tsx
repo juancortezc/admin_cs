@@ -111,7 +111,10 @@ export default function AdministracionPagosPage() {
   // Estados para modales de creación
   const [showRecurringModal, setShowRecurringModal] = useState(false)
   const [selectedRecurring, setSelectedRecurring] = useState<PagoRecurrente | null>(null)
-  const [showPartialModal, setShowPartialModal] = useState(false)
+  const [showAbonoModal, setShowAbonoModal] = useState(false)
+  const [cuentaSeleccionada, setCuentaSeleccionada] = useState<CuentaParcial | null>(null)
+  const [showPagoEventualModal, setShowPagoEventualModal] = useState(false)
+  const [showPagoParcialModal, setShowPagoParcialModal] = useState(false)
 
   // Estado para filtro de categoría
   const [categoriaFiltrada, setCategoriaFiltrada] = useState<string | null>(null)
@@ -755,15 +758,26 @@ export default function AdministracionPagosPage() {
           <>
             <div className="flex items-center justify-between mb-6">
               <p className="text-sm text-gray-600">{cuentasParciales.length} cuenta{cuentasParciales.length !== 1 ? 's' : ''} con pago parcial</p>
-              <button
-                onClick={() => setShowPartialModal(true)}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Crear Pago Parcial
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPagoEventualModal(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Pago Eventual
+                </button>
+                <button
+                  onClick={() => setShowPagoParcialModal(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Pago Parcial
+                </button>
+              </div>
             </div>
 
             {cuentasParciales.length > 0 ? (
@@ -778,9 +792,20 @@ export default function AdministracionPagosPage() {
                         </div>
                         <p className="text-xs text-gray-600">Período: {cuenta.periodo} • {cuenta.cantidadAbonos} abono{cuenta.cantidadAbonos !== 1 ? 's' : ''}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-gray-900">${cuenta.montoPactado.toLocaleString()}</p>
-                        <p className="text-xs text-gray-500">Total</p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">${cuenta.montoPactado.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">Total</p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCuentaSeleccionada(cuenta)
+                            setShowAbonoModal(true)
+                          }}
+                          className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-xs font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all shadow-sm"
+                        >
+                          + Abono
+                        </button>
                       </div>
                     </div>
 
@@ -1166,6 +1191,346 @@ export default function AdministracionPagosPage() {
                   </div>
                 </form>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Crear Pago Eventual */}
+        {showPagoEventualModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowPagoEventualModal(false)}>
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-gradient-to-r from-emerald-600 to-green-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Nuevo Pago Eventual</h2>
+                    <p className="text-sm text-white/90 mt-1">Registrar un pago único no recurrente</p>
+                  </div>
+                  <button onClick={() => setShowPagoEventualModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                setGuardando(true)
+
+                try {
+                  const body = {
+                    proveedor: formData.get('proveedor'),
+                    ruc: formData.get('ruc') || null,
+                    cuentaDestino: formData.get('cuentaDestino') || null,
+                    fechaPago: formData.get('fechaPago'),
+                    fechaVencimiento: formData.get('fechaVencimiento') || null,
+                    periodo: (formData.get('fechaPago') as string).substring(0, 7),
+                    categoria: formData.get('categoria'),
+                    monto: parseFloat(formData.get('monto') as string),
+                    descripcion: formData.get('descripcion'),
+                    numeroFactura: formData.get('numeroFactura') || null,
+                    numeroDocumento: formData.get('numeroDocumento') || null,
+                    metodoPago: formData.get('metodoPago'),
+                    estado: 'PAGADO',
+                    observaciones: formData.get('observaciones') || null,
+                  }
+
+                  const res = await fetch('/api/otros-pagos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                  })
+
+                  if (!res.ok) {
+                    const error = await res.json()
+                    alert(error.error || 'Error al crear pago eventual')
+                    return
+                  }
+
+                  setShowPagoEventualModal(false)
+                  cargarPagosEventuales()
+                  alert('Pago eventual creado exitosamente')
+                } catch (error) {
+                  console.error('Error:', error)
+                  alert('Error al crear pago eventual')
+                } finally {
+                  setGuardando(false)
+                }
+              }} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor *</label>
+                    <input type="text" name="proveedor" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Nombre del proveedor" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">RUC</label>
+                    <input type="text" name="ruc" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="RUC del proveedor" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cuenta Destino</label>
+                    <input type="text" name="cuentaDestino" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Número de cuenta" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+                    <input type="date" name="fechaPago" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento</label>
+                    <input type="date" name="fechaVencimiento" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoría *</label>
+                    <select name="categoria" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                      <option value="">Seleccione...</option>
+                      <option value="SERVICIOS_PUBLICOS">Servicios Públicos</option>
+                      <option value="SERVICIOS_PERSONALES">Servicios Personales</option>
+                      <option value="MANTENIMIENTO">Mantenimiento</option>
+                      <option value="LIMPIEZA">Limpieza</option>
+                      <option value="HONORARIOS">Honorarios</option>
+                      <option value="IMPUESTOS">Impuestos</option>
+                      <option value="OTROS">Otros</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Monto *</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                      <input type="number" name="monto" step="0.01" min="0" required className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="0.00" />
+                    </div>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                    <input type="text" name="descripcion" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Descripción del pago" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Número de Factura</label>
+                    <input type="text" name="numeroFactura" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Nº de factura" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Método de Pago *</label>
+                    <select name="metodoPago" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                      <option value="">Seleccione...</option>
+                      <option value="TRANSFERENCIA">Transferencia</option>
+                      <option value="EFECTIVO">Efectivo</option>
+                      <option value="CHEQUE">Cheque</option>
+                      <option value="DEBITO_AUTOMATICO">Débito Automático</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Número de Documento/Referencia</label>
+                    <input type="text" name="numeroDocumento" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent" placeholder="Nº de transacción o referencia" />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                    <textarea name="observaciones" rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" placeholder="Notas adicionales..." />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                  <button type="button" onClick={() => setShowPagoEventualModal(false)} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors disabled:opacity-50">{guardando ? 'Creando...' : 'Crear Pago Eventual'}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Crear Pago Parcial (Selector de Cuenta) */}
+        {showPagoParcialModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowPagoParcialModal(false)}>
+            <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Registrar Pago Parcial</h2>
+                    <p className="text-sm text-white/90 mt-1">Selecciona la cuenta y registra el abono</p>
+                  </div>
+                  <button onClick={() => setShowPagoParcialModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {cuentasParciales.length > 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600 mb-4">Selecciona una cuenta para registrar el abono:</p>
+                    {cuentasParciales.map((cuenta) => (
+                      <div
+                        key={cuenta.id}
+                        onClick={() => {
+                          setCuentaSeleccionada(cuenta)
+                          setShowPagoParcialModal(false)
+                          setShowAbonoModal(true)
+                        }}
+                        className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-gray-900 text-sm">{cuenta.espacioIdentificador} - {cuenta.arrendatarioNombre}</h3>
+                              <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-orange-100 text-orange-700">{cuenta.concepto}</span>
+                            </div>
+                            <p className="text-xs text-gray-600">Período: {cuenta.periodo}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-gray-900">${cuenta.montoPactado.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">Total</p>
+                          </div>
+                        </div>
+
+                        <div className="mb-2">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-600">Progreso</span>
+                            <span className="font-medium text-emerald-600">{cuenta.porcentajePagado.toFixed(1)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-100 rounded-full h-2">
+                            <div className="bg-emerald-500 h-2 rounded-full transition-all" style={{ width: `${Math.min(cuenta.porcentajePagado, 100)}%` }}></div>
+                          </div>
+                          <div className="flex justify-between text-xs mt-1">
+                            <span className="text-emerald-600">Abonado: ${cuenta.totalAbonado.toLocaleString()}</span>
+                            <span className="text-orange-600 font-semibold">Pendiente: ${cuenta.saldoPendiente.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                          <p className="text-xs text-gray-500">{cuenta.cantidadAbonos} abono{cuenta.cantidadAbonos !== 1 ? 's' : ''} registrados</p>
+                          <div className="flex items-center gap-1 text-indigo-600 text-xs font-medium">
+                            <span>Seleccionar</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-sm text-gray-500">No hay cuentas con pagos parciales pendientes</p>
+                    <button
+                      onClick={() => setShowPagoParcialModal(false)}
+                      className="mt-4 px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    >
+                      Cerrar
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Registrar Abono */}
+        {showAbonoModal && cuentaSeleccionada && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}}>
+            <div className="bg-white rounded-2xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Registrar Abono</h2>
+                    <p className="text-sm text-white/90 mt-1">{cuentaSeleccionada.espacioIdentificador} - {cuentaSeleccionada.arrendatarioNombre}</p>
+                  </div>
+                  <button onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={async (e) => {
+                e.preventDefault()
+                const formData = new FormData(e.currentTarget)
+                setGuardando(true)
+                try {
+                  const res = await fetch('/api/cobros/registrar-abono', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      cobroRelacionadoId: cuentaSeleccionada.id,
+                      montoPagado: formData.get('monto'),
+                      fechaPago: formData.get('fecha'),
+                      metodoPago: formData.get('metodoPago'),
+                      numeroComprobante: formData.get('numeroComprobante') || null,
+                      observaciones: formData.get('observaciones') || null,
+                    })
+                  })
+
+                  if (!res.ok) {
+                    const error = await res.json()
+                    alert(error.error || 'Error al registrar abono')
+                    return
+                  }
+
+                  setShowAbonoModal(false)
+                  setCuentaSeleccionada(null)
+                  cargarPagosEventuales()
+                } catch (error) {
+                  console.error('Error:', error)
+                  alert('Error al registrar abono')
+                } finally {
+                  setGuardando(false)
+                }
+              }} className="p-6 space-y-4">
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-700">Saldo pendiente:</span>
+                    <span className="font-bold text-orange-600">${cuentaSeleccionada.saldoPendiente.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>Total abonado:</span>
+                    <span>${cuentaSeleccionada.totalAbonado.toLocaleString()} / ${cuentaSeleccionada.montoPactado.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Monto del Abono *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                    <input type="number" name="monto" step="0.01" max={cuentaSeleccionada.saldoPendiente} required className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="0.00" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago *</label>
+                  <input type="date" name="fecha" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Método de Pago *</label>
+                  <select name="metodoPago" required className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">Seleccione...</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="CHEQUE">Cheque</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nº Comprobante</label>
+                  <input type="text" name="numeroComprobante" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Opcional" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                  <textarea name="observaciones" rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none" placeholder="Opcional" />
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button type="button" onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : 'Registrar Abono'}</button>
+                </div>
+              </form>
             </div>
           </div>
         )}

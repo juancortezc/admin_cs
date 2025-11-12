@@ -153,6 +153,15 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
       } else if (evento.tipo === 'otro') {
         endpoint = '/api/otros-pagos'
         body.fechaPago = fecha
+        body.proveedor = evento.titulo
+        body.descripcion = evento.descripcion || 'Pago parcial'
+        body.periodo = fecha.substring(0, 7) // YYYY-MM
+        body.categoria = 'OTROS'
+        body.metodoPago = formaPago
+        body.estado = 'PAGADO'
+        body.monto = parseFloat(monto)
+        body.numeroDocumento = referencia || null
+        body.observaciones = observaciones || null
       } else if (evento.tipo === 'pago') {
         // Para pagos existentes pendientes, actualizar a PAGADO
         if (evento.pagoId) {
