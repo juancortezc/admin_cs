@@ -117,16 +117,37 @@ export async function POST(request: Request) {
       )
     }
 
-    // Generar código interno
+    // Generar código interno único
     const ultimoPago = await prisma.otroPago.findFirst({
-      orderBy: { codigoInterno: 'desc' },
+      orderBy: { createdAt: 'desc' },
     })
 
     let nuevoCodigo = 'G-0001'
-    if (ultimoPago) {
-      const prefijo = ultimoPago.codigoInterno.split('-')[0]
-      const numero = parseInt(ultimoPago.codigoInterno.split('-')[1])
-      nuevoCodigo = `${prefijo}-${String(numero + 1).padStart(4, '0')}`
+    if (ultimoPago && ultimoPago.codigoInterno) {
+      const match = ultimoPago.codigoInterno.match(/^([A-Z]+)-(\d+)$/)
+      if (match) {
+        const prefijo = match[1]
+        const numero = parseInt(match[2])
+        nuevoCodigo = `${prefijo}-${String(numero + 1).padStart(4, '0')}`
+      }
+    }
+
+    // Verificar que el código no exista (por si acaso)
+    let intentos = 0
+    while (intentos < 10) {
+      const existe = await prisma.otroPago.findUnique({
+        where: { codigoInterno: nuevoCodigo }
+      })
+      if (!existe) break
+
+      // Si existe, incrementar el número
+      const match = nuevoCodigo.match(/^([A-Z]+)-(\d+)$/)
+      if (match) {
+        const prefijo = match[1]
+        const numero = parseInt(match[2])
+        nuevoCodigo = `${prefijo}-${String(numero + 1).padStart(4, '0')}`
+      }
+      intentos++
     }
 
     // Asegurar que descripcion siempre tenga un valor válido
