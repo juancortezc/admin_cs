@@ -177,11 +177,15 @@ export async function POST(request: Request) {
     return NextResponse.json(pago, { status: 201 })
   } catch (error) {
     console.error('Error al crear pago:', error)
-    // Log detallado para debugging en Vercel
-    console.error('Body recibido:', JSON.stringify(error))
+    // Log detallado para debugging
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('Error message:', errorMessage)
+    console.error('Stack:', error instanceof Error ? error.stack : 'No stack')
+
     return NextResponse.json({
       error: 'Error al crear pago',
-      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+      message: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     }, { status: 500 })
   }
 }
