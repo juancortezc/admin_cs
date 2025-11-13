@@ -109,6 +109,14 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
+    // Validar campos requeridos
+    if (!body.proveedor || !body.fechaPago || !body.categoria || !body.monto || !body.metodoPago) {
+      return NextResponse.json(
+        { error: 'Faltan campos requeridos: proveedor, fechaPago, categoria, monto, metodoPago' },
+        { status: 400 }
+      )
+    }
+
     // Generar código interno
     const ultimoPago = await prisma.otroPago.findFirst({
       orderBy: { codigoInterno: 'desc' },
@@ -121,6 +129,9 @@ export async function POST(request: Request) {
       nuevoCodigo = `${prefijo}-${String(numero + 1).padStart(4, '0')}`
     }
 
+    // Asegurar que descripcion siempre tenga un valor válido
+    const descripcion = body.descripcion || body.proveedor || 'Pago registrado'
+
     const pago = await prisma.otroPago.create({
       data: {
         codigoInterno: nuevoCodigo,
@@ -132,7 +143,7 @@ export async function POST(request: Request) {
         periodo: body.periodo,
         categoria: body.categoria,
         monto: parseFloat(body.monto),
-        descripcion: body.descripcion,
+        descripcion: descripcion,
         numeroFactura: body.numeroFactura || null,
         numeroDocumento: body.numeroDocumento || null,
         metodoPago: body.metodoPago,
@@ -145,6 +156,11 @@ export async function POST(request: Request) {
     return NextResponse.json(pago, { status: 201 })
   } catch (error) {
     console.error('Error al crear pago:', error)
-    return NextResponse.json({ error: 'Error al crear pago' }, { status: 500 })
+    // Log detallado para debugging en Vercel
+    console.error('Body recibido:', JSON.stringify(error))
+    return NextResponse.json({
+      error: 'Error al crear pago',
+      details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
+    }, { status: 500 })
   }
 }

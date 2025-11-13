@@ -1541,7 +1541,7 @@ export default function AdministracionPagosPage() {
                     periodo: (formData.get('fechaPago') as string).substring(0, 7),
                     categoria: pagoRecurrenteParaRegistrar.categoria,
                     monto: parseFloat(formData.get('monto') as string),
-                    descripcion: pagoRecurrenteParaRegistrar.descripcion,
+                    descripcion: pagoRecurrenteParaRegistrar.descripcion || pagoRecurrenteParaRegistrar.nombre || 'Pago recurrente',
                     numeroDocumento: formData.get('numeroDocumento') || null,
                     metodoPago: pagoRecurrenteParaRegistrar.metodoPago,
                     estado: 'PAGADO',
