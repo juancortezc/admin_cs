@@ -138,9 +138,25 @@ export default function AdministracionPagosPage() {
       const res = await fetch('/api/pagos')
       const data = await res.json()
 
+      // Verificar si hay error en la respuesta
+      if (!res.ok || data.error) {
+        console.error('Error al cargar pagos:', data.error || 'Error desconocido')
+        setPagos([])
+        setLoading(false)
+        return
+      }
+
+      // Verificar que data.pagos sea un array
+      if (!Array.isArray(data.pagos)) {
+        console.error('La respuesta no contiene un array de pagos:', data)
+        setPagos([])
+        setLoading(false)
+        return
+      }
+
       // Filtrar pagos por mes seleccionado
       const [year, month] = mesSeleccionado.split('-').map(Number)
-      const pagosFiltradosPorMes = (data.pagos || []).filter((pago: Pago) => {
+      const pagosFiltradosPorMes = data.pagos.filter((pago: Pago) => {
         const fechaPago = new Date(pago.fecha)
         return fechaPago.getFullYear() === year && fechaPago.getMonth() + 1 === month
       })
