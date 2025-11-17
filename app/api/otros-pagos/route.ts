@@ -153,6 +153,9 @@ export async function POST(request: Request) {
     // Asegurar que descripcion siempre tenga un valor válido
     const descripcion = body.descripcion || body.proveedor || 'Pago registrado'
 
+    // Generar periodo automáticamente si no se proporciona (YYYY-MM)
+    const periodo = body.periodo || new Date(body.fechaPago).toISOString().slice(0, 7)
+
     const pago = await prisma.otroPago.create({
       data: {
         codigoInterno: nuevoCodigo,
@@ -161,7 +164,7 @@ export async function POST(request: Request) {
         cuentaDestino: body.cuentaDestino || null,
         fechaPago: new Date(body.fechaPago),
         fechaVencimiento: body.fechaVencimiento ? new Date(body.fechaVencimiento) : null,
-        periodo: body.periodo,
+        periodo: periodo,
         categoria: body.categoria,
         monto: parseFloat(body.monto),
         descripcion: descripcion,

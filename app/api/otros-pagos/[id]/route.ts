@@ -33,24 +33,27 @@ export async function PUT(request: Request, { params }: Params) {
     const { id } = await params
     const body = await request.json()
 
+    // Construir objeto de actualización solo con campos proporcionados
+    const updateData: any = {}
+
+    if (body.proveedor !== undefined) updateData.proveedor = body.proveedor
+    if (body.ruc !== undefined) updateData.ruc = body.ruc || null
+    if (body.cuentaDestino !== undefined) updateData.cuentaDestino = body.cuentaDestino || null
+    if (body.fechaPago !== undefined) updateData.fechaPago = new Date(body.fechaPago)
+    if (body.fechaVencimiento !== undefined) updateData.fechaVencimiento = body.fechaVencimiento ? new Date(body.fechaVencimiento) : null
+    if (body.periodo !== undefined) updateData.periodo = body.periodo
+    if (body.categoria !== undefined) updateData.categoria = body.categoria
+    if (body.monto !== undefined) updateData.monto = parseFloat(body.monto)
+    if (body.descripcion !== undefined) updateData.descripcion = body.descripcion
+    if (body.numeroFactura !== undefined) updateData.numeroFactura = body.numeroFactura || null
+    if (body.numeroDocumento !== undefined) updateData.numeroDocumento = body.numeroDocumento || null
+    if (body.metodoPago !== undefined) updateData.metodoPago = body.metodoPago
+    if (body.estado !== undefined) updateData.estado = body.estado
+    if (body.observaciones !== undefined) updateData.observaciones = body.observaciones || null
+
     const pago = await prisma.otroPago.update({
       where: { id },
-      data: {
-        proveedor: body.proveedor,
-        ruc: body.ruc || null,
-        cuentaDestino: body.cuentaDestino || null,
-        fechaPago: new Date(body.fechaPago),
-        fechaVencimiento: body.fechaVencimiento ? new Date(body.fechaVencimiento) : null,
-        periodo: body.periodo,
-        categoria: body.categoria,
-        monto: parseFloat(body.monto),
-        descripcion: body.descripcion,
-        numeroFactura: body.numeroFactura || null,
-        numeroDocumento: body.numeroDocumento || null,
-        metodoPago: body.metodoPago,
-        estado: body.estado,
-        observaciones: body.observaciones || null,
-      },
+      data: updateData,
     })
 
     return NextResponse.json(pago)
@@ -58,6 +61,7 @@ export async function PUT(request: Request, { params }: Params) {
     if (error.code === 'P2025') {
       return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 })
     }
+    console.error('Error al actualizar pago:', error)
     return NextResponse.json({ error: 'Error al actualizar pago' }, { status: 500 })
   }
 }
