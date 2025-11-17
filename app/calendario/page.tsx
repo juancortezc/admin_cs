@@ -560,6 +560,7 @@ function CalendarioContent() {
             monto: selectedBill.monto,
             dia: new Date(selectedBill.fecha).getDate(),
             espacioId: selectedBill.espacioId,
+            pagoId: activeTab === 'pagos' ? selectedBill.id : undefined,
           }}
           onClose={() => setSelectedBill(null)}
           onSuccess={() => {
