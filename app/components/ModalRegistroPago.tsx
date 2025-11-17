@@ -273,7 +273,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
                 required
-                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
               />
             </div>
 
@@ -290,7 +290,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
                   value={monto}
                   onChange={(e) => setMonto(e.target.value)}
                   required
-                  className="w-full pl-7 pr-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                  className="w-full pl-7 pr-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
                   placeholder="0.00"
                 />
               </div>
@@ -304,7 +304,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
               <select
                 value={formaPago}
                 onChange={(e) => setFormaPago(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
               >
                 <option value="TRANSFERENCIA">Transferencia</option>
                 <option value="EFECTIVO">Efectivo</option>
@@ -322,7 +322,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
                   type="text"
                   value={referencia}
                   onChange={(e) => setReferencia(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all"
                   placeholder="Opcional"
                 />
               </div>
@@ -337,7 +337,7 @@ export default function ModalRegistroPago({ evento, onClose, onSuccess }: ModalR
                 value={observaciones}
                 onChange={(e) => setObservaciones(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#007AFF] focus:border-transparent transition-all resize-none"
                 placeholder="Opcional"
               />
             </div>
