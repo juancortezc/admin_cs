@@ -130,35 +130,72 @@ export async function POST(request: Request) {
     const montoPagado = body.montoPagado || 0
     const balancePendiente = body.precioTotal - montoPagado
 
-    const reserva = await prisma.reservaAirbnb.create({
-      data: {
-        codigoReserva: nuevoCodigo,
-        espacioId: body.espacioId,
-        huespedId: body.huespedId,
-        checkIn: new Date(body.checkIn),
-        checkOut: new Date(body.checkOut),
-        noches,
-        numHuespedes: body.numHuespedes || 1,
-        canalReserva: body.canalReserva || 'AIRBNB',
-        codigoConfirmacion: body.codigoConfirmacion || null,
-        precioTotal: body.precioTotal,
-        precioPorNoche: body.precioPorNoche,
-        precioLimpieza: body.precioLimpieza || 0,
-        depositoSeguridad: body.depositoSeguridad || 0,
-        comisionPlataforma: body.comisionPlataforma || 0,
-        estadoReserva: body.estadoReserva || 'CONFIRMADA',
-        estadoPago: montoPagado >= body.precioTotal ? 'PAGADO' : (montoPagado > 0 ? 'PARCIAL' : 'PENDIENTE'),
-        montoPagado,
-        balancePendiente,
-        observaciones: body.observaciones || null,
-      },
-      include: {
-        espacio: true,
-        huesped: true,
-      },
+    // Usar transacción para crear reserva y cobro juntos
+    const result = await prisma.$transaction(async (tx) => {
+      const reserva = await tx.reservaAirbnb.create({
+        data: {
+          codigoReserva: nuevoCodigo,
+          espacioId: body.espacioId,
+          huespedId: body.huespedId,
+          checkIn: new Date(body.checkIn),
+          checkOut: new Date(body.checkOut),
+          noches,
+          numHuespedes: body.numHuespedes || 1,
+          canalReserva: body.canalReserva || 'AIRBNB',
+          codigoConfirmacion: body.codigoConfirmacion || null,
+          precioTotal: body.precioTotal,
+          precioPorNoche: body.precioPorNoche,
+          precioLimpieza: body.precioLimpieza || 0,
+          depositoSeguridad: body.depositoSeguridad || 0,
+          comisionPlataforma: body.comisionPlataforma || 0,
+          estadoReserva: body.estadoReserva || 'CONFIRMADA',
+          estadoPago: montoPagado >= body.precioTotal ? 'PAGADO' : (montoPagado > 0 ? 'PARCIAL' : 'PENDIENTE'),
+          montoPagado,
+          balancePendiente,
+          observaciones: body.observaciones || null,
+        },
+        include: {
+          espacio: true,
+          huesped: true,
+        },
+      })
+
+      // Crear cuenta por cobrar automáticamente
+      // Auto-generar código interno del cobro
+      const ultimoCobro = await tx.cobro.findFirst({
+        orderBy: { codigoInterno: 'desc' },
+      })
+
+      let codigoCobro = 'P-0001'
+      if (ultimoCobro) {
+        const numero = parseInt(ultimoCobro.codigoInterno.split('-')[1])
+        codigoCobro = `P-${String(numero + 1).padStart(4, '0')}`
+      }
+
+      // Crear el cobro pendiente con fecha de vencimiento = fecha de checkout
+      await tx.cobro.create({
+        data: {
+          codigoInterno: codigoCobro,
+          espacioAirbnbId: body.espacioId,
+          concepto: 'AIRBNB',
+          periodo: `${checkIn.getFullYear()}-${String(checkIn.getMonth() + 1).padStart(2, '0')}`,
+          montoPagado: 0,
+          montoPactado: body.precioTotal,
+          diferencia: -body.precioTotal,
+          fechaPago: checkOut, // Se usará cuando se registre el pago
+          fechaVencimiento: checkOut,
+          diasDiferencia: null,
+          metodoPago: 'TRANSFERENCIA', // Valor por defecto, se actualizará al registrar el pago
+          numeroComprobante: nuevoCodigo, // Referencia a la reserva
+          estado: 'PENDIENTE',
+          observaciones: `Reserva ${nuevoCodigo} - Check-in: ${checkIn.toLocaleDateString()} - Check-out: ${checkOut.toLocaleDateString()}`,
+        },
+      })
+
+      return reserva
     })
 
-    return NextResponse.json(reserva, { status: 201 })
+    return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('Error al crear reserva:', error)
     return NextResponse.json(

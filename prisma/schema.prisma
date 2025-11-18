@@ -249,8 +249,13 @@ model PagoRecurrente {
 model Cobro {
   id                    String        @id @default(cuid())
   codigoInterno         String        @unique // P-0001, P-0002, etc. (auto-generado)
-  espacioId             String
-  espacio               Espacio       @relation(fields: [espacioId], references: [id])
+
+  // Relación con espacios (uno u otro, no ambos)
+  espacioId             String?
+  espacio               Espacio?      @relation(fields: [espacioId], references: [id])
+
+  espacioAirbnbId       String?
+  espacioAirbnb         EspacioAirbnb? @relation(fields: [espacioAirbnbId], references: [id])
 
   // Concepto del cobro
   concepto              ConceptoCobro @default(RENTA)
@@ -388,6 +393,7 @@ model EspacioAirbnb {
   // Relaciones
   reservas          ReservaAirbnb[]
   mantenimientos    MantenimientoAirbnb[]
+  cobros            Cobro[]
 
   @@index([activo])
 }
