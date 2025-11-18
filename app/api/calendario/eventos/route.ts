@@ -88,6 +88,7 @@ export async function GET(request: Request) {
               arrendatario: true,
             },
           },
+          espacioAirbnb: true,
         },
       })
 
@@ -96,16 +97,25 @@ export async function GET(request: Request) {
         hoy.setHours(0, 0, 0, 0)
         const vencido = new Date(cobro.fechaVencimiento) < hoy
 
+        // Determine if this is a regular space or Airbnb space
+        const isAirbnb = cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+        const espacioIdentificador = isAirbnb
+          ? cobro.espacioAirbnb?.nombre || 'Airbnb'
+          : cobro.espacio?.identificador || 'N/A'
+        const descripcion = isAirbnb
+          ? 'Airbnb'
+          : cobro.espacio?.arrendatario?.nombre || ''
+
         eventos.push({
           id: `cobro-pendiente-${cobro.id}`,
           tipo: 'arriendo',
-          titulo: `${cobro.concepto} ${cobro.espacio.identificador}`,
-          descripcion: cobro.espacio.arrendatario?.nombre || '',
+          titulo: `${cobro.concepto} ${espacioIdentificador}`,
+          descripcion,
           monto: cobro.montoPactado,
           fecha: cobro.fechaVencimiento.toISOString(),
           dia: new Date(cobro.fechaVencimiento).getDate(),
           vencido,
-          espacioId: cobro.espacioId,
+          espacioId: cobro.espacioId || cobro.espacioAirbnbId,
           cobroId: cobro.id, // Para poder editarlo si ya existe
         })
       })

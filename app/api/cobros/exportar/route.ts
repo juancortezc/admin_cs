@@ -69,6 +69,7 @@ export async function GET(request: Request) {
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
       },
       orderBy: {
         fechaPago: 'desc',
@@ -76,23 +77,33 @@ export async function GET(request: Request) {
     })
 
     // Preparar datos para Excel (mismo formato que el PDF)
-    const datosExcel = cobros.map((cobro) => ({
-      'ID Pago': cobro.codigoInterno,
-      'ID Espacio': cobro.espacio.identificador,
-      'Arrendatario/Cliente': cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
-      'Fecha Pago': new Date(cobro.fechaPago).toLocaleDateString('es-ES'),
-      Periodo: cobro.periodo || '',
-      Concepto: cobro.concepto === 'OTRO' ? cobro.conceptoPersonalizado || 'OTRO' : cobro.concepto,
-      'Método de Pago': cobro.metodoPago,
-      '# Comprobante': cobro.numeroComprobante || '',
-      Monto: cobro.montoPagado,
-      'Pago Pactado': cobro.montoPactado,
-      Diferencia: cobro.diferencia,
-      Observaciones: cobro.observaciones || '',
-      Estado: cobro.estado,
-      'Fecha Vencimiento': new Date(cobro.fechaVencimiento).toLocaleDateString('es-ES'),
-      'Días Diferencia': cobro.diasDiferencia || '',
-    }))
+    const datosExcel = cobros.map((cobro) => {
+      const isAirbnb = cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+      const espacioIdentificador = isAirbnb
+        ? cobro.espacioAirbnb?.nombre || 'Airbnb'
+        : cobro.espacio?.identificador || 'N/A'
+      const arrendatarioNombre = isAirbnb
+        ? 'Airbnb'
+        : cobro.espacio?.arrendatario?.nombre || 'Sin arrendatario'
+
+      return {
+        'ID Pago': cobro.codigoInterno,
+        'ID Espacio': espacioIdentificador,
+        'Arrendatario/Cliente': arrendatarioNombre,
+        'Fecha Pago': new Date(cobro.fechaPago).toLocaleDateString('es-ES'),
+        Periodo: cobro.periodo || '',
+        Concepto: cobro.concepto === 'OTRO' ? cobro.conceptoPersonalizado || 'OTRO' : cobro.concepto,
+        'Método de Pago': cobro.metodoPago,
+        '# Comprobante': cobro.numeroComprobante || '',
+        Monto: cobro.montoPagado,
+        'Pago Pactado': cobro.montoPactado,
+        Diferencia: cobro.diferencia,
+        Observaciones: cobro.observaciones || '',
+        Estado: cobro.estado,
+        'Fecha Vencimiento': new Date(cobro.fechaVencimiento).toLocaleDateString('es-ES'),
+        'Días Diferencia': cobro.diasDiferencia || '',
+      }
+    })
 
     // Crear workbook y worksheet
     const workbook = XLSX.utils.book_new()

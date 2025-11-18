@@ -34,6 +34,7 @@ export async function GET(request: Request) {
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
         cobroRelacionado: true, // Cobro principal al que pertenece
         pagosParciales: true, // Otros pagos parciales relacionados
       },
@@ -46,13 +47,22 @@ export async function GET(request: Request) {
     const grupos: any = {}
 
     cobrosParciales.forEach((cobro) => {
-      const key = `${cobro.espacioId}-${cobro.periodo || 'sin-periodo'}`
+      const isAirbnb = cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+      const espacioId = cobro.espacioId || cobro.espacioAirbnbId
+      const key = `${espacioId}-${cobro.periodo || 'sin-periodo'}`
 
       if (!grupos[key]) {
+        const espacioIdentificador = isAirbnb
+          ? cobro.espacioAirbnb?.nombre || 'Airbnb'
+          : cobro.espacio?.identificador || 'N/A'
+        const arrendatarioNombre = isAirbnb
+          ? 'Airbnb'
+          : cobro.espacio?.arrendatario?.nombre || 'Sin arrendatario'
+
         grupos[key] = {
-          espacioId: cobro.espacioId,
-          espacioIdentificador: cobro.espacio.identificador,
-          arrendatarioNombre: cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
+          espacioId,
+          espacioIdentificador,
+          arrendatarioNombre,
           periodo: cobro.periodo || 'Sin período',
           montoPactado: cobro.montoPactado,
           totalPagado: 0,

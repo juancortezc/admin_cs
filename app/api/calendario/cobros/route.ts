@@ -38,6 +38,7 @@ export async function GET(request: Request) {
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
       },
       orderBy: {
         fechaVencimiento: 'asc',
@@ -45,34 +46,45 @@ export async function GET(request: Request) {
     })
 
     // Transform existing cobros to calendar bill format
-    bills.push(...cobros.map((cobro) => ({
-      id: cobro.id,
-      codigoInterno: cobro.codigoInterno,
-      espacioId: cobro.espacioId, // UUID for API calls
-      espacioIdentificador: cobro.espacio.identificador, // Display identifier like "CS1"
-      espacioNombre: cobro.espacio.identificador,
-      arrendatarioNombre: cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
-      titulo: `${cobro.concepto}${
-        cobro.conceptoPersonalizado ? ` - ${cobro.conceptoPersonalizado}` : ''
-      }`,
-      concepto: cobro.concepto,
-      conceptoPersonalizado: cobro.conceptoPersonalizado,
-      periodo: cobro.periodo,
-      monto: cobro.montoPactado,
-      montoPagado: cobro.montoPagado,
-      montoPactado: cobro.montoPactado,
-      diferencia: cobro.diferencia,
-      estado: cobro.estado,
-      fechaVencimiento: cobro.fechaVencimiento,
-      fechaPago: cobro.fechaPago,
-      fecha: cobro.fechaVencimiento, // For calendar display
-      tipo: 'cobro' as const,
-      formaPago: cobro.metodoPago,
-      referencia: cobro.numeroComprobante,
-      observaciones: cobro.observaciones,
-      // Partial payment fields
-      esPagoParcial: cobro.esParcial,
-    })))
+    bills.push(...cobros.map((cobro) => {
+      // Determine if this is a regular space or Airbnb space
+      const isAirbnb = cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+      const espacioIdentificador = isAirbnb
+        ? cobro.espacioAirbnb?.nombre || 'Airbnb'
+        : cobro.espacio?.identificador || 'N/A'
+      const arrendatarioNombre = isAirbnb
+        ? 'Airbnb'
+        : cobro.espacio?.arrendatario?.nombre || 'Sin arrendatario'
+
+      return {
+        id: cobro.id,
+        codigoInterno: cobro.codigoInterno,
+        espacioId: cobro.espacioId || cobro.espacioAirbnbId, // UUID for API calls
+        espacioIdentificador, // Display identifier like "CS1" or Airbnb space name
+        espacioNombre: espacioIdentificador,
+        arrendatarioNombre,
+        titulo: `${cobro.concepto}${
+          cobro.conceptoPersonalizado ? ` - ${cobro.conceptoPersonalizado}` : ''
+        }`,
+        concepto: cobro.concepto,
+        conceptoPersonalizado: cobro.conceptoPersonalizado,
+        periodo: cobro.periodo,
+        monto: cobro.montoPactado,
+        montoPagado: cobro.montoPagado,
+        montoPactado: cobro.montoPactado,
+        diferencia: cobro.diferencia,
+        estado: cobro.estado,
+        fechaVencimiento: cobro.fechaVencimiento,
+        fechaPago: cobro.fechaPago,
+        fecha: cobro.fechaVencimiento, // For calendar display
+        tipo: 'cobro' as const,
+        formaPago: cobro.metodoPago,
+        referencia: cobro.numeroComprobante,
+        observaciones: cobro.observaciones,
+        // Partial payment fields
+        esPagoParcial: cobro.esParcial,
+      }
+    }))
 
     // 2. Generate recurring monthly cobros for active spaces with arrendatarios
     const espaciosActivos = await prisma.espacio.findMany({

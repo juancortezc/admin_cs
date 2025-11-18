@@ -20,6 +20,7 @@ export async function GET() {
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
         pagosParciales: {
           orderBy: {
             fechaPago: 'asc',
@@ -37,11 +38,19 @@ export async function GET() {
       const saldoPendiente = cobro.montoPactado - totalAbonado
       const porcentajePagado = (totalAbonado / cobro.montoPactado) * 100
 
+      const isAirbnb = cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+      const espacioIdentificador = isAirbnb
+        ? cobro.espacioAirbnb?.nombre || 'Airbnb'
+        : cobro.espacio?.identificador || 'N/A'
+      const arrendatarioNombre = isAirbnb
+        ? 'Airbnb'
+        : cobro.espacio?.arrendatario?.nombre || 'Sin arrendatario'
+
       return {
         id: cobro.id,
         codigoInterno: cobro.codigoInterno,
-        espacioIdentificador: cobro.espacio.identificador,
-        arrendatarioNombre: cobro.espacio.arrendatario?.nombre || 'Sin arrendatario',
+        espacioIdentificador,
+        arrendatarioNombre,
         concepto: cobro.concepto,
         periodo: cobro.periodo,
         montoPactado: cobro.montoPactado,
