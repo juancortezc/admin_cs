@@ -70,7 +70,7 @@ export async function GET() {
         return {
           id: espacio.id,
           nombre: espacio.nombre,
-          capacidad: espacio.capacidad,
+          capacidad: espacio.capacidadHuespedes,
           ...(reservaActual && {
             reservaActual: {
               id: reservaActual.id,
