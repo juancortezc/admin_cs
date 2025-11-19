@@ -11,9 +11,10 @@ import CalendarioAirbnb from '@/app/components/airbnb/CalendarioAirbnb'
 import ReservasTab from '@/app/components/airbnb/ReservasTab'
 import HuespedesTab from '@/app/components/airbnb/HuespedesTab'
 import EspaciosTab from '@/app/components/airbnb/EspaciosTab'
+import OcupacionTab from '@/app/components/airbnb/OcupacionTab'
 
 export default function AirbnbPage() {
-  const [tabActivo, setTabActivo] = useState<'calendario' | 'reservas' | 'huespedes' | 'espacios'>('calendario')
+  const [tabActivo, setTabActivo] = useState<'calendario' | 'reservas' | 'huespedes' | 'espacios' | 'ocupacion'>('calendario')
 
   const tabs = [
     {
@@ -49,6 +50,15 @@ export default function AirbnbPage() {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      )
+    },
+    {
+      id: 'ocupacion',
+      nombre: 'Ocupación',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
         </svg>
       )
     },
@@ -104,6 +114,7 @@ export default function AirbnbPage() {
           {tabActivo === 'reservas' && <ReservasTab />}
           {tabActivo === 'huespedes' && <HuespedesTab />}
           {tabActivo === 'espacios' && <EspaciosTab />}
+          {tabActivo === 'ocupacion' && <OcupacionTab />}
         </div>
       </main>
     </div>

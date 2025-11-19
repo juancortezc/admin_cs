@@ -20,6 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
         cobroRelacionado: true,
         pagosParciales: true,
       },
@@ -109,6 +110,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             arrendatario: true,
           },
         },
+        espacioAirbnb: true,
       },
     })
 

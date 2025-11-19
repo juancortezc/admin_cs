@@ -12,7 +12,8 @@ import Navbar from '@/app/components/Navbar'
 type Cobro = {
   id: string
   codigoInterno: string
-  espacioId: string
+  espacioId: string | null
+  espacioAirbnbId: string | null
   concepto: string
   conceptoPersonalizado: string | null
   periodo: string | null
@@ -33,7 +34,10 @@ type Cobro = {
     arrendatario: {
       nombre: string
     } | null
-  }
+  } | null
+  espacioAirbnb: {
+    nombre: string
+  } | null
 }
 
 export default function CobroDetailPage() {
@@ -243,7 +247,10 @@ export default function CobroDetailPage() {
               <div>
                 <h1 className="text-2xl font-bold text-white">{cobro.codigoInterno}</h1>
                 <p className="text-white/80 text-sm mt-1">
-                  {cobro.espacio.identificador} • {cobro.espacio.arrendatario?.nombre || 'Sin arrendatario'}
+                  {cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb
+                    ? `${cobro.espacioAirbnb.nombre} • Airbnb`
+                    : `${cobro.espacio?.identificador || 'N/A'} • ${cobro.espacio?.arrendatario?.nombre || 'Sin arrendatario'}`
+                  }
                 </p>
               </div>
               <div className="text-right">
@@ -459,35 +466,62 @@ export default function CobroDetailPage() {
               <div>
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                   <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4">
-                    <h3 className="text-sm font-semibold text-white">Información del Espacio</h3>
+                    <h3 className="text-sm font-semibold text-white">
+                      {cobro.concepto === 'AIRBNB' ? 'Información de Airbnb' : 'Información del Espacio'}
+                    </h3>
                   </div>
                   <div className="p-4 space-y-4">
-                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-3 rounded-xl">
-                      <p className="text-xs text-indigo-600 font-medium mb-1">Identificador</p>
-                      <p className="text-lg font-bold text-indigo-700">{cobro.espacio.identificador}</p>
-                    </div>
+                    {cobro.concepto === 'AIRBNB' && cobro.espacioAirbnb ? (
+                      <>
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-3 rounded-xl">
+                          <p className="text-xs text-indigo-600 font-medium mb-1">Espacio Airbnb</p>
+                          <p className="text-lg font-bold text-indigo-700">{cobro.espacioAirbnb.nombre}</p>
+                        </div>
 
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
-                      <p className="text-xs text-gray-600 font-medium mb-1">Tipo</p>
-                      <p className="text-gray-900 font-semibold">{cobro.espacio.tipo}</p>
-                    </div>
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
+                          <p className="text-xs text-gray-600 font-medium mb-1">Tipo</p>
+                          <p className="text-gray-900 font-semibold">Airbnb</p>
+                        </div>
 
-                    {cobro.espacio.arrendatario && (
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
-                        <p className="text-xs text-gray-600 font-medium mb-1">Arrendatario</p>
-                        <p className="text-gray-900 font-semibold">{cobro.espacio.arrendatario.nombre}</p>
-                      </div>
+                        {cobro.numeroComprobante && (
+                          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
+                            <p className="text-xs text-gray-600 font-medium mb-1">Código de Reserva</p>
+                            <p className="text-gray-900 font-semibold">{cobro.numeroComprobante}</p>
+                          </div>
+                        )}
+                      </>
+                    ) : cobro.espacio ? (
+                      <>
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-3 rounded-xl">
+                          <p className="text-xs text-indigo-600 font-medium mb-1">Identificador</p>
+                          <p className="text-lg font-bold text-indigo-700">{cobro.espacio.identificador}</p>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
+                          <p className="text-xs text-gray-600 font-medium mb-1">Tipo</p>
+                          <p className="text-gray-900 font-semibold">{cobro.espacio.tipo}</p>
+                        </div>
+
+                        {cobro.espacio.arrendatario && (
+                          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-3 rounded-xl">
+                            <p className="text-xs text-gray-600 font-medium mb-1">Arrendatario</p>
+                            <p className="text-gray-900 font-semibold">{cobro.espacio.arrendatario.nombre}</p>
+                          </div>
+                        )}
+                      </>
+                    ) : null}
+
+                    {(cobro.espacioId || cobro.espacioAirbnbId) && (
+                      <button
+                        onClick={() => router.push(cobro.espacioId ? `/cobros/historial/${cobro.espacioId}` : '/airbnb')}
+                        className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-all font-semibold shadow-md flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        {cobro.espacioId ? 'Ver Historial' : 'Ver en Airbnb'}
+                      </button>
                     )}
-
-                    <button
-                      onClick={() => router.push(`/cobros/historial/${cobro.espacioId}`)}
-                      className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-all font-semibold shadow-md flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Ver Historial
-                    </button>
                   </div>
                 </div>
               </div>
