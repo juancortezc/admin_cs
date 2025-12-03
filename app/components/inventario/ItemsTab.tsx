@@ -65,19 +65,19 @@ export default function ItemsTab() {
       })
   }
 
-  const getCategoriaGradient = (categoria: string) => {
-    const gradientes: Record<string, string> = {
-      LIMPIEZA: 'from-blue-600 to-cyan-600',
-      AMENIDADES: 'from-purple-600 to-pink-600',
-      COCINA: 'from-orange-600 to-amber-600',
-      BANO: 'from-cyan-600 to-teal-600',
-      ELECTRODOMESTICOS: 'from-red-600 to-rose-600',
-      MUEBLES: 'from-amber-600 to-yellow-600',
-      MANTENIMIENTO: 'from-yellow-600 to-orange-600',
-      OFICINA: 'from-gray-600 to-gray-700',
-      DECORACION: 'from-pink-600 to-rose-600',
+  const getCategoriaColor = (categoria: string) => {
+    const colores: Record<string, string> = {
+      LIMPIEZA: 'bg-blue-100 text-blue-700',
+      AMENIDADES: 'bg-purple-100 text-purple-700',
+      COCINA: 'bg-orange-100 text-orange-700',
+      BANO: 'bg-cyan-100 text-cyan-700',
+      ELECTRODOMESTICOS: 'bg-red-100 text-red-700',
+      MUEBLES: 'bg-amber-100 text-amber-700',
+      MANTENIMIENTO: 'bg-yellow-100 text-yellow-700',
+      OFICINA: 'bg-gray-100 text-gray-700',
+      DECORACION: 'bg-pink-100 text-pink-700',
     }
-    return gradientes[categoria] || 'from-gray-600 to-gray-700'
+    return colores[categoria] || 'bg-gray-100 text-gray-700'
   }
 
   if (loading) {
@@ -95,25 +95,24 @@ export default function ItemsTab() {
     <div>
       {/* Alertas de stock bajo */}
       {alertas.length > 0 && (
-        <div className="mb-6 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4 shadow-md">
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
           <div className="flex items-start gap-3">
-            <div className="bg-red-600 p-2 rounded-lg">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <div className="bg-red-100 p-2 rounded-lg">
+              <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-base font-bold text-red-800 mb-2">
+              <h3 className="text-sm font-semibold text-red-800 mb-1">
                 {alertas.length} producto(s) con stock bajo
               </h3>
-              <p className="text-sm text-red-600 mb-3">Revisa y repone el inventario urgentemente</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {alertas.map((alerta) => (
                   <span
                     key={alerta.id}
-                    className="text-xs bg-white px-3 py-1.5 rounded-lg text-gray-700 border border-red-300 font-medium"
+                    className="text-xs bg-white px-2 py-1 rounded text-gray-700 border border-red-200"
                   >
-                    <span className="font-bold">{alerta.nombre}</span>: {alerta.stockActual} (mín: {alerta.stockMinimo})
+                    {alerta.nombre}: {alerta.stockActual} (mín: {alerta.stockMinimo})
                   </span>
                 ))}
               </div>
@@ -125,7 +124,7 @@ export default function ItemsTab() {
       {/* Estadísticas con gradientes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+          <div className="bg-indigo-600 p-4">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +140,7 @@ export default function ItemsTab() {
         </div>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="bg-gradient-to-r from-red-600 to-orange-600 p-4">
+          <div className="bg-red-100 p-4">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -157,7 +156,7 @@ export default function ItemsTab() {
         </div>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4">
+          <div className="bg-green-100 p-4">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +191,7 @@ export default function ItemsTab() {
               setItemSeleccionado(null)
               setMostrarModal(true)
             }}
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
+            className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -205,7 +204,7 @@ export default function ItemsTab() {
       {/* Cards de items */}
       {items.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-12 text-center">
-          <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="bg-gray-100 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
@@ -216,7 +215,7 @@ export default function ItemsTab() {
               setItemSeleccionado(null)
               setMostrarModal(true)
             }}
-            className="mt-4 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg"
+            className="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-semibold"
           >
             Crear primer item
           </button>
@@ -231,14 +230,14 @@ export default function ItemsTab() {
                 key={item.id}
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden"
               >
-                {/* Header con gradiente según categoría */}
-                <div className={`bg-gradient-to-r ${getCategoriaGradient(item.categoria)} p-4`}>
+                {/* Header */}
+                <div className="bg-gray-100 p-4 border-b border-gray-200">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-bold text-white">{item.nombre}</h3>
-                      <p className="text-white/80 text-sm mt-1">{item.codigo}</p>
+                      <h3 className="text-xl font-bold text-gray-900">{item.nombre}</h3>
+                      <p className="text-gray-500 text-sm mt-1">{item.codigo}</p>
                     </div>
-                    <span className="px-3 py-1 text-xs font-bold rounded-lg bg-white/20 backdrop-blur-sm text-white">
+                    <span className={`px-3 py-1 text-xs font-bold rounded-lg ${getCategoriaColor(item.categoria)}`}>
                       {item.categoria.replace(/_/g, ' ')}
                     </span>
                   </div>
@@ -249,8 +248,8 @@ export default function ItemsTab() {
                   {/* Stock con alerta si está bajo */}
                   <div className={`mb-4 p-3 rounded-xl ${
                     stockBajo
-                      ? 'bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300'
-                      : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200'
+                      ? 'bg-red-50 border border-red-300'
+                      : 'bg-gray-50 border border-gray-200'
                   }`}>
                     <div className="flex items-center gap-2 mb-1">
                       <svg className={`w-5 h-5 ${stockBajo ? 'text-red-600' : 'text-gray-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +303,7 @@ export default function ItemsTab() {
                         setItemSeleccionado(item)
                         setMostrarModal(true)
                       }}
-                      className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold text-sm shadow-md flex items-center justify-center gap-2"
+                      className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-semibold text-sm flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

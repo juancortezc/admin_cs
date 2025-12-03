@@ -26,15 +26,15 @@ export default function AdministracionPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       <Navbar activeTab="Pagos" />
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-              <CoinsIcon className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <CoinsIcon className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Administración</h1>

@@ -32,19 +32,9 @@ export default function InventarioPage() {
       <MainNavbar activeSection="pagos" />
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header con Material Design 3 */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-              <BoxIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Inventario</h1>
-              <p className="text-sm text-gray-600 mt-0.5">
-                Gestión de stock, movimientos y control kardex
-              </p>
-            </div>
-          </div>
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <h1 className="text-lg font-semibold text-gray-900">Inventario</h1>
         </div>
 
         {/* Navigation Tabs - Administración */}

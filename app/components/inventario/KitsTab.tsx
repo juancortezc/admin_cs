@@ -56,7 +56,7 @@ export default function KitsTab() {
       </div>
 
       {/* Info destacada */}
-      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 shadow-md">
+      <div className="mb-6 bg-blue-50 border border-blue-200 rounded-xl p-5">
         <div className="flex gap-3">
           <div className="bg-blue-600 p-2 rounded-lg flex-shrink-0">
             <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -81,8 +81,8 @@ export default function KitsTab() {
               key={kit.id}
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden"
             >
-              {/* Header con gradiente */}
-              <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-4">
+              {/* Header */}
+              <div className="bg-purple-600 p-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-bold text-white">{kit.nombre}</h3>
@@ -106,7 +106,7 @@ export default function KitsTab() {
 
                 {/* Estadísticas */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-3 rounded-xl border-2 border-indigo-200">
+                  <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-200">
                     <div className="flex items-center gap-2 mb-1">
                       <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -116,7 +116,7 @@ export default function KitsTab() {
                     <p className="text-2xl font-bold text-indigo-900">{kit._count?.items || 0}</p>
                   </div>
 
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-3 rounded-xl border-2 border-green-200">
+                  <div className="bg-green-50 p-3 rounded-xl border border-green-200">
                     <div className="flex items-center gap-2 mb-1">
                       <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -132,7 +132,7 @@ export default function KitsTab() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-md p-12 text-center">
-          <div className="bg-gradient-to-br from-purple-100 to-pink-100 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="bg-purple-100 w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg className="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
@@ -163,8 +163,8 @@ export default function KitsTab() {
             { num: 4, text: 'El stock se actualiza automáticamente al momento de la entrega', icon: '✅' },
             { num: 5, text: 'Puedes ver los movimientos generados en el tab "Kardex" seleccionando el item', icon: '📊' },
           ].map((item) => (
-            <div key={item.num} className="flex gap-3 items-start p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:shadow-md transition-all">
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
+            <div key={item.num} className="flex gap-3 items-start p-3 bg-gray-50 rounded-xl hover:shadow-md transition-all">
+              <div className="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0">
                 {item.num}
               </div>
               <div className="flex items-start gap-2 flex-1">

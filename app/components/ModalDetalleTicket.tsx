@@ -104,35 +104,35 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
     }
   }
 
-  const getPrioridadGradient = (prioridad: string) => {
+  const getPrioridadColor = (prioridad: string) => {
     switch (prioridad) {
-      case 'URGENTE': return 'from-red-600 to-rose-600'
-      case 'ALTA': return 'from-orange-600 to-amber-600'
-      case 'MEDIA': return 'from-yellow-600 to-amber-600'
-      case 'BAJA': return 'from-green-600 to-emerald-600'
-      default: return 'from-gray-600 to-gray-700'
+      case 'URGENTE': return 'bg-red-100 text-red-700'
+      case 'ALTA': return 'bg-orange-100 text-orange-700'
+      case 'MEDIA': return 'bg-yellow-100 text-yellow-700'
+      case 'BAJA': return 'bg-green-100 text-green-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const getEstadoGradient = (estado: string) => {
+  const getEstadoColor = (estado: string) => {
     switch (estado) {
-      case 'COMPLETADO': return 'from-green-600 to-emerald-600'
-      case 'EN_PROCESO': return 'from-blue-600 to-indigo-600'
-      case 'EN_ESPERA': return 'from-yellow-600 to-amber-600'
-      case 'PENDIENTE': return 'from-gray-600 to-gray-700'
-      case 'CANCELADO': return 'from-red-600 to-rose-600'
-      default: return 'from-gray-600 to-gray-700'
+      case 'COMPLETADO': return 'bg-green-600'
+      case 'EN_PROCESO': return 'bg-blue-600'
+      case 'EN_ESPERA': return 'bg-yellow-600'
+      case 'PENDIENTE': return 'bg-gray-600'
+      case 'CANCELADO': return 'bg-red-600'
+      default: return 'bg-gray-600'
     }
   }
 
-  const getTipoNovedadGradient = (tipo: string) => {
+  const getTipoNovedadColor = (tipo: string) => {
     switch (tipo) {
-      case 'SOLUCION': return 'from-green-600 to-emerald-600'
-      case 'PROBLEMA': return 'from-red-600 to-rose-600'
-      case 'COSTO_ADICIONAL': return 'from-orange-600 to-amber-600'
-      case 'CAMBIO_ESTADO': return 'from-blue-600 to-indigo-600'
-      case 'ACTUALIZACION': return 'from-purple-600 to-indigo-600'
-      default: return 'from-gray-600 to-gray-700'
+      case 'SOLUCION': return 'bg-green-100 text-green-700'
+      case 'PROBLEMA': return 'bg-red-100 text-red-700'
+      case 'COSTO_ADICIONAL': return 'bg-orange-100 text-orange-700'
+      case 'CAMBIO_ESTADO': return 'bg-blue-100 text-blue-700'
+      case 'ACTUALIZACION': return 'bg-purple-100 text-purple-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
@@ -144,16 +144,16 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
       }}
     >
       <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header con gradiente según estado */}
-        <div className={`sticky top-0 bg-gradient-to-r ${getEstadoGradient(ticket.estado)} p-6 rounded-t-2xl shadow-lg z-10`}>
+        {/* Header */}
+        <div className={`sticky top-0 ${getEstadoColor(ticket.estado)} p-6 rounded-t-2xl z-10`}>
           <div className="flex justify-between items-start">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
                 <h2 className="text-3xl font-bold text-white">{ticket.numeroTicket}</h2>
-                <span className={`px-3 py-1 text-xs font-bold rounded-lg bg-gradient-to-r ${getPrioridadGradient(ticket.prioridad)} text-white shadow-md`}>
+                <span className={`px-3 py-1 text-xs font-bold rounded-lg ${getPrioridadColor(ticket.prioridad)}`}>
                   {ticket.prioridad}
                 </span>
-                <span className="px-3 py-1 text-xs font-bold rounded-lg bg-white/20 backdrop-blur-sm text-white">
+                <span className="px-3 py-1 text-xs font-bold rounded-lg bg-white/20 text-white">
                   {ticket.categoria.replace(/_/g, ' ')}
                 </span>
               </div>
@@ -162,7 +162,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
             </div>
             <button
               onClick={onClose}
-              className="bg-white/20 backdrop-blur-sm p-2 rounded-xl hover:bg-white/30 transition-all"
+              className="bg-white/20 p-2 rounded-xl hover:bg-white/30 transition-all"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -176,7 +176,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             {/* Espacio */}
             {ticket.espacio && (
-              <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-4 rounded-xl border border-indigo-200">
+              <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -189,7 +189,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Asignado a */}
             {ticket.asignadoA && (
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200">
+              <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -202,7 +202,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Proveedor */}
             {ticket.proveedor && (
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-300">
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -214,7 +214,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
             )}
 
             {/* Fecha de creación */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border border-gray-300">
+            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
               <div className="flex items-center gap-2 mb-2">
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -232,7 +232,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha de inicio */}
             {ticket.fechaInicio && (
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
+              <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -251,7 +251,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha estimada */}
             {ticket.fechaEstimada && (
-              <div className="bg-gradient-to-br from-yellow-50 to-amber-50 p-4 rounded-xl border border-yellow-200">
+              <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -270,7 +270,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Fecha de completado */}
             {ticket.fechaCompletado && (
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+              <div className="bg-green-50 p-4 rounded-xl border border-green-200">
                 <div className="flex items-center gap-2 mb-2">
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -288,7 +288,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
             )}
 
             {/* Costo Estimado */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-200">
+            <div className="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
               <div className="flex items-center gap-2 mb-2">
                 <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -299,7 +299,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
             </div>
 
             {/* Costo Real */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+            <div className="bg-green-50 p-4 rounded-xl border border-green-200">
               <div className="flex items-center gap-2 mb-2">
                 <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -312,7 +312,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
           {/* Observaciones */}
           {ticket.observaciones && (
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-4 rounded-xl border border-amber-200 mb-6">
+            <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 mb-6">
               <div className="flex items-center gap-2 mb-2">
                 <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -331,7 +331,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
               </h3>
               <button
                 onClick={() => setMostrarFormNovedad(!mostrarFormNovedad)}
-                className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg flex items-center gap-2"
+                className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-semibold flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -342,7 +342,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
 
             {/* Formulario para agregar novedad */}
             {mostrarFormNovedad && (
-              <form onSubmit={handleSubmitNovedad} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6 border-2 border-gray-200 shadow-md">
+              <form onSubmit={handleSubmitNovedad} className="bg-gray-50 rounded-xl p-6 mb-6 border border-gray-200">
                 <h4 className="text-lg font-bold text-gray-900 mb-4">Nueva Novedad</h4>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -405,7 +405,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
                     <button
                       type="submit"
                       disabled={loading}
-                      className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-semibold shadow-lg disabled:opacity-50"
+                      className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-semibold disabled:opacity-50"
                     >
                       {loading ? 'Guardando...' : 'Guardar Novedad'}
                     </button>
@@ -423,7 +423,7 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
                 </div>
               ) : novedades.length === 0 ? (
                 <div className="text-center py-12 bg-gray-50 rounded-xl">
-                  <div className="bg-gradient-to-br from-gray-100 to-gray-200 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="bg-gray-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
@@ -433,9 +433,9 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
                 </div>
               ) : (
                 novedades.map((novedad) => (
-                  <div key={novedad.id} className="bg-white rounded-xl p-5 border-2 border-gray-200 shadow-sm hover:shadow-md transition-all">
+                  <div key={novedad.id} className="bg-white rounded-xl p-5 border border-gray-200 hover:shadow-md transition-all">
                     <div className="flex justify-between items-start mb-3">
-                      <span className={`px-3 py-1.5 text-xs font-bold rounded-lg bg-gradient-to-r ${getTipoNovedadGradient(novedad.tipo)} text-white shadow-md`}>
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-lg ${getTipoNovedadColor(novedad.tipo)}`}>
                         {novedad.tipo.replace(/_/g, ' ')}
                       </span>
                       <div className="text-right">
@@ -481,10 +481,10 @@ export default function ModalDetalleTicket({ ticket, onClose, onActualizar }: Mo
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gradient-to-r from-gray-50 to-gray-100 border-t-2 border-gray-300 px-6 py-4 rounded-b-2xl">
+        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 rounded-b-2xl">
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all font-bold text-lg shadow-lg"
+            className="w-full px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-bold text-lg"
           >
             Cerrar
           </button>

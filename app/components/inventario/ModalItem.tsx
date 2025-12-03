@@ -83,22 +83,22 @@ export default function ModalItem({ item, onClose, onGuardar }: ModalItemProps) 
       }}
     >
       <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header con gradiente */}
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl shadow-lg z-10">
+        {/* Header */}
+        <div className="sticky top-0 bg-white p-6 rounded-t-2xl border-b border-gray-100 z-10">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-xl font-semibold text-gray-900">
                 {item ? 'Editar Item' : 'Nuevo Item de Inventario'}
               </h2>
-              <p className="text-white/80 mt-1">
+              <p className="text-gray-500 text-sm mt-1">
                 {item ? 'Actualiza la información del item' : 'Completa la información para crear el item'}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="bg-white/20 backdrop-blur-sm p-2 rounded-xl hover:bg-white/30 transition-all"
+              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -231,7 +231,7 @@ export default function ModalItem({ item, onClose, onGuardar }: ModalItemProps) 
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg flex items-center gap-2"
+              className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2"
             >
               {loading ? (
                 <>

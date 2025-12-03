@@ -111,13 +111,13 @@ export default function MovimientosTab() {
     }
   }
 
-  const getTipoGradient = (tipo: string) => {
+  const getTipoColor = (tipo: string) => {
     switch (tipo) {
-      case 'ENTRADA': return 'from-green-600 to-emerald-600'
-      case 'SALIDA': return 'from-red-600 to-rose-600'
-      case 'AJUSTE_POSITIVO': return 'from-blue-600 to-indigo-600'
-      case 'AJUSTE_NEGATIVO': return 'from-orange-600 to-amber-600'
-      default: return 'from-gray-600 to-gray-700'
+      case 'ENTRADA': return 'bg-green-600'
+      case 'SALIDA': return 'bg-red-600'
+      case 'AJUSTE_POSITIVO': return 'bg-blue-600'
+      case 'AJUSTE_NEGATIVO': return 'bg-orange-600'
+      default: return 'bg-gray-600'
     }
   }
 
@@ -152,7 +152,7 @@ export default function MovimientosTab() {
                   onClick={() => setFormData({ ...formData, tipoMovimiento: tipo.value })}
                   className={`p-4 rounded-xl text-left transition-all ${
                     formData.tipoMovimiento === tipo.value
-                      ? `bg-gradient-to-r ${getTipoGradient(tipo.value)} text-white shadow-lg scale-105`
+                      ? `${getTipoColor(tipo.value)} text-white scale-105`
                       : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-md'
                   }`}
                 >
@@ -193,7 +193,7 @@ export default function MovimientosTab() {
 
             {/* Info del item seleccionado */}
             {itemSeleccionado && (
-              <div className="mt-3 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border-2 border-indigo-200">
+              <div className="mt-3 bg-indigo-50 rounded-xl p-4 border border-indigo-200">
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <p className="text-indigo-600 text-xs font-medium mb-1">Stock Actual</p>
@@ -249,9 +249,9 @@ export default function MovimientosTab() {
 
           {/* Costo total */}
           {formData.cantidad > 0 && formData.costoUnitario > 0 && (
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-5 shadow-lg">
+            <div className="bg-green-600 rounded-xl p-5">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 backdrop-blur-sm p-3 rounded-lg">
+                <div className="bg-white/20 p-3 rounded-lg">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -282,7 +282,7 @@ export default function MovimientosTab() {
 
           {/* Campos adicionales para salidas */}
           {(formData.tipoMovimiento === 'SALIDA') && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-br from-red-50 to-orange-50 rounded-xl border-2 border-red-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-2">
                   Persona que Recibe
@@ -338,7 +338,7 @@ export default function MovimientosTab() {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg flex items-center gap-2"
+              className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2"
             >
               {loading ? (
                 <>
