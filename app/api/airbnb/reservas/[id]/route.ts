@@ -142,6 +142,31 @@ export async function DELETE(request: Request, { params }: Params) {
   try {
     const { id } = await params
 
+    // Verificar si la reserva existe
+    const reserva = await prisma.reservaAirbnb.findUnique({
+      where: { id },
+      select: { codigoReserva: true },
+    })
+
+    if (!reserva) {
+      return NextResponse.json(
+        { error: 'Reserva no encontrada' },
+        { status: 404 }
+      )
+    }
+
+    // Verificar si tiene abonos registrados
+    const abonosCount = await prisma.abonoReserva.count({
+      where: { reservaId: id },
+    })
+
+    if (abonosCount > 0) {
+      return NextResponse.json(
+        { error: `No se puede eliminar. La reserva tiene ${abonosCount} abono(s) registrado(s). Elimine los abonos primero.` },
+        { status: 400 }
+      )
+    }
+
     await prisma.reservaAirbnb.delete({
       where: { id },
     })
@@ -152,6 +177,12 @@ export async function DELETE(request: Request, { params }: Params) {
       return NextResponse.json(
         { error: 'Reserva no encontrada' },
         { status: 404 }
+      )
+    }
+    if (error.code === 'P2003' || error.code === 'P2014') {
+      return NextResponse.json(
+        { error: 'No se puede eliminar. La reserva tiene registros asociados.' },
+        { status: 400 }
       )
     }
     console.error('Error al eliminar reserva:', error)

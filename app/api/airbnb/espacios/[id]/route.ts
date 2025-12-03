@@ -91,6 +91,55 @@ export async function DELETE(request: Request, { params }: Params) {
   try {
     const { id } = await params
 
+    // Verificar si el espacio existe
+    const espacio = await prisma.espacioAirbnb.findUnique({
+      where: { id },
+      select: { nombre: true },
+    })
+
+    if (!espacio) {
+      return NextResponse.json(
+        { error: 'Espacio no encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Verificar si tiene reservas asociadas
+    const reservasCount = await prisma.reservaAirbnb.count({
+      where: { espacioId: id },
+    })
+
+    if (reservasCount > 0) {
+      return NextResponse.json(
+        { error: `No se puede eliminar. El espacio tiene ${reservasCount} reserva(s) asociada(s). Elimine las reservas primero o desactive el espacio.` },
+        { status: 400 }
+      )
+    }
+
+    // Verificar si tiene cobros asociados
+    const cobrosCount = await prisma.cobro.count({
+      where: { espacioAirbnbId: id },
+    })
+
+    if (cobrosCount > 0) {
+      return NextResponse.json(
+        { error: `No se puede eliminar. El espacio tiene ${cobrosCount} cobro(s) asociado(s). Elimine los cobros primero.` },
+        { status: 400 }
+      )
+    }
+
+    // Verificar si tiene mantenimientos asociados
+    const mantenimientosCount = await prisma.mantenimientoAirbnb.count({
+      where: { espacioId: id },
+    })
+
+    if (mantenimientosCount > 0) {
+      return NextResponse.json(
+        { error: `No se puede eliminar. El espacio tiene ${mantenimientosCount} mantenimiento(s) asociado(s). Elimine los mantenimientos primero.` },
+        { status: 400 }
+      )
+    }
+
     await prisma.espacioAirbnb.delete({
       where: { id },
     })
@@ -101,6 +150,12 @@ export async function DELETE(request: Request, { params }: Params) {
       return NextResponse.json(
         { error: 'Espacio no encontrado' },
         { status: 404 }
+      )
+    }
+    if (error.code === 'P2003' || error.code === 'P2014') {
+      return NextResponse.json(
+        { error: 'No se puede eliminar. El espacio tiene registros asociados.' },
+        { status: 400 }
       )
     }
     console.error('Error al eliminar espacio:', error)

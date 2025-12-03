@@ -7,10 +7,13 @@
 
 import { useEffect, useState } from 'react'
 import ModalNuevaReserva from './ModalNuevaReserva'
+import ModalEditarReserva from './ModalEditarReserva'
 
 type Reserva = {
   id: string
   codigoReserva: string
+  espacioId: string
+  huespedId: string
   checkIn: string
   checkOut: string
   noches: number
@@ -18,10 +21,14 @@ type Reserva = {
   canalReserva: string
   codigoConfirmacion: string | null
   precioTotal: number
+  precioPorNoche: number
+  precioLimpieza: number
   estadoReserva: string
   estadoPago: string
   montoPagado: number
   balancePendiente: number
+  notasReserva: string | null
+  observaciones: string | null
   espacio: {
     nombre: string
   }
@@ -39,6 +46,7 @@ export default function ReservasTab() {
   const [filtroEstado, setFiltroEstado] = useState('todos')
   const [filtroEstadoPago, setFiltroEstadoPago] = useState('todos')
   const [mostrarModal, setMostrarModal] = useState(false)
+  const [reservaEditando, setReservaEditando] = useState<Reserva | null>(null)
 
   useEffect(() => {
     cargarReservas()
@@ -253,10 +261,7 @@ export default function ReservasTab() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      // TODO: Implement edit functionality
-                      alert('Funcionalidad de edición en desarrollo')
-                    }}
+                    onClick={() => setReservaEditando(reserva)}
                     className="p-2.5 text-indigo-600 hover:bg-indigo-100 rounded-xl transition-all"
                     title="Editar reserva"
                   >
@@ -320,6 +325,18 @@ export default function ReservasTab() {
           onClose={() => setMostrarModal(false)}
           onGuardar={() => {
             setMostrarModal(false)
+            cargarReservas()
+          }}
+        />
+      )}
+
+      {/* Modal Editar Reserva */}
+      {reservaEditando && (
+        <ModalEditarReserva
+          reserva={reservaEditando}
+          onClose={() => setReservaEditando(null)}
+          onGuardar={() => {
+            setReservaEditando(null)
             cargarReservas()
           }}
         />
