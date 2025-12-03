@@ -595,79 +595,74 @@ export default function AdministracionPagosPage() {
               </div>
             </div>
 
-            {/* Lista de pagos */}
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              {categoriasFiltradas.length > 0 ? (
-                <div className="divide-y divide-gray-100">
-                  {categoriasFiltradas
-                    .filter(cat => !categoriaFiltrada || cat.categoria === categoriaFiltrada)
-                    .flatMap((categoria) => categoria.pagos)
-                    .map((pago) => (
-                      <div key={pago.id} className="group flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${pago.esIngreso ? 'bg-emerald-100' : 'bg-red-100'}`}>
-                            <svg className={`w-5 h-5 ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              {pago.esIngreso ? (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8l-8-8-8 8" />
-                              ) : (
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20V4m-8 8l8 8 8-8" />
-                              )}
-                            </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm">{pago.titulo}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-xs text-gray-500">{pago.descripcion}</span>
-                              <span className="text-gray-300">•</span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(pago.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
-                              </span>
-                              {pago.formaPago && (
-                                <>
-                                  <span className="text-gray-300">•</span>
-                                  <span className="text-xs text-gray-400">{pago.formaPago}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
+            {/* Lista de pagos en grid */}
+            {categoriasFiltradas.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {categoriasFiltradas
+                  .filter(cat => !categoriaFiltrada || cat.categoria === categoriaFiltrada)
+                  .flatMap((categoria) => categoria.pagos)
+                  .map((pago) => (
+                    <div key={pago.id} className="group bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition-all">
+                      {/* Header con icono y acciones */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${pago.esIngreso ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                          <svg className={`w-5 h-5 ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {pago.esIngreso ? (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8l-8-8-8 8" />
+                            ) : (
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20V4m-8 8l8 8 8-8" />
+                            )}
+                          </svg>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <p className={`text-sm font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
-                            {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
-                          </p>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => setPagoEditando(pago)}
-                              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
-                              title="Editar"
-                            >
-                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => setPagoEliminando(pago)}
-                              className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                              title="Eliminar"
-                            >
-                              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setPagoEditando(pago)}
+                            className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => setPagoEliminando(pago)}
+                            className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
-                    ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                  </svg>
-                  <p className="text-sm text-gray-500">{busqueda ? 'No se encontraron pagos' : 'No hay pagos registrados'}</p>
-                </div>
-              )}
-            </div>
+
+                      {/* Título */}
+                      <p className="font-medium text-gray-900 text-sm mb-1">{pago.titulo}</p>
+
+                      {/* Descripción y fecha */}
+                      <p className="text-xs text-gray-500 mb-1">{pago.descripcion}</p>
+                      <p className="text-xs text-gray-400 mb-3">
+                        {new Date(pago.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
+                        {pago.formaPago && ` • ${pago.formaPago}`}
+                      </p>
+
+                      {/* Monto */}
+                      <div className="border-t border-gray-100 pt-3">
+                        <p className={`text-lg font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
+                          {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border border-gray-100 text-center py-12">
+                <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                </svg>
+                <p className="text-sm text-gray-500">{busqueda ? 'No se encontraron pagos' : 'No hay pagos registrados'}</p>
+              </div>
+            )}
 
             {/* Modal estilo Excel */}
             {categoriaExpandida && (
@@ -932,82 +927,87 @@ export default function AdministracionPagosPage() {
             {pagosRecurrentes.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {pagosRecurrentes.map((pago) => (
-                  <div key={pago.id} className="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all">
-                    <div className="flex justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 text-sm">{pago.nombre}</h3>
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-md ${pago.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
-                            {pago.activo ? 'Activo' : 'Inactivo'}
-                          </span>
-                          <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-indigo-100 text-indigo-700">{pago.categoria.replace('_', ' ')}</span>
-                        </div>
-                        <p className="text-xs text-gray-600 mb-2">{pago.proveedor} • {pago.descripcion}</p>
-                        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-                          <span>{pago.frecuencia}{pago.diaPago && ` - Día ${pago.diaPago}`}</span>
-                          <span>Desde: {new Date(pago.fechaInicio).toLocaleDateString('es-CL')}</span>
-                          {pago.fechaFin && <span className="text-orange-600">Hasta: {new Date(pago.fechaFin).toLocaleDateString('es-CL')}</span>}
-                          <span>{pago.metodoPago}</span>
-                          {pago._count && pago._count.pagosGenerados > 0 && <span className="text-indigo-600">{pago._count.pagosGenerados} generado{pago._count.pagosGenerados !== 1 ? 's' : ''}</span>}
-                        </div>
-                        {pago.observaciones && <p className="text-xs text-gray-500 mt-2 italic">{pago.observaciones}</p>}
-                      </div>
-                      <div className="flex items-start gap-3 ml-4">
-                        <div className="text-right">
-                          {pago.esMontoVariable ? (
-                            <p className="text-sm font-bold text-orange-600">Variable</p>
-                          ) : (
-                            <p className="text-sm font-bold text-gray-900">${pago.montoFijo?.toLocaleString()}</p>
-                          )}
-                          <p className="text-xs text-gray-500 mt-0.5">{pago.codigoInterno}</p>
-                        </div>
-                        {/* Botón visible de registrar pago */}
-                        {pago.activo && (
-                          <button
-                            onClick={() => {
-                              setPagoRecurrenteParaRegistrar(pago)
-                              setShowRegistrarPagoRecurrenteModal(true)
-                            }}
-                            className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition-colors"
-                          >
-                            Registrar Pago
-                          </button>
-                        )}
-                        {/* Botones de acción */}
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => {
-                              setSelectedRecurring(pago)
-                              setShowRecurringModal(true)
-                            }}
-                            className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors"
-                            title="Editar"
-                          >
-                            <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (!confirm(`¿Eliminar el pago recurrente "${pago.nombre}"?`)) return
-                              try {
-                                const res = await fetch(`/api/pagos-recurrentes/${pago.id}`, { method: 'DELETE' })
-                                if (!res.ok) throw new Error('Error al eliminar')
-                                cargarPagosRecurrentes()
-                              } catch (error) {
-                                alert('Error al eliminar pago recurrente')
-                              }
-                            }}
-                            className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                            title="Eliminar"
-                          >
-                            <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
+                  <div key={pago.id} className="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all flex flex-col">
+                    {/* Header con nombre y badges */}
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 text-sm">{pago.nombre}</h3>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            setSelectedRecurring(pago)
+                            setShowRecurringModal(true)
+                          }}
+                          className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          title="Editar"
+                        >
+                          <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`¿Eliminar el pago recurrente "${pago.nombre}"?`)) return
+                            try {
+                              const res = await fetch(`/api/pagos-recurrentes/${pago.id}`, { method: 'DELETE' })
+                              if (!res.ok) throw new Error('Error al eliminar')
+                              cargarPagosRecurrentes()
+                            } catch (error) {
+                              alert('Error al eliminar pago recurrente')
+                            }
+                          }}
+                          className="p-1.5 hover:bg-red-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          title="Eliminar"
+                        >
+                          <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-md ${pago.activo ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'}`}>
+                        {pago.activo ? 'Activo' : 'Inactivo'}
+                      </span>
+                      <span className="px-2 py-0.5 text-xs font-medium rounded-md bg-indigo-100 text-indigo-700">{pago.categoria.replace('_', ' ')}</span>
+                    </div>
+
+                    {/* Descripción */}
+                    <p className="text-xs text-gray-600 mb-2">{pago.proveedor} • {pago.descripcion}</p>
+
+                    {/* Info de frecuencia */}
+                    <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-3">
+                      <span>{pago.frecuencia}{pago.diaPago && ` - Día ${pago.diaPago}`}</span>
+                      <span>• {pago.metodoPago}</span>
+                      {pago._count && pago._count.pagosGenerados > 0 && <span className="text-indigo-600">• {pago._count.pagosGenerados} generado{pago._count.pagosGenerados !== 1 ? 's' : ''}</span>}
+                    </div>
+
+                    {/* Monto */}
+                    <div className="mb-3">
+                      {pago.esMontoVariable ? (
+                        <p className="text-lg font-bold text-orange-600">Variable</p>
+                      ) : (
+                        <p className="text-lg font-bold text-gray-900">${pago.montoFijo?.toLocaleString()}</p>
+                      )}
+                      <p className="text-xs text-gray-500">{pago.codigoInterno}</p>
+                    </div>
+
+                    {/* Spacer para empujar el botón hacia abajo */}
+                    <div className="flex-1"></div>
+
+                    {/* Botón Pagar */}
+                    {pago.activo && (
+                      <button
+                        onClick={() => {
+                          setPagoRecurrenteParaRegistrar(pago)
+                          setShowRegistrarPagoRecurrenteModal(true)
+                        }}
+                        className="w-full px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors"
+                      >
+                        Pagar
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
