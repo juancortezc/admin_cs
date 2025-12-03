@@ -1,14 +1,13 @@
 /**
- * Página Cobros - Casa del Sol
- * Vista con tabs: Todos, Pendientes, Historial
- * Material Design 3 con nuevo PageLayout
+ * Página Cobros - Administración de Espacios
+ * Diseño limpio Material Design 3
  */
 
 'use client'
 
 import { useEffect, useState } from 'react'
-import PageLayout from '@/app/components/PageLayout'
-import { ClipboardListIcon } from '@/app/components/icons'
+import Link from 'next/link'
+import MainNavbar from '@/app/components/MainNavbar'
 import ModalRegistroCobro from '@/app/components/ModalRegistroCobro'
 
 type Cobro = {
@@ -50,6 +49,11 @@ export default function CobrosPage() {
   // Filtros
   const [busqueda, setBusqueda] = useState('')
   const [mesSeleccionado, setMesSeleccionado] = useState('')
+
+  const meses = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ]
 
   // Inicializar con el mes actual
   useEffect(() => {
@@ -101,20 +105,6 @@ export default function CobrosPage() {
     cargarCobros()
   }
 
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case 'PAGADO':
-      case 'COBRADO':
-        return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20'
-      case 'PENDIENTE':
-        return 'bg-amber-500/10 text-amber-700 border-amber-500/20'
-      case 'PARCIAL':
-        return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-      default:
-        return 'bg-gray-100 text-gray-700'
-    }
-  }
-
   // Filtrar cobros por vista activa
   const cobrosFiltrados = cobros.filter((cobro) => {
     if (activeView === 'pendientes') {
@@ -126,13 +116,6 @@ export default function CobrosPage() {
     return true
   })
 
-  // Subtabs config
-  const subtabs = [
-    { id: 'todos', nombre: 'Todos' },
-    { id: 'pendientes', nombre: 'Pendientes' },
-    { id: 'historial', nombre: 'Historial' },
-  ]
-
   // Resumen stats
   const stats = {
     total: cobros.length,
@@ -141,87 +124,152 @@ export default function CobrosPage() {
     montoPendiente: cobros
       .filter(c => c.estado === 'PENDIENTE' || c.estado === 'PARCIAL')
       .reduce((sum, c) => sum + (c.montoPactado - c.montoPagado), 0),
+    montoCobrado: cobros
+      .filter(c => c.estado === 'PAGADO' || c.estado === 'COBRADO')
+      .reduce((sum, c) => sum + c.montoPagado, 0),
   }
 
-  if (loading) {
+  const formatMoney = (amount: number) => {
+    return new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(amount)
+  }
+
+  const getMesNombre = () => {
+    if (!mesSeleccionado) return ''
+    const [year, month] = mesSeleccionado.split('-')
+    return `${meses[parseInt(month) - 1]} ${year}`
+  }
+
+  if (loading && cobros.length === 0) {
     return (
-      <PageLayout
-        title="Cobros"
-        subtitle="Gestión de cobros y cuentas por cobrar"
-        icon={<ClipboardListIcon className="w-6 h-6 text-white" />}
-        activeSection="cobros"
-      >
+      <div className="min-h-screen bg-gray-50">
+        <MainNavbar activeSection="cobros" />
         <div className="flex items-center justify-center h-96">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
-          </div>
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         </div>
-      </PageLayout>
+      </div>
     )
   }
 
   return (
-    <PageLayout
-      title="Cobros"
-      subtitle="Gestión de cobros y cuentas por cobrar"
-      icon={<ClipboardListIcon className="w-6 h-6 text-white" />}
-      activeSection="cobros"
-      subtabs={subtabs}
-      activeSubtab={activeView}
-      onSubtabChange={(tabId) => setActiveView(tabId as 'todos' | 'pendientes' | 'historial')}
-      actions={
-        <button
-          onClick={() => setShowModalNuevo(true)}
-          className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Nuevo Cobro
-        </button>
-      }
-    >
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Cobros</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
-        </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-          <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Pendientes</p>
-          <p className="text-2xl font-bold text-amber-600 mt-1">{stats.pendientes}</p>
-        </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-          <p className="text-xs font-medium text-emerald-600 uppercase tracking-wide">Pagados</p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{stats.pagados}</p>
-        </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200">
-          <p className="text-xs font-medium text-red-600 uppercase tracking-wide">Por Cobrar</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">${stats.montoPendiente.toLocaleString()}</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="cobros" />
 
-      {/* Filtros */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-200 mb-6">
-        <div className="flex flex-wrap gap-3 items-center">
-          {/* Selector de Mes */}
-          <input
-            type="month"
-            value={mesSeleccionado}
-            onChange={(e) => setMesSeleccionado(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white"
-          />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Header con título y filtros */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold text-gray-900">Cobros</h1>
+            <input
+              type="month"
+              value={mesSeleccionado}
+              onChange={(e) => setMesSeleccionado(e.target.value)}
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+          <button
+            onClick={() => setShowModalNuevo(true)}
+            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo Cobro
+          </button>
+        </div>
+
+        {/* Cards de resumen */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Cobrado */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Cobrado</p>
+                <p className="text-xl font-bold text-emerald-600">{formatMoney(stats.montoCobrado)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Por Cobrar */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Por Cobrar</p>
+                <p className="text-xl font-bold text-amber-600">{formatMoney(stats.montoPendiente)}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pagados */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Pagados</p>
+                <p className="text-xl font-bold text-gray-900">{stats.pagados}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Pendientes */}
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Pendientes</p>
+                <p className="text-xl font-bold text-gray-900">{stats.pendientes}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs de filtro */}
+        <div className="flex items-center gap-2">
+          {[
+            { id: 'todos', label: 'Todos', count: stats.total },
+            { id: 'pendientes', label: 'Pendientes', count: stats.pendientes },
+            { id: 'historial', label: 'Pagados', count: stats.pagados },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveView(tab.id as typeof activeView)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeView === tab.id
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {tab.label}
+              <span className="ml-2 text-xs opacity-70">({tab.count})</span>
+            </button>
+          ))}
 
           {/* Búsqueda */}
-          <div className="relative flex-1 min-w-[200px]">
+          <div className="relative ml-auto">
             <input
               type="text"
-              placeholder="Buscar por código, espacio, arrendatario..."
+              placeholder="Buscar..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleFiltrar()}
-              className="w-full px-4 py-2 pl-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-white"
+              className="w-64 px-4 py-2 pl-10 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -232,101 +280,85 @@ export default function CobrosPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-
-          {/* Botón Filtrar */}
-          <button
-            onClick={handleFiltrar}
-            className="px-5 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-all text-sm font-medium"
-          >
-            Filtrar
-          </button>
-        </div>
-      </div>
-
-      {/* Tabla de Cobros */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-              <tr>
-                <th className="px-4 py-4 text-left text-sm font-semibold">Código</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold">Fecha</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold">Espacio</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold">Arrendatario</th>
-                <th className="px-4 py-4 text-left text-sm font-semibold">Concepto</th>
-                <th className="px-4 py-4 text-right text-sm font-semibold">Pactado</th>
-                <th className="px-4 py-4 text-right text-sm font-semibold">Pagado</th>
-                <th className="px-4 py-4 text-center text-sm font-semibold">Estado</th>
-                <th className="px-4 py-4 text-center text-sm font-semibold">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {cobrosFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
-                    No se encontraron cobros con estos filtros
-                  </td>
-                </tr>
-              ) : (
-                cobrosFiltrados.map((cobro) => (
-                  <tr
-                    key={cobro.id}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => window.location.href = `/cobros/${cobro.id}`}
-                  >
-                    <td className="px-4 py-3 text-sm font-medium text-indigo-600">
-                      {cobro.codigoInterno}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                      {cobro.espacio?.identificador || cobro.espacioAirbnb?.nombre || '-'}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {cobro.espacio?.arrendatario?.nombre || (cobro.espacioAirbnb ? 'Airbnb' : '-')}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{cobro.concepto}</td>
-                    <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
-                      ${cobro.montoPactado.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-right font-medium text-emerald-600">
-                      ${cobro.montoPagado.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${getColorEstado(cobro.estado)}`}>
-                        {cobro.estado}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          window.location.href = `/cobros/${cobro.id}`
-                        }}
-                        className="p-2 rounded-lg hover:bg-indigo-50 transition-all"
-                        title="Ver detalles"
-                      >
-                        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
         </div>
 
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Mostrando <span className="font-semibold text-gray-900">{cobrosFiltrados.length}</span> de {cobros.length} cobros
+        {/* Lista de cobros */}
+        {cobrosFiltrados.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-gray-500">No hay cobros para mostrar en {getMesNombre()}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {cobrosFiltrados.map((cobro) => (
+              <Link
+                key={cobro.id}
+                href={`/cobros/${cobro.id}`}
+                className="block bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-gray-200 transition-all"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    {/* Indicador de estado */}
+                    <div className={`w-2 h-12 rounded-full ${
+                      cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                        ? 'bg-emerald-500'
+                        : cobro.estado === 'PARCIAL'
+                        ? 'bg-amber-500'
+                        : 'bg-red-500'
+                    }`} />
+
+                    {/* Info principal */}
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900">
+                          {cobro.espacio?.identificador || cobro.espacioAirbnb?.nombre || '-'}
+                        </span>
+                        <span className="text-xs text-gray-400">{cobro.codigoInterno}</span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {cobro.espacio?.arrendatario?.nombre || (cobro.espacioAirbnb ? 'Airbnb' : '-')}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {cobro.concepto} • {new Date(cobro.fechaPago).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Montos */}
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-gray-900">
+                      {formatMoney(cobro.montoPactado)}
+                    </p>
+                    {cobro.estado === 'PARCIAL' && (
+                      <p className="text-sm text-emerald-600">
+                        Pagado: {formatMoney(cobro.montoPagado)}
+                      </p>
+                    )}
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                      cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : cobro.estado === 'PARCIAL'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {cobro.estado}
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Footer info */}
+        {cobrosFiltrados.length > 0 && (
+          <p className="text-sm text-gray-500 text-center">
+            Mostrando {cobrosFiltrados.length} de {cobros.length} cobros en {getMesNombre()}
           </p>
-        </div>
-      </div>
+        )}
+      </main>
 
       {/* Modal Nuevo Cobro */}
       <ModalRegistroCobro
@@ -337,6 +369,6 @@ export default function CobrosPage() {
           cargarCobros()
         }}
       />
-    </PageLayout>
+    </div>
   )
 }
