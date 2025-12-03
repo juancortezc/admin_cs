@@ -6,8 +6,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Navbar from '@/app/components/Navbar'
+import MainNavbar from '@/app/components/MainNavbar'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { use } from 'react'
 
 type Cobro = {
@@ -84,32 +85,15 @@ export default function HistorialEspacioPage({
     )
   })
 
-  const getColorEstado = (estado: string) => {
-    switch (estado) {
-      case 'PAGADO':
-      case 'COBRADO':
-        return 'bg-gray-500/10 text-gray-700 border-gray-500/20'
-      case 'PENDIENTE':
-        return 'bg-blue-500/10 text-blue-700 border-blue-500/20'
-      case 'PARCIAL':
-        return 'bg-orange-500/10 text-orange-700 border-orange-500/20'
-      default:
-        return 'bg-gray-100 text-gray-700'
-    }
-  }
-
   const totalRecaudado = cobros.reduce((sum, c) => sum + c.montoPagado, 0)
   const totalPactado = cobros.reduce((sum, c) => sum + c.montoPactado, 0)
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Estado de cuenta" />
+      <div className="min-h-screen bg-gray-50">
+        <MainNavbar activeSection="cobros" />
         <div className="flex items-center justify-center h-96">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
-          </div>
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
@@ -117,210 +101,166 @@ export default function HistorialEspacioPage({
 
   if (!espacio) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Estado de cuenta" />
+      <div className="min-h-screen bg-gray-50">
+        <MainNavbar activeSection="cobros" />
         <div className="flex items-center justify-center h-96">
-          <p className="text-gray-600">Espacio no encontrado</p>
+          <p className="text-gray-500">Espacio no encontrado</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Estado de cuenta" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="cobros" />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header con Back Button + Título + Búsqueda */}
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Left: Back button + Título */}
-            <div className="flex items-center gap-3">
-              {/* Back Button */}
-              <button
-                onClick={() => router.push('/cobros/espacios')}
-                className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-all"
-                title="Volver"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-              </button>
-
-              {/* Título con info del espacio */}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Historial de Cobros - {espacio.identificador}
-                </h1>
-                <p className="text-sm text-gray-600 mt-1">
-                  {espacio.tipo}
-                  {espacio.arrendatario && ` • ${espacio.arrendatario.nombre}`}
-                </p>
-              </div>
-            </div>
-
-            {/* Right: Búsqueda */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar cobro..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="w-64 px-4 py-2 pl-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-white"
-              />
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/cobros/espacios')}
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
+            </button>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">
+                Historial - {espacio.identificador}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {espacio.tipo}
+                {espacio.arrendatario && ` • ${espacio.arrendatario.nombre}`}
+              </p>
             </div>
+          </div>
+
+          {/* Búsqueda */}
+          <div className="relative w-full md:w-64">
+            <input
+              type="text"
+              placeholder="Buscar cobro..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full px-4 py-2 pl-10 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-            <div className="text-sm text-gray-600 mb-1">Total de Cobros</div>
-            <div className="text-3xl font-bold text-gray-900">{cobros.length}</div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-            <div className="text-sm text-gray-600 mb-1">Total Recaudado</div>
-            <div className="text-3xl font-bold text-emerald-600">
-              ${totalRecaudado.toLocaleString()}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Total Cobros</p>
+                <p className="text-xl font-bold text-gray-900">{cobros.length}</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
-            <div className="text-sm text-gray-600 mb-1">Total Pactado</div>
-            <div className="text-3xl font-bold text-gray-900">
-              ${totalPactado.toLocaleString()}
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Total Recaudado</p>
+                <p className="text-xl font-bold text-emerald-600">${totalRecaudado.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 font-medium">Total Pactado</p>
+                <p className="text-xl font-bold text-gray-900">${totalPactado.toLocaleString()}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Tabla Excel-like de Cobros */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-                <tr>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Código</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Fecha Pago</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Periodo</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Concepto</th>
-                  <th className="px-4 py-4 text-left text-sm font-semibold">Método</th>
-                  <th className="px-4 py-4 text-right text-sm font-semibold">Monto Pactado</th>
-                  <th className="px-4 py-4 text-right text-sm font-semibold">Monto Pagado</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold">Estado</th>
-                  <th className="px-4 py-4 text-center text-sm font-semibold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {cobrosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
-                      No se encontraron cobros
-                    </td>
-                  </tr>
-                ) : (
-                  cobrosFiltrados.map((cobro) => (
-                    <tr
-                      key={cobro.id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => router.push(`/cobros/${cobro.id}`)}
-                    >
-                      <td className="px-4 py-3 text-sm font-medium text-indigo-600">
-                        {cobro.codigoInterno}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
-                        {cobro.periodo || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{cobro.concepto}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{cobro.metodoPago}</td>
-                      <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
-                        ${cobro.montoPactado.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-right font-medium text-emerald-600">
-                        ${cobro.montoPagado.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span
-                          className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold border ${getColorEstado(
-                            cobro.estado
-                          )}`}
-                        >
-                          {cobro.estado}
+        {/* Lista de Cobros */}
+        {cobrosFiltrados.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            <p className="text-gray-500">No se encontraron cobros</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="divide-y divide-gray-50">
+              {cobrosFiltrados.map((cobro) => (
+                <Link
+                  key={cobro.id}
+                  href={`/cobros/${cobro.id}`}
+                  className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-2 h-12 rounded-full ${
+                      cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                        ? 'bg-emerald-500'
+                        : cobro.estado === 'PARCIAL'
+                        ? 'bg-amber-500'
+                        : 'bg-red-500'
+                    }`} />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900">
+                          {cobro.periodo || new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              router.push(`/cobros/${cobro.id}`)
-                            }}
-                            className="p-2 rounded-lg hover:bg-indigo-50 transition-all"
-                            title="Ver detalles"
-                          >
-                            <svg
-                              className="w-4 h-4 text-indigo-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                              />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                        <span className="text-xs text-gray-400">{cobro.codigoInterno}</span>
+                      </div>
+                      <p className="text-sm text-gray-500">{cobro.concepto} • {cobro.metodoPago}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-gray-900">${cobro.montoPagado.toLocaleString()}</p>
+                    <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                      cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : cobro.estado === 'PARCIAL'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {cobro.estado}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
 
-          {/* Footer con total de registros */}
-          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
-              Total: <span className="font-semibold text-gray-900">{cobrosFiltrados.length}</span>{' '}
-              cobro(s)
-            </p>
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
+              <p className="text-sm text-gray-500">
+                {cobrosFiltrados.length} cobro(s) encontrado(s)
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )

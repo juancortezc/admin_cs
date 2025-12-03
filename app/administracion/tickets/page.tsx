@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/app/components/Navbar'
+import MainNavbar from '@/app/components/MainNavbar'
 import TabsPill from '@/app/components/TabsPill'
 import { WrenchIcon, CoinsIcon, BoxIcon } from '@/app/components/icons'
 import ModalTicket from '@/app/components/ModalTicket'
@@ -111,8 +111,8 @@ export default function MantenimientoPage() {
   const ticketsFiltrados = tickets
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Tickets" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="pagos" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header con Material Design 3 */}

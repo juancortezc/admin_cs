@@ -8,9 +8,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/app/components/Navbar'
-import TabsPill from '@/app/components/TabsPill'
-import { CreditCardIcon, CashIcon, RefreshIcon, CoinsIcon, WrenchIcon, BoxIcon } from '@/app/components/icons'
+import MainNavbar from '@/app/components/MainNavbar'
 
 type Pago = {
   id: string
@@ -31,7 +29,6 @@ type Pago = {
 type CategoriaAgrupada = {
   categoria: string
   nombre: string
-  gradiente: string
   totalPagos: number
   montoTotal: number
   pagos: Pago[]
@@ -167,41 +164,37 @@ export default function AdministracionPagosPage() {
       const categoriasMap = new Map<string, CategoriaAgrupada>()
 
       // Categorías predefinidas para tipos especiales
-      const categoriasEspeciales: Record<string, {nombre: string, gradiente: string}> = {
-        'arriendo': { nombre: 'Arriendos', gradiente: 'from-emerald-500 to-teal-500' },
-        'airbnb': { nombre: 'Airbnb', gradiente: 'from-pink-500 to-rose-500' },
-        'servicio': { nombre: 'Servicios Básicos (BD)', gradiente: 'from-blue-500 to-cyan-500' },
-        'salario': { nombre: 'Salarios', gradiente: 'from-purple-500 to-pink-500' },
-        'SERVICIOS_PUBLICOS': { nombre: 'Servicios Públicos', gradiente: 'from-blue-500 to-cyan-500' },
-        'SERVICIOS_PERSONALES': { nombre: 'Servicios Personales', gradiente: 'from-indigo-500 to-purple-500' },
-        'MANTENIMIENTO': { nombre: 'Mantenimiento', gradiente: 'from-orange-500 to-amber-500' },
-        'LIMPIEZA': { nombre: 'Limpieza', gradiente: 'from-teal-500 to-emerald-500' },
-        'HONORARIOS': { nombre: 'Honorarios', gradiente: 'from-violet-500 to-purple-500' },
-        'IMPUESTOS': { nombre: 'Impuestos', gradiente: 'from-red-500 to-rose-500' },
-        'OTROS': { nombre: 'Otros', gradiente: 'from-gray-500 to-slate-500' }
+      const categoriasEspeciales: Record<string, {nombre: string}> = {
+        'arriendo': { nombre: 'Arriendos' },
+        'airbnb': { nombre: 'Airbnb' },
+        'servicio': { nombre: 'Servicios Básicos (BD)' },
+        'salario': { nombre: 'Salarios' },
+        'SERVICIOS_PUBLICOS': { nombre: 'Servicios Públicos' },
+        'SERVICIOS_PERSONALES': { nombre: 'Servicios Personales' },
+        'MANTENIMIENTO': { nombre: 'Mantenimiento' },
+        'LIMPIEZA': { nombre: 'Limpieza' },
+        'HONORARIOS': { nombre: 'Honorarios' },
+        'IMPUESTOS': { nombre: 'Impuestos' },
+        'OTROS': { nombre: 'Otros' }
       }
 
       pagosFiltradosPorMes.forEach((pago: Pago) => {
         // Determinar la categoría
         let categoriaKey: string
         let categoriaNombre: string
-        let categoriaGradiente: string
 
         if (pago.tipo === 'arriendo' || pago.tipo === 'servicio' || pago.tipo === 'salario' || pago.tipo === 'airbnb') {
           // Usar el tipo como categoría
           categoriaKey = pago.tipo
           categoriaNombre = categoriasEspeciales[pago.tipo]?.nombre || pago.tipoLabel
-          categoriaGradiente = categoriasEspeciales[pago.tipo]?.gradiente || 'from-gray-500 to-slate-500'
         } else if (pago.categoria && categoriasEspeciales[pago.categoria]) {
           // Usar la categoría específica de OtrosPagos
           categoriaKey = pago.categoria
           categoriaNombre = categoriasEspeciales[pago.categoria].nombre
-          categoriaGradiente = categoriasEspeciales[pago.categoria].gradiente
         } else {
           // Fallback a OTROS
           categoriaKey = 'OTROS'
           categoriaNombre = 'Otros'
-          categoriaGradiente = 'from-gray-500 to-slate-500'
         }
 
         // Obtener o crear categoría
@@ -209,7 +202,6 @@ export default function AdministracionPagosPage() {
           categoriasMap.set(categoriaKey, {
             categoria: categoriaKey,
             nombre: categoriaNombre,
-            gradiente: categoriaGradiente,
             totalPagos: 0,
             montoTotal: 0,
             pagos: []
@@ -421,245 +413,261 @@ export default function AdministracionPagosPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Pagos" />
+      <div className="min-h-screen bg-gray-50">
+        <MainNavbar activeSection="pagos" />
         <div className="flex items-center justify-center h-96">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
-          </div>
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
   }
 
   const tabs = [
-    { id: 'estado', nombre: 'Estado de cuenta', icon: <CreditCardIcon /> },
-    { id: 'eventuales', nombre: 'Pagos Eventuales', icon: <CashIcon /> },
-    { id: 'recurrentes', nombre: 'Pagos Recurrentes', icon: <RefreshIcon /> },
+    { id: 'estado', nombre: 'Estado de cuenta' },
+    { id: 'eventuales', nombre: 'Pagos Eventuales' },
+    { id: 'recurrentes', nombre: 'Pagos Recurrentes' },
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Pagos" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="pagos" />
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header con Material Design 3 */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
-              <CreditCardIcon className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Administración de Pagos</h1>
-              <p className="text-sm text-gray-600 mt-0.5">
-                Gestión de pagos eventuales, recurrentes y estado de cuenta
-              </p>
-            </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Header con título y filtros */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold text-gray-900">Pagos</h1>
+            {activeTab === 'estado' && (
+              <input
+                type="month"
+                value={mesSeleccionado}
+                onChange={(e) => setMesSeleccionado(e.target.value)}
+                className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            )}
+          </div>
+
+          {/* Navegación a otras secciones */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push('/administracion/tickets')}
+              className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Tickets
+            </button>
+            <button
+              onClick={() => router.push('/administracion/inventario')}
+              className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Inventario
+            </button>
           </div>
         </div>
 
-        {/* Navigation Tabs - Administración */}
-        <div className="mb-6">
-          <TabsPill
-            tabs={[
-              { id: 'pagos', nombre: 'Pagos', icon: <CoinsIcon /> },
-              { id: 'tickets', nombre: 'Tickets', icon: <WrenchIcon /> },
-              { id: 'inventario', nombre: 'Inventario', icon: <BoxIcon /> },
-            ]}
-            activeTab="pagos"
-            onTabChange={(tabId) => {
-              if (tabId === 'tickets') router.push('/administracion/tickets')
-              else if (tabId === 'inventario') router.push('/administracion/inventario')
-            }}
-          />
-        </div>
-
-        {/* Tabs y Filtros */}
-        <div className="mb-6 flex items-center justify-between gap-4 flex-wrap">
-          <TabsPill
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as any)}
-          />
-
-          {/* Selector de Mes - Solo visible en tab Estado */}
-          {activeTab === 'estado' && (
-            <div className="min-w-[200px]">
-              <select
-                value={mesSeleccionado}
-                onChange={(e) => setMesSeleccionado(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all bg-white shadow-sm"
-              >
-                {mesesDisponibles.map(mes => (
-                  <option key={mes.value} value={mes.value}>{mes.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
+        {/* Tabs de filtro */}
+        <div className="flex items-center gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-indigo-100 text-indigo-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              {tab.nombre}
+            </button>
+          ))}
         </div>
 
         {activeTab === 'estado' && (
           <>
-            {/* Resumen del Mes */}
-            <div className="mb-6">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">Resumen del Mes</h3>
-                      <p className="text-white/80 text-sm mt-1">
-                        {mesesDisponibles.find(m => m.value === mesSeleccionado)?.label}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold text-white">${montoTotalMes.toLocaleString()}</p>
-                      <p className="text-white/80 text-sm mt-1">{totalPagosMes} pago{totalPagosMes !== 1 ? 's' : ''}</p>
-                    </div>
+            {/* Cards de resumen */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Total del Mes */}
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Total Mes</p>
+                    <p className="text-xl font-bold text-gray-900">${montoTotalMes.toLocaleString()}</p>
                   </div>
                 </div>
+              </div>
 
-                {/* Desglose por categorías */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-sm font-semibold text-gray-700">
-                      {categoriaFiltrada ? 'Categoría seleccionada' : 'Desglose por Categoría'}
-                    </h4>
-                    {categoriaFiltrada && (
-                      <button
-                        onClick={() => setCategoriaFiltrada(null)}
-                        className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-                      >
-                        Mostrar todas
-                      </button>
-                    )}
+              {/* Cantidad de Pagos */}
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {categoriasAgrupadas.map((categoria) => (
-                      <div
-                        key={categoria.categoria}
-                        onClick={() => setCategoriaFiltrada(categoriaFiltrada === categoria.categoria ? null : categoria.categoria)}
-                        className={`flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer transition-all hover:shadow-md ${
-                          categoriaFiltrada === categoria.categoria ? 'scale-110 ring-2 ring-indigo-500' : ''
-                        }`}
-                      >
-                        <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${categoria.gradiente}`}></div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-gray-900 truncate">{categoria.nombre}</p>
-                          <p className="text-sm font-bold text-gray-900">${categoria.montoTotal.toLocaleString()}</p>
-                          <p className="text-xs text-gray-500">{categoria.totalPagos} pago{categoria.totalPagos !== 1 ? 's' : ''}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Pagos</p>
+                    <p className="text-xl font-bold text-gray-900">{totalPagosMes}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Categorías */}
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Categorías</p>
+                    <p className="text-xl font-bold text-gray-900">{categoriasAgrupadas.length}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filtro Activo */}
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Filtro</p>
+                    <p className="text-sm font-bold text-gray-900 truncate">{categoriaFiltrada ? categoriasAgrupadas.find(c => c.categoria === categoriaFiltrada)?.nombre || 'Seleccionado' : 'Todos'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Barra de búsqueda */}
-            <div className="mb-6">
+            {/* Filtros por categoría y búsqueda */}
+            <div className="flex items-center gap-4 flex-wrap">
+              {/* Chips de categorías */}
+              <div className="flex items-center gap-2 flex-wrap flex-1">
+                <button
+                  onClick={() => setCategoriaFiltrada(null)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    !categoriaFiltrada
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  Todas
+                </button>
+                {categoriasAgrupadas.map((cat) => (
+                  <button
+                    key={cat.categoria}
+                    onClick={() => setCategoriaFiltrada(categoriaFiltrada === cat.categoria ? null : cat.categoria)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      categoriaFiltrada === cat.categoria
+                        ? 'bg-indigo-100 text-indigo-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat.nombre} ({cat.totalPagos})
+                  </button>
+                ))}
+              </div>
+
+              {/* Búsqueda */}
               <div className="relative">
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
                 <input
                   type="text"
-                  placeholder="Buscar por título, descripción..."
+                  placeholder="Buscar..."
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-gray-400 bg-white"
+                  className="w-64 px-4 py-2 pl-10 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
 
-            {categoriasFiltradas.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {categoriasFiltradas
-                  .filter(cat => !categoriaFiltrada || cat.categoria === categoriaFiltrada)
-                  .map((categoria) => (
-                  <div key={categoria.categoria} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all">
-                    <div
-                      className={`bg-gradient-to-r ${categoria.gradiente} p-4 cursor-pointer`}
-                      onClick={() => setCategoriaExpandida(categoriaExpandida === categoria.categoria ? null : categoria.categoria)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold text-white">{categoria.nombre}</h3>
-                          <p className="text-sm text-white/80 mt-0.5">{categoria.totalPagos} pago{categoria.totalPagos !== 1 ? 's' : ''}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-white">${categoria.montoTotal.toLocaleString()}</p>
-                          <p className="text-xs text-white/80">Click para ver detalle</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 space-y-2">
-                      {categoria.pagos.map((pago) => (
-                        <div key={pago.id} className="group flex items-start justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-900 text-sm">{pago.titulo}</p>
-                            <p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{pago.descripcion}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-xs text-gray-500">
-                                {new Date(pago.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' })}
-                              </p>
+            {/* Lista de pagos */}
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              {categoriasFiltradas.length > 0 ? (
+                <div className="divide-y divide-gray-100">
+                  {categoriasFiltradas
+                    .filter(cat => !categoriaFiltrada || cat.categoria === categoriaFiltrada)
+                    .flatMap((categoria) => categoria.pagos)
+                    .map((pago) => (
+                      <div key={pago.id} className="group flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${pago.esIngreso ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                            <svg className={`w-5 h-5 ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {pago.esIngreso ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8l-8-8-8 8" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20V4m-8 8l8 8 8-8" />
+                              )}
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm">{pago.titulo}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-gray-500">{pago.descripcion}</span>
+                              <span className="text-gray-300">•</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(pago.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
+                              </span>
                               {pago.formaPago && (
                                 <>
                                   <span className="text-gray-300">•</span>
-                                  <p className="text-xs text-gray-500">{pago.formaPago}</p>
+                                  <span className="text-xs text-gray-400">{pago.formaPago}</span>
                                 </>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 ml-3">
-                            <div className="text-right">
-                              <p className={`text-sm font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
-                                {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
-                              </p>
-                            </div>
-                            {/* Botones de acción */}
-                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setPagoEditando(pago)
-                                }}
-                                className="p-1.5 hover:bg-indigo-100 rounded-lg transition-colors"
-                                title="Editar"
-                              >
-                                <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  setPagoEliminando(pago)
-                                }}
-                                className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                                title="Eliminar"
-                              >
-                                <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <p className={`text-sm font-bold ${pago.esIngreso ? 'text-emerald-600' : 'text-red-600'}`}>
+                            {pago.esIngreso ? '+' : '-'}${pago.monto.toLocaleString()}
+                          </p>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => setPagoEditando(pago)}
+                              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                              title="Editar"
+                            >
+                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setPagoEliminando(pago)}
+                              className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Eliminar"
+                            >
+                              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-white rounded-2xl border border-gray-200">
-                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                </svg>
-                <p className="text-sm text-gray-500">{busqueda ? 'No se encontraron pagos' : 'No hay pagos registrados'}</p>
-              </div>
-            )}
+                      </div>
+                    ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
+                  </svg>
+                  <p className="text-sm text-gray-500">{busqueda ? 'No se encontraron pagos' : 'No hay pagos registrados'}</p>
+                </div>
+              )}
+            </div>
 
             {/* Modal estilo Excel */}
             {categoriaExpandida && (
@@ -671,17 +679,17 @@ export default function AdministracionPagosPage() {
 
                     return (
                       <>
-                        <div className={`bg-gradient-to-r ${categoria.gradiente} p-6`}>
+                        <div className="p-6 border-b border-gray-100">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h2 className="text-2xl font-bold text-white">{categoria.nombre}</h2>
-                              <p className="text-white/90 mt-1">{categoria.totalPagos} pagos • ${categoria.montoTotal.toLocaleString()}</p>
+                              <h2 className="text-lg font-semibold text-gray-900">{categoria.nombre}</h2>
+                              <p className="text-sm text-gray-500 mt-1">{categoria.totalPagos} pagos • ${categoria.montoTotal.toLocaleString()}</p>
                             </div>
                             <button
                               onClick={() => setCategoriaExpandida(null)}
-                              className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                             >
-                              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                               </svg>
                             </button>
@@ -795,18 +803,18 @@ export default function AdministracionPagosPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowPagoEventualModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                  className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center gap-2 text-sm font-medium"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Pago Eventual
                 </button>
                 <button
                   onClick={() => setShowPagoParcialModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm font-medium"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   Pago Parcial
@@ -836,7 +844,7 @@ export default function AdministracionPagosPage() {
                             setCuentaSeleccionada(cuenta)
                             setShowAbonoModal(true)
                           }}
-                          className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-xs font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all shadow-sm"
+                          className="px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 transition-colors"
                         >
                           + Abono
                         </button>
@@ -896,10 +904,10 @@ export default function AdministracionPagosPage() {
                   <button
                     key={estado.value}
                     onClick={() => setFiltroEstado(estado.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       filtroEstado === estado.value
-                        ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
-                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                        ? 'bg-indigo-100 text-indigo-700'
+                        : 'text-gray-600 hover:bg-gray-100'
                     }`}
                   >
                     {estado.label}
@@ -912,9 +920,9 @@ export default function AdministracionPagosPage() {
                   setSelectedRecurring(null)
                   setShowRecurringModal(true)
                 }}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm font-medium"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 Crear Pago Recurrente
@@ -960,7 +968,7 @@ export default function AdministracionPagosPage() {
                               setPagoRecurrenteParaRegistrar(pago)
                               setShowRegistrarPagoRecurrenteModal(true)
                             }}
-                            className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-xs font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-all shadow-sm"
+                            className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-medium rounded-lg hover:bg-emerald-700 transition-colors"
                           >
                             Registrar Pago
                           </button>
@@ -1017,15 +1025,15 @@ export default function AdministracionPagosPage() {
         {/* Modal de Edición */}
         {pagoEditando && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPagoEditando(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-white">Editar Pago</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Editar Pago</h2>
                   <button
                     onClick={() => setPagoEditando(null)}
-                    className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                   >
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -1133,7 +1141,7 @@ export default function AdministracionPagosPage() {
               <div className="px-6 pb-6 flex gap-3 justify-end">
                 <button
                   onClick={() => setPagoEditando(null)}
-                  className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
                   disabled={guardando}
                 >
                   Cancelar
@@ -1141,7 +1149,7 @@ export default function AdministracionPagosPage() {
                 <button
                   onClick={guardarEdicionPago}
                   disabled={guardando}
-                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 text-sm font-medium"
                 >
                   {guardando ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
@@ -1153,25 +1161,25 @@ export default function AdministracionPagosPage() {
         {/* Modal de Confirmación de Eliminación */}
         {pagoEliminando && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setPagoEliminando(null)}>
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-gradient-to-r from-red-600 to-rose-600 p-6">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-white/20 rounded-xl">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-3 bg-red-100 rounded-xl">
+                    <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-white">Confirmar Eliminación</h2>
-                    <p className="text-white/90 text-sm mt-1">Esta acción no se puede deshacer</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Confirmar Eliminación</h2>
+                    <p className="text-sm text-gray-500 mt-0.5">Esta acción no se puede deshacer</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-6">
-                <p className="text-gray-700 mb-2">¿Estás seguro que deseas eliminar este pago?</p>
+                <p className="text-sm text-gray-700 mb-2">¿Estás seguro que deseas eliminar este pago?</p>
                 <div className="bg-gray-50 rounded-lg p-4 mt-4">
-                  <p className="font-semibold text-gray-900 text-sm">{pagoEliminando.titulo}</p>
+                  <p className="font-medium text-gray-900 text-sm">{pagoEliminando.titulo}</p>
                   <p className="text-xs text-gray-600 mt-1">{pagoEliminando.descripcion}</p>
                   <p className="text-sm font-bold text-red-600 mt-2">
                     ${pagoEliminando.monto.toLocaleString()}
@@ -1182,7 +1190,7 @@ export default function AdministracionPagosPage() {
               <div className="px-6 pb-6 flex gap-3 justify-end">
                 <button
                   onClick={() => setPagoEliminando(null)}
-                  className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
                   disabled={guardando}
                 >
                   Cancelar
@@ -1190,7 +1198,7 @@ export default function AdministracionPagosPage() {
                 <button
                   onClick={() => eliminarPago(pagoEliminando)}
                   disabled={guardando}
-                  className="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50 text-sm font-medium"
                 >
                   {guardando ? 'Eliminando...' : 'Eliminar Pago'}
                 </button>
@@ -1202,12 +1210,12 @@ export default function AdministracionPagosPage() {
         {/* Modal: Crear/Editar Pago Recurrente */}
         {showRecurringModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}}>
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-white p-6 border-b border-gray-100">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-white">{selectedRecurring ? 'Editar Pago Recurrente' : 'Nuevo Pago Recurrente'}</h2>
-                  <button onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <h2 className="text-lg font-semibold text-gray-900">{selectedRecurring ? 'Editar Pago Recurrente' : 'Nuevo Pago Recurrente'}</h2>
+                  <button onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
@@ -1282,7 +1290,7 @@ export default function AdministracionPagosPage() {
                   </div>
                   <div className="flex gap-2 pt-2">
                     <button type="button" onClick={() => {setShowRecurringModal(false); setSelectedRecurring(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
-                    <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : (selectedRecurring ? 'Actualizar' : 'Crear') + ' Pago Recurrente'}</button>
+                    <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : (selectedRecurring ? 'Actualizar' : 'Crear') + ' Pago Recurrente'}</button>
                   </div>
                 </form>
               </div>
@@ -1293,15 +1301,15 @@ export default function AdministracionPagosPage() {
         {/* Modal: Crear Pago Eventual */}
         {showPagoEventualModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowPagoEventualModal(false)}>
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="sticky top-0 bg-gradient-to-r from-emerald-600 to-green-600 p-6 rounded-t-2xl">
+            <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-white p-6 border-b border-gray-100 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Nuevo Pago Eventual</h2>
-                    <p className="text-sm text-white/90 mt-1">Registrar un pago único no recurrente</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Nuevo Pago Eventual</h2>
+                    <p className="text-sm text-gray-500 mt-1">Registrar un pago único no recurrente</p>
                   </div>
-                  <button onClick={() => setShowPagoEventualModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={() => setShowPagoEventualModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
@@ -1433,7 +1441,7 @@ export default function AdministracionPagosPage() {
 
                 <div className="flex gap-2 pt-2 border-t border-gray-200">
                   <button type="button" onClick={() => setShowPagoEventualModal(false)} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
-                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors disabled:opacity-50">{guardando ? 'Creando...' : 'Crear Pago Eventual'}</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">{guardando ? 'Creando...' : 'Crear Pago Eventual'}</button>
                 </div>
               </form>
             </div>
@@ -1443,15 +1451,15 @@ export default function AdministracionPagosPage() {
         {/* Modal: Crear Pago Parcial (Selector de Cuenta) */}
         {showPagoParcialModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => setShowPagoParcialModal(false)}>
-            <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 p-6 rounded-t-2xl">
+            <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="sticky top-0 bg-white p-6 border-b border-gray-100 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Registrar Pago Parcial</h2>
-                    <p className="text-sm text-white/90 mt-1">Selecciona la cuenta y registra el abono</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Registrar Pago Parcial</h2>
+                    <p className="text-sm text-gray-500 mt-1">Selecciona la cuenta y registra el abono</p>
                   </div>
-                  <button onClick={() => setShowPagoParcialModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={() => setShowPagoParcialModal(false)} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
@@ -1530,15 +1538,15 @@ export default function AdministracionPagosPage() {
         {/* Modal: Registrar Pago desde Pago Recurrente */}
         {showRegistrarPagoRecurrenteModal && pagoRecurrenteParaRegistrar && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}}>
-            <div className="bg-white rounded-2xl max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-gradient-to-r from-emerald-600 to-green-600 p-6 rounded-t-2xl">
+            <div className="bg-white rounded-xl max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-100 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Registrar Pago</h2>
-                    <p className="text-sm text-white/90 mt-1">{pagoRecurrenteParaRegistrar.nombre}</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Registrar Pago</h2>
+                    <p className="text-sm text-gray-500 mt-1">{pagoRecurrenteParaRegistrar.nombre}</p>
                   </div>
-                  <button onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
@@ -1642,7 +1650,7 @@ export default function AdministracionPagosPage() {
 
                 <div className="flex gap-2 pt-2 border-t border-gray-200">
                   <button type="button" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
-                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-sm font-medium rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors disabled:opacity-50">{guardando ? 'Registrando...' : 'Registrar Pago'}</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">{guardando ? 'Registrando...' : 'Registrar Pago'}</button>
                 </div>
               </form>
             </div>
@@ -1652,15 +1660,15 @@ export default function AdministracionPagosPage() {
         {/* Modal: Registrar Abono */}
         {showAbonoModal && cuentaSeleccionada && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}}>
-            <div className="bg-white rounded-2xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6 rounded-t-2xl">
+            <div className="bg-white rounded-xl max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6 border-b border-gray-100 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-white">Registrar Abono</h2>
-                    <p className="text-sm text-white/90 mt-1">{cuentaSeleccionada.espacioIdentificador} - {cuentaSeleccionada.arrendatarioNombre}</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Registrar Abono</h2>
+                    <p className="text-sm text-gray-500 mt-1">{cuentaSeleccionada.espacioIdentificador} - {cuentaSeleccionada.arrendatarioNombre}</p>
                   </div>
-                  <button onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <button onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               </div>
@@ -1745,7 +1753,7 @@ export default function AdministracionPagosPage() {
 
                 <div className="flex gap-2 pt-2">
                   <button type="button" onClick={() => {setShowAbonoModal(false); setCuentaSeleccionada(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
-                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : 'Registrar Abono'}</button>
+                  <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">{guardando ? 'Guardando...' : 'Registrar Abono'}</button>
                 </div>
               </form>
             </div>

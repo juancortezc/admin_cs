@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/app/components/Navbar'
+import MainNavbar from '@/app/components/MainNavbar'
 import TabsPill from '@/app/components/TabsPill'
 import { BoxIcon, ArrowsExchangeIcon, ChartBarIcon, GiftIcon, CoinsIcon, WrenchIcon } from '@/app/components/icons'
 import ItemsTab from '@/app/components/inventario/ItemsTab'
@@ -28,8 +28,8 @@ export default function InventarioPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Inventario" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="pagos" />
 
       <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
         {/* Header con Material Design 3 */}

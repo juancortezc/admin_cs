@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Navbar from '@/app/components/Navbar'
+import MainNavbar from '@/app/components/MainNavbar'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -123,247 +123,171 @@ export default function EspaciosPage() {
 
   if (cargando) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-        <Navbar activeTab="Estado de cuenta" />
+      <div className="min-h-screen bg-gray-50">
+        <MainNavbar activeSection="cobros" />
         <div className="flex items-center justify-center h-96">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-sm text-gray-600 font-medium">Cargando...</p>
-          </div>
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
-      <Navbar activeTab="Estado de cuenta" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="cobros" />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Navigation Buttons + Search (Primera Fila) */}
-        <div className="mb-6">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Left: Navigation buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                onClick={() => setActiveView('espacios')}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  activeView === 'espacios'
-                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                Por Espacio
-              </button>
-              <button
-                onClick={() => {
-                  setActiveView('todos')
-                  router.push('/cobros')
-                }}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  activeView === 'todos'
-                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                Todos los Cobros
-              </button>
-              <button
-                onClick={() => {
-                  setActiveView('parciales')
-                  router.push('/cobros/parciales')
-                }}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  activeView === 'parciales'
-                    ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200 transform scale-105'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                Pagos Parciales
-              </button>
-            </div>
-
-            {/* Right: Compact Search */}
-            <div className="flex gap-2 items-center flex-wrap">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Buscar espacio o arrendatario..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="w-64 px-4 py-2 pl-10 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent bg-white"
-                />
-                <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
-            </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold text-gray-900">Cobros por Espacio</h1>
           </div>
+
+          {/* Tabs de navegación */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/cobros"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Todos
+            </Link>
+            <button
+              className="px-4 py-2 text-sm font-medium bg-indigo-100 text-indigo-700 rounded-lg"
+            >
+              Por Espacio
+            </button>
+            <Link
+              href="/cobros/parciales"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              Parciales
+            </Link>
+          </div>
+        </div>
+
+        {/* Búsqueda */}
+        <div className="relative w-full md:w-64">
+          <input
+            type="text"
+            placeholder="Buscar espacio o arrendatario..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="w-full px-4 py-2 pl-10 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
 
         {/* Espacios Cards */}
         {espaciosFiltrados.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No se encontraron espacios</h3>
-            <p className="mt-1 text-sm text-gray-500">Intenta ajustar la búsqueda.</p>
+            <p className="text-gray-500">No se encontraron espacios</p>
           </div>
         ) : (
           <div className="space-y-4">
             {espaciosFiltrados.map((espacio) => (
               <div
                 key={espacio.espacioId}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md hover:border-gray-200 transition-all"
               >
                 {/* Space Header */}
-                <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+                <div className="px-4 py-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                       <Link
                         href={`/espacios/${espacio.espacioId}`}
-                        className="text-xl font-bold text-indigo-700 hover:text-indigo-900"
+                        className="text-base font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
                       >
                         {espacio.espacioIdentificador}
                       </Link>
-                      <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full font-medium">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                         {espacio.espacioTipo}
                       </span>
                       {espacio.arrendatarioNombre && (
-                        <span className="text-sm text-gray-700 font-medium">
-                          • {espacio.arrendatarioNombre}
+                        <span className="text-sm text-gray-600">
+                          {espacio.arrendatarioNombre}
                         </span>
                       )}
                     </div>
 
                     <div className="text-right">
-                      <div className="text-xs text-gray-600 mb-1">Total Recaudado</div>
-                      <div className="text-2xl font-bold text-emerald-600">
+                      <p className="text-xl font-bold text-emerald-600">
                         ${espacio.totalRecaudado.toLocaleString()}
-                      </div>
+                      </p>
+                      <p className="text-xs text-gray-500">recaudado</p>
                     </div>
                   </div>
 
                   {/* Stats Row */}
-                  <div className="flex items-center gap-6 mt-3 text-sm">
-                    <div>
-                      <span className="text-gray-600">Cobros:</span>{' '}
-                      <span className="font-semibold text-gray-900">{espacio.totalCobros}</span>
-                    </div>
+                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                    <span>{espacio.totalCobros} cobros</span>
                     {espacio.montoPactadoMensual && (
-                      <div>
-                        <span className="text-gray-600">Monto mensual:</span>{' '}
-                        <span className="font-semibold text-gray-900">
-                          ${espacio.montoPactadoMensual.toLocaleString()}
-                        </span>
-                      </div>
+                      <span>${espacio.montoPactadoMensual.toLocaleString()}/mes</span>
                     )}
                     {espacio.ultimoPago && (
-                      <div>
-                        <span className="text-gray-600">Último pago:</span>{' '}
-                        <span className="font-semibold text-gray-900">
-                          {new Date(espacio.ultimoPago.fecha).toLocaleDateString('es-EC')}
-                        </span>
-                      </div>
+                      <span>Último: {new Date(espacio.ultimoPago.fecha).toLocaleDateString('es-EC')}</span>
                     )}
                   </div>
                 </div>
 
-                {/* Cobros Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
-                          Código
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
-                          Periodo
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600">
-                          Concepto
-                        </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">
-                          Pactado
-                        </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600">
-                          Pagado
-                        </th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600">
-                          Estado
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {espacio.cobros.slice(0, 2).map((cobro) => (
-                        <tr
-                          key={cobro.id}
-                          onClick={() => router.push(`/cobros/${cobro.id}`)}
-                          className="hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
-                          <td className="px-4 py-3 text-sm font-medium text-indigo-600">
-                            {cobro.codigoInterno}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-700">
+                {/* Últimos cobros */}
+                <div className="divide-y divide-gray-50">
+                  {espacio.cobros.slice(0, 2).map((cobro) => (
+                    <Link
+                      key={cobro.id}
+                      href={`/cobros/${cobro.id}`}
+                      className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-8 rounded-full ${
+                          cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                            ? 'bg-emerald-500'
+                            : cobro.estado === 'PARCIAL'
+                            ? 'bg-amber-500'
+                            : 'bg-red-500'
+                        }`} />
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">
                             {cobro.periodo || new Date(cobro.fechaPago).toLocaleDateString('es-EC')}
-                          </td>
-                          <td className="px-4 py-3 text-xs text-gray-600">{cobro.concepto}</td>
-                          <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
-                            ${cobro.montoPactado.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-right font-semibold text-emerald-600">
-                            ${cobro.montoPagado.toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span
-                              className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
-                                cobro.estado === 'PAGADO'
-                                  ? 'bg-gray-100 text-gray-700'
-                                  : cobro.estado === 'PENDIENTE'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : 'bg-orange-100 text-orange-700'
-                              }`}
-                            >
-                              {cobro.estado}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </p>
+                          <p className="text-xs text-gray-500">{cobro.concepto}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          ${cobro.montoPagado.toLocaleString()}
+                        </p>
+                        <span className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                          cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : cobro.estado === 'PARCIAL'
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {cobro.estado}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
 
                 {/* Show more link */}
                 {espacio.cobros.length > 2 && (
-                  <div className="bg-gray-50 px-6 py-3 text-center border-t border-gray-200">
-                    <Link
-                      href={`/cobros/historial/${espacio.espacioId}`}
-                      className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
-                    >
-                      Ver todos los {espacio.cobros.length} cobros →
-                    </Link>
-                  </div>
+                  <Link
+                    href={`/cobros/historial/${espacio.espacioId}`}
+                    className="block px-4 py-3 text-center text-sm text-indigo-600 hover:bg-indigo-50 transition-colors border-t border-gray-100"
+                  >
+                    Ver los {espacio.cobros.length} cobros
+                  </Link>
                 )}
               </div>
             ))}
@@ -371,11 +295,9 @@ export default function EspaciosPage() {
         )}
 
         {/* Footer */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            Total: <span className="font-semibold text-gray-900">{espaciosFiltrados.length}</span> espacio(s)
-          </p>
-        </div>
+        <p className="text-sm text-gray-500 text-center">
+          {espaciosFiltrados.length} espacio(s) encontrado(s)
+        </p>
       </main>
     </div>
   )

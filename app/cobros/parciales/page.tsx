@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Navbar from '@/app/components/Navbar'
+import MainNavbar from '@/app/components/MainNavbar'
 import Link from 'next/link'
 
 type PagoParcial = {
@@ -50,107 +50,103 @@ export default function ParcialesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Navbar activeTab="Estado de cuenta" />
+    <div className="min-h-screen bg-gray-50">
+      <MainNavbar activeSection="cobros" />
 
-      <main className="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Tabs con Material Design */}
-        <div className="mb-6">
-          <div className="inline-flex bg-white/60 backdrop-blur-sm rounded-xl p-1 gap-1 shadow-sm border border-gray-200">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 className="text-lg font-semibold text-gray-900">Pagos Parciales</h1>
+
+          {/* Tabs de navegación */}
+          <div className="flex items-center gap-2">
             <Link
               href="/cobros"
-              className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-white/50 transition-all"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              Todos los Cobros
-            </Link>
-            <Link
-              href="/cobros/parciales"
-              className="px-6 py-2.5 rounded-lg text-sm font-medium bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md transition-all"
-            >
-              Pagos Parciales
+              Todos
             </Link>
             <Link
               href="/cobros/espacios"
-              className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-white/50 transition-all"
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             >
               Por Espacio
             </Link>
+            <button
+              className="px-4 py-2 text-sm font-medium bg-indigo-100 text-indigo-700 rounded-lg"
+            >
+              Parciales
+            </button>
           </div>
         </div>
 
         {/* Content */}
         {cargando ? (
-          <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
-            <p className="mt-4 text-sm font-medium text-gray-600">Cargando pagos parciales...</p>
+          <div className="flex items-center justify-center h-64">
+            <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : pagosParciales.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-green-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
+          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              No hay pagos parciales pendientes
-            </h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Todos los cobros están completamente pagados o pendientes.
-            </p>
+            <h3 className="text-base font-semibold text-gray-900">No hay pagos parciales pendientes</h3>
+            <p className="mt-1 text-sm text-gray-500">Todos los cobros están pagados o pendientes.</p>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Summary Cards con Material Design */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Total con Pagos Parciales */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-4">
-                  <p className="text-sm font-medium text-white/80">Total con Pagos Parciales</p>
-                  <p className="text-3xl font-bold text-white mt-1">{pagosParciales.length}</p>
-                </div>
-                <div className="p-4">
-                  <p className="text-xs text-gray-500">Cobros en proceso de pago</p>
-                </div>
-              </div>
-
-              {/* Monto Total Pagado */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4">
-                  <p className="text-sm font-medium text-white/80">Monto Total Pagado</p>
-                  <p className="text-3xl font-bold text-white mt-1">
-                    ${pagosParciales.reduce((sum, p) => sum + p.totalPagado, 0).toLocaleString()}
-                  </p>
-                </div>
-                <div className="p-4">
-                  <p className="text-xs text-gray-500">Acumulado de pagos parciales</p>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Pagos Parciales</p>
+                    <p className="text-xl font-bold text-gray-900">{pagosParciales.length}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Saldo Pendiente Total */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-orange-600 to-red-600 p-4">
-                  <p className="text-sm font-medium text-white/80">Saldo Pendiente Total</p>
-                  <p className="text-3xl font-bold text-white mt-1">
-                    ${pagosParciales.reduce((sum, p) => sum + p.saldoPendiente, 0).toLocaleString()}
-                  </p>
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Total Pagado</p>
+                    <p className="text-xl font-bold text-emerald-600">
+                      ${pagosParciales.reduce((sum, p) => sum + p.totalPagado, 0).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-                <div className="p-4">
-                  <p className="text-xs text-gray-500">Por completar en estos cobros</p>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 font-medium">Saldo Pendiente</p>
+                    <p className="text-xl font-bold text-amber-600">
+                      ${pagosParciales.reduce((sum, p) => sum + p.saldoPendiente, 0).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Partial Payments List con Material Design */}
+            {/* Lista de Pagos Parciales */}
             <div className="space-y-4">
               {pagosParciales.map((pago) => {
                 const porcentaje = (pago.totalPagado / pago.montoPactado) * 100
@@ -158,113 +154,69 @@ export default function ParcialesPage() {
                 return (
                   <div
                     key={`${pago.espacioId}-${pago.periodo}`}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all"
+                    className="bg-white rounded-xl border border-gray-100 overflow-hidden"
                   >
-                    {/* Header con gradiente */}
-                    <div className="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
-                      <div className="flex items-start justify-between">
+                    {/* Header */}
+                    <div className="px-4 py-4 border-b border-gray-100">
+                      <div className="flex items-center justify-between">
                         <div>
                           <Link
                             href={`/espacios/${pago.espacioId}`}
-                            className="text-xl font-bold text-white hover:text-white/90 transition-colors"
+                            className="text-base font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
                           >
                             {pago.espacioIdentificador}
                           </Link>
-                          <p className="text-sm text-white/80 mt-1">
+                          <p className="text-sm text-gray-500">
                             {pago.arrendatarioNombre} • {pago.periodo}
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
-                            <span className="text-3xl font-bold text-white">{porcentaje.toFixed(0)}%</span>
-                          </div>
-                          <p className="text-xs text-white/70 mt-1">Completado</p>
+                          <p className="text-lg font-bold text-gray-900">{porcentaje.toFixed(0)}%</p>
+                          <p className="text-xs text-gray-500">completado</p>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mt-3">
+                        <div className="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>${pago.totalPagado.toLocaleString()} pagado</span>
+                          <span className="text-amber-600 font-medium">Falta: ${pago.saldoPendiente.toLocaleString()}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full bg-indigo-600 rounded-full transition-all"
+                            style={{ width: `${porcentaje}%` }}
+                          />
                         </div>
                       </div>
                     </div>
 
-                    <div className="p-6">
-                      {/* Progress Bar Mejorada */}
-                      <div className="mb-6">
-                        <div className="flex justify-between text-sm font-medium mb-2">
-                          <span className="text-gray-600">Progreso del Pago</span>
-                          <span className="text-gray-900">${pago.totalPagado.toLocaleString()} / ${pago.montoPactado.toLocaleString()}</span>
-                        </div>
-                        <div className="relative w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                          <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-600 to-blue-600 rounded-full transition-all duration-500 shadow-sm"
-                            style={{ width: `${porcentaje}%` }}
-                          ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-gray-500 mt-2">
-                          <span>Pagado: ${pago.totalPagado.toLocaleString()}</span>
-                          <span className="text-orange-600 font-medium">Falta: ${pago.saldoPendiente.toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      {/* Individual Payments */}
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-sm font-semibold text-gray-900">
-                            Pagos Registrados
-                          </h4>
-                          <span className="inline-flex items-center px-3 py-1 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-semibold">
-                            {pago.cantidadPagos} {pago.cantidadPagos === 1 ? 'pago' : 'pagos'}
-                          </span>
-                        </div>
-                        <div className="space-y-2">
-                          {pago.pagos.map((p) => (
-                            <Link
-                              key={p.id}
-                              href={`/cobros/${p.id}`}
-                              className="group flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-sm transition-all"
-                            >
-                              <div className="flex items-center gap-4">
-                                <div className="flex-shrink-0">
-                                  <div className="w-10 h-10 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl flex items-center justify-center group-hover:from-indigo-100 group-hover:to-blue-100 transition-colors">
-                                    <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                  </div>
-                                </div>
-                                <div>
-                                  <div className="text-sm font-semibold text-indigo-600 group-hover:text-indigo-700">
-                                    {p.codigoInterno}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-xs text-gray-500">
-                                      {new Date(p.fechaPago).toLocaleDateString('es-EC', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })}
-                                    </span>
-                                    <span className="text-xs text-gray-400">•</span>
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                                      {p.metodoPago}
-                                    </span>
-                                  </div>
-                                  {p.observaciones && (
-                                    <div className="text-xs text-gray-400 mt-1 max-w-md truncate">
-                                      {p.observaciones}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-right">
-                                  <div className="text-lg font-bold text-gray-900">
-                                    ${p.montoPagado.toLocaleString()}
-                                  </div>
-                                </div>
-                                <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
+                    {/* Lista de pagos */}
+                    <div className="divide-y divide-gray-50">
+                      {pago.pagos.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/cobros/${p.id}`}
+                          className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                              <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{p.codigoInterno}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(p.fechaPago).toLocaleDateString('es-EC')} • {p.metodoPago}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            ${p.montoPagado.toLocaleString()}
+                          </p>
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 )
