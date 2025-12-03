@@ -10,6 +10,7 @@ type Bill = {
   codigoInterno?: string
   espacioId?: string
   espacioIdentificador?: string
+  arrendatarioNombre?: string
   proveedor?: string
   titulo: string
   monto: number
@@ -168,7 +169,7 @@ export default function CalendarWeekView({
                           <div className="font-semibold text-black text-sm truncate">
                             {bill.tipo === 'pago'
                               ? bill.proveedor || bill.titulo
-                              : bill.espacioIdentificador || bill.id.substring(0, 8)}
+                              : bill.arrendatarioNombre || bill.espacioIdentificador || bill.id.substring(0, 8)}
                           </div>
                         </div>
                       </div>
