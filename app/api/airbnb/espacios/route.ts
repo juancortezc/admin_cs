@@ -16,6 +16,18 @@ export async function GET() {
             reservas: true,
           },
         },
+        reservas: {
+          where: {
+            estadoReserva: { in: ['EN_CURSO', 'CONFIRMADA'] },
+          },
+          include: {
+            huesped: true,
+          },
+          orderBy: {
+            checkIn: 'desc',
+          },
+          take: 5,
+        },
       },
       orderBy: {
         nombre: 'asc',
