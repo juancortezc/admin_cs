@@ -278,7 +278,7 @@ function CalendarioContent() {
         {/* Header con Material Design 3 */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center">
               <CalendarIcon className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -334,7 +334,7 @@ function CalendarioContent() {
               <div className="flex-1">
                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                   <div
-                    className="bg-gradient-to-r from-indigo-600 to-blue-600 h-2.5 rounded-full transition-all duration-500"
+                    className="bg-indigo-600 h-2.5 rounded-full transition-all duration-500"
                     style={{ width: `${paymentPercentage}%` }}
                   ></div>
                 </div>
@@ -590,7 +590,7 @@ function CalendarioContent() {
 export default function CalendarioPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-indigo-50">
+      <div className="min-h-screen bg-gray-50">
         <div className="flex items-center justify-center h-96">
           <div className="flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-3 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
