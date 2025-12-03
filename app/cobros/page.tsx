@@ -291,61 +291,59 @@ export default function CobrosPage() {
             <p className="text-gray-500">No hay cobros para mostrar en {getMesNombre()}</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {cobrosFiltrados.map((cobro) => (
               <Link
                 key={cobro.id}
                 href={`/cobros/${cobro.id}`}
                 className="block bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-gray-200 transition-all"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    {/* Indicador de estado */}
-                    <div className={`w-2 h-12 rounded-full ${
+                {/* Header con estado e identificador */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-8 rounded-full ${
                       cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
                         ? 'bg-emerald-500'
                         : cobro.estado === 'PARCIAL'
                         ? 'bg-amber-500'
                         : 'bg-red-500'
                     }`} />
-
-                    {/* Info principal */}
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900">
-                          {cobro.espacio?.identificador || cobro.espacioAirbnb?.nombre || '-'}
-                        </span>
-                        <span className="text-xs text-gray-400">{cobro.codigoInterno}</span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        {cobro.espacio?.arrendatario?.nombre || (cobro.espacioAirbnb ? 'Airbnb' : '-')}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {cobro.concepto} • {new Date(cobro.fechaPago).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })}
-                      </p>
+                      <span className="font-semibold text-gray-900">
+                        {cobro.espacio?.identificador || cobro.espacioAirbnb?.nombre || '-'}
+                      </span>
+                      <p className="text-xs text-gray-400">{cobro.codigoInterno}</p>
                     </div>
                   </div>
+                  <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                    cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : cobro.estado === 'PARCIAL'
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {cobro.estado}
+                  </span>
+                </div>
 
-                  {/* Montos */}
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-gray-900">
-                      {formatMoney(cobro.montoPactado)}
+                {/* Info del arrendatario */}
+                <p className="text-sm text-gray-600 mb-2">
+                  {cobro.espacio?.arrendatario?.nombre || (cobro.espacioAirbnb ? 'Airbnb' : '-')}
+                </p>
+                <p className="text-xs text-gray-400 mb-3">
+                  {cobro.concepto} • {new Date(cobro.fechaPago).toLocaleDateString('es-EC', { day: '2-digit', month: 'short' })}
+                </p>
+
+                {/* Montos */}
+                <div className="border-t border-gray-100 pt-3">
+                  <p className="text-lg font-bold text-gray-900">
+                    {formatMoney(cobro.montoPactado)}
+                  </p>
+                  {cobro.estado === 'PARCIAL' && (
+                    <p className="text-sm text-emerald-600">
+                      Pagado: {formatMoney(cobro.montoPagado)}
                     </p>
-                    {cobro.estado === 'PARCIAL' && (
-                      <p className="text-sm text-emerald-600">
-                        Pagado: {formatMoney(cobro.montoPagado)}
-                      </p>
-                    )}
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
-                      cobro.estado === 'PAGADO' || cobro.estado === 'COBRADO'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : cobro.estado === 'PARCIAL'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {cobro.estado}
-                    </span>
-                  </div>
+                  )}
                 </div>
               </Link>
             ))}

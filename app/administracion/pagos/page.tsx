@@ -823,7 +823,7 @@ export default function AdministracionPagosPage() {
             </div>
 
             {cuentasParciales.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cuentasParciales.map((cuenta) => (
                   <div key={cuenta.id} className="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all">
                     <div className="flex items-start justify-between mb-3">
@@ -930,7 +930,7 @@ export default function AdministracionPagosPage() {
             </div>
 
             {pagosRecurrentes.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {pagosRecurrentes.map((pago) => (
                   <div key={pago.id} className="group bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md transition-all">
                     <div className="flex justify-between">
