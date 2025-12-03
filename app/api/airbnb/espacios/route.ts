@@ -19,6 +19,7 @@ export async function GET() {
         reservas: {
           where: {
             estadoReserva: { in: ['EN_CURSO', 'CONFIRMADA'] },
+            checkOut: { gte: new Date() }, // Solo reservas que no han terminado
           },
           include: {
             huesped: true,
