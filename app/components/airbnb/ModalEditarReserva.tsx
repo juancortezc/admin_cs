@@ -151,14 +151,14 @@ export default function ModalEditarReserva({ reserva, onClose, onGuardar }: Moda
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 flex justify-between items-center rounded-t-2xl">
+        <div className="sticky top-0 bg-white px-6 py-4 flex justify-between items-center rounded-t-2xl border-b border-gray-100">
           <div>
-            <h2 className="text-xl font-semibold text-white">Editar Reserva</h2>
-            <p className="text-indigo-100 text-sm">{reserva.codigoReserva}</p>
+            <h2 className="text-xl font-semibold text-gray-900">Editar Reserva</h2>
+            <p className="text-gray-500 text-sm">{reserva.codigoReserva}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-xl"
+            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -240,7 +240,7 @@ export default function ModalEditarReserva({ reserva, onClose, onGuardar }: Moda
 
           {/* Noches calculadas */}
           {calcularNoches() > 0 && (
-            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 flex items-center justify-between">
+            <div className="bg-indigo-50 rounded-xl p-4 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Noches calculadas:</span>
               <span className="text-lg font-bold text-indigo-600">{calcularNoches()}</span>
             </div>
@@ -433,7 +433,7 @@ export default function ModalEditarReserva({ reserva, onClose, onGuardar }: Moda
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
+              className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Guardar Cambios'}
             </button>

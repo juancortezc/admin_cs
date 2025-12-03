@@ -72,13 +72,13 @@ export default function ReservasTab() {
 
   const getEstadoColor = (estado: string) => {
     const colores: any = {
-      PENDIENTE: 'bg-gray-100 text-gray-700 border-gray-300',
-      CONFIRMADA: 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-300',
-      EN_CURSO: 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border-green-300',
-      COMPLETADA: 'bg-gray-100 text-gray-600 border-gray-200',
-      CANCELADA: 'bg-gradient-to-r from-red-50 to-pink-50 text-red-700 border-red-300',
+      PENDIENTE: 'bg-gray-100 text-gray-700',
+      CONFIRMADA: 'bg-blue-100 text-blue-700',
+      EN_CURSO: 'bg-emerald-100 text-emerald-700',
+      COMPLETADA: 'bg-gray-100 text-gray-600',
+      CANCELADA: 'bg-red-100 text-red-700',
     }
-    return colores[estado] || 'bg-gray-100 text-gray-700 border-gray-200'
+    return colores[estado] || 'bg-gray-100 text-gray-700'
   }
 
   const getEstadoPagoColor = (estado: string) => {
@@ -112,15 +112,12 @@ export default function ReservasTab() {
       {/* Header con filtros - Material Design 3 */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-5">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Reservas</h2>
-            <p className="text-sm text-gray-600 mt-1">{reservas.length} reservas</p>
-          </div>
+          <p className="text-sm text-gray-600">{reservas.length} reservas</p>
           <button
             onClick={() => setMostrarModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-sm font-semibold rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Nueva Reserva
@@ -221,23 +218,23 @@ export default function ReservasTab() {
             </div>
 
             <div className="grid grid-cols-4 gap-4 border-t-2 border-gray-100 pt-4 mb-4">
-              <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+              <div className="text-center p-3 bg-emerald-50 rounded-xl">
                 <div className="text-xs text-green-700 font-semibold mb-1">Check-in</div>
                 <div className="text-sm font-bold text-gray-900">
                   {formatearFecha(reserva.checkIn)}
                 </div>
               </div>
-              <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
+              <div className="text-center p-3 bg-blue-50 rounded-xl">
                 <div className="text-xs text-blue-700 font-semibold mb-1">Check-out</div>
                 <div className="text-sm font-bold text-gray-900">
                   {formatearFecha(reserva.checkOut)}
                 </div>
               </div>
-              <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+              <div className="text-center p-3 bg-purple-50 rounded-xl">
                 <div className="text-xs text-purple-700 font-semibold mb-1">Noches</div>
                 <div className="text-xl font-bold text-gray-900">{reserva.noches}</div>
               </div>
-              <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl">
+              <div className="text-center p-3 bg-indigo-50 rounded-xl">
                 <div className="text-xs text-indigo-700 font-semibold mb-1">Huéspedes</div>
                 <div className="text-xl font-bold text-gray-900">{reserva.numHuespedes}</div>
               </div>
@@ -245,11 +242,11 @@ export default function ReservasTab() {
 
             <div className="flex items-center justify-between pt-4 border-t-2 border-gray-100">
               <div className="flex gap-2 text-xs">
-                <span className="px-3 py-1.5 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 rounded-lg font-semibold">
+                <span className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg font-semibold">
                   {reserva.canalReserva}
                 </span>
                 {reserva._count && reserva._count.abonos > 0 && (
-                  <span className="px-3 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-indigo-700 rounded-lg font-semibold">
+                  <span className="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg font-semibold">
                     {reserva._count.abonos} abono(s)
                   </span>
                 )}
@@ -304,8 +301,8 @@ export default function ReservasTab() {
 
       {/* Mensaje vacío - Material Design 3 */}
       {reservas.length === 0 && (
-        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-indigo-50 rounded-2xl border-2 border-dashed border-indigo-200">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-indigo-200">
+          <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>

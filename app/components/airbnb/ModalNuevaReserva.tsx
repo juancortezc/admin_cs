@@ -164,7 +164,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                 required
                 value={formData.espacioId}
                 onChange={(e) => setFormData({ ...formData, espacioId: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="">Selecciona un espacio</option>
                 {espacios.map((espacio) => (
@@ -184,7 +184,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                   required
                   value={formData.huespedId}
                   onChange={(e) => setFormData({ ...formData, huespedId: e.target.value })}
-                  className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
                   <option value="">Selecciona un huésped</option>
                   {huespedes.map((huesped) => (
@@ -237,7 +237,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                 required
                 value={formData.checkIn}
                 onChange={(e) => setFormData({ ...formData, checkIn: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
@@ -250,7 +250,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                 required
                 value={formData.checkOut}
                 onChange={(e) => setFormData({ ...formData, checkOut: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                 min="1"
                 value={formData.numHuespedes}
                 onChange={(e) => setFormData({ ...formData, numHuespedes: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
@@ -286,7 +286,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
               <select
                 value={formData.canalReserva}
                 onChange={(e) => setFormData({ ...formData, canalReserva: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="AIRBNB">Airbnb</option>
                 <option value="BOOKING">Booking</option>
@@ -305,7 +305,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
               type="text"
               value={formData.codigoConfirmacion}
               onChange={(e) => setFormData({ ...formData, codigoConfirmacion: e.target.value })}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="Ej: HM123456789"
             />
           </div>
@@ -329,7 +329,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                     precioTotal: noches * precioPorNoche
                   })
                 }}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
@@ -342,7 +342,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
                 step="0.01"
                 value={formData.precioTotal}
                 onChange={(e) => setFormData({ ...formData, precioTotal: Number(e.target.value) })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent bg-zinc-50"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-zinc-50"
               />
             </div>
           </div>
@@ -356,7 +356,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
               value={formData.notas}
               onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
               placeholder="Solicitudes especiales, alergias, etc..."
             />
           </div>
@@ -373,7 +373,7 @@ export default function ModalNuevaReserva({ onClose, onGuardar }: ModalNuevaRese
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Creando...' : 'Crear Reserva'}
             </button>

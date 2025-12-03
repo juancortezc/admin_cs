@@ -84,7 +84,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
               required
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="Juan Pérez"
             />
           </div>
@@ -98,7 +98,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="juan@ejemplo.com"
             />
           </div>
@@ -113,7 +113,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
                 type="tel"
                 value={formData.telefono}
                 onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="+52 123 456 7890"
               />
             </div>
@@ -126,7 +126,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
                 type="tel"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
-                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+                className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="+52 123 456 7890"
               />
             </div>
@@ -141,7 +141,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
               type="text"
               value={formData.pais}
               onChange={(e) => setFormData({ ...formData, pais: e.target.value })}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="México"
             />
           </div>
@@ -155,7 +155,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
               value={formData.notas}
               onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
               rows={3}
-              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-[#007AFF] focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
               placeholder="Información adicional sobre el huésped..."
             />
           </div>
@@ -172,7 +172,7 @@ export default function ModalNuevoHuesped({ onClose, onGuardar }: ModalNuevoHues
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-[#007AFF] text-white text-sm font-medium rounded-lg hover:bg-[#0051D5] transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
               {loading ? 'Guardando...' : 'Guardar Huésped'}
             </button>

@@ -90,18 +90,15 @@ export default function EspaciosTab() {
     <div>
       {/* Header con botón agregar - Material Design 3 */}
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Espacios Airbnb</h2>
-          <p className="text-sm text-gray-600 mt-1">{espacios.length} propiedades registradas</p>
-        </div>
+        <p className="text-sm text-gray-600">{espacios.length} propiedades registradas</p>
         <button
           onClick={() => {
             setEspacioEditando(null)
             setModalAbierto(true)
           }}
-          className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Agregar Espacio
@@ -120,7 +117,7 @@ export default function EspaciosTab() {
               <span
                 className={`px-3 py-1 text-xs font-semibold rounded-full ${
                   espacio.activo
-                    ? 'bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 border border-green-200'
+                    ? 'bg-green-100 text-green-700 border border-green-200'
                     : 'bg-gray-100 text-gray-600 border border-gray-200'
                 }`}
               >
@@ -133,15 +130,15 @@ export default function EspaciosTab() {
             )}
 
             <div className="grid grid-cols-3 gap-3 mb-5">
-              <div className="text-center p-3 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl">
+              <div className="text-center p-3 bg-indigo-50 rounded-xl">
                 <div className="text-indigo-600 text-xs font-medium mb-1">Huéspedes</div>
                 <div className="text-xl font-bold text-gray-900">{espacio.capacidadHuespedes}</div>
               </div>
-              <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+              <div className="text-center p-3 bg-purple-50 rounded-xl">
                 <div className="text-purple-600 text-xs font-medium mb-1">Camas</div>
                 <div className="text-xl font-bold text-gray-900">{espacio.numCamas}</div>
               </div>
-              <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl">
+              <div className="text-center p-3 bg-blue-50 rounded-xl">
                 <div className="text-blue-600 text-xs font-medium mb-1">Baños</div>
                 <div className="text-xl font-bold text-gray-900">{espacio.numBanos}</div>
               </div>
@@ -175,7 +172,7 @@ export default function EspaciosTab() {
                   setEspacioEditando(espacio)
                   setModalAbierto(true)
                 }}
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -201,7 +198,7 @@ export default function EspaciosTab() {
                     }
                   }
                 }}
-                className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg"
+                className="px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
                 title="Eliminar espacio"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,8 +212,8 @@ export default function EspaciosTab() {
 
       {/* Mensaje vacío - Material Design 3 */}
       {espacios.length === 0 && (
-        <div className="text-center py-16 bg-gradient-to-br from-gray-50 to-indigo-50 rounded-2xl border-2 border-dashed border-indigo-200">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-indigo-200">
+          <div className="w-20 h-20 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
@@ -225,7 +222,7 @@ export default function EspaciosTab() {
           <p className="text-sm text-gray-600 mb-6">Comienza agregando tu primer espacio de alquiler</p>
           <button
             onClick={() => setModalAbierto(true)}
-            className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg shadow-indigo-200"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
           >
             Agregar primer espacio
           </button>
@@ -244,13 +241,13 @@ export default function EspaciosTab() {
           />
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
             <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl pointer-events-auto animate-in zoom-in-95 duration-200">
-              <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-5 rounded-t-3xl">
+              <div className="sticky top-0 bg-white px-6 py-5 rounded-t-3xl border-b border-gray-100">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-xl font-bold text-gray-900">
                       {espacioEditando ? 'Editar Espacio' : 'Nuevo Espacio'}
                     </h3>
-                    <p className="text-indigo-100 text-sm mt-1">
+                    <p className="text-gray-500 text-sm mt-1">
                       {espacioEditando ? 'Actualiza la información del espacio' : 'Completa los datos del nuevo espacio'}
                     </p>
                   </div>
@@ -259,9 +256,9 @@ export default function EspaciosTab() {
                       setModalAbierto(false)
                       setEspacioEditando(null)
                     }}
-                    className="p-2 rounded-xl hover:bg-white/20 transition-colors"
+                    className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
                   >
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -398,7 +395,7 @@ export default function EspaciosTab() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all font-semibold shadow-lg shadow-indigo-200"
+                  className="flex-1 px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors font-semibold"
                 >
                   {espacioEditando ? 'Actualizar' : 'Crear'}
                 </button>

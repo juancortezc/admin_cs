@@ -132,40 +132,40 @@ export default function OcupacionTab() {
         <div className="card-elevated bg-white rounded-2xl p-2 inline-flex gap-1">
           <button
             onClick={() => setFiltro('TODOS')}
-            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               filtro === 'TODOS'
-                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-200'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-indigo-100 text-indigo-700'
+                : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             Todos ({espacios.length})
           </button>
           <button
             onClick={() => setFiltro('OCUPADO')}
-            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               filtro === 'OCUPADO'
-                ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-200'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-red-100 text-red-700'
+                : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             Ocupados ({espacios.filter((e) => getEstadoEspacio(e) === 'OCUPADO').length})
           </button>
           <button
             onClick={() => setFiltro('DISPONIBLE')}
-            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               filtro === 'DISPONIBLE'
-                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-200'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-green-100 text-green-700'
+                : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             Disponibles ({espacios.filter((e) => getEstadoEspacio(e) === 'DISPONIBLE').length})
           </button>
           <button
             onClick={() => setFiltro('PROXIMA_RESERVA')}
-            className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
+            className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
               filtro === 'PROXIMA_RESERVA'
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-200'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-amber-100 text-amber-700'
+                : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             Próximas ({espacios.filter((e) => getEstadoEspacio(e) === 'PROXIMA_RESERVA').length})
@@ -259,7 +259,7 @@ export default function OcupacionTab() {
                       {espacio.cobroPendiente && espacio.cobroPendiente.estado !== 'PAGADO' && (
                         <Link
                           href={`/cobros/${espacio.cobroPendiente.id}`}
-                          className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-sm hover:shadow-lg transition-all text-center"
+                          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-700 transition-colors text-center"
                         >
                           Registrar pago
                         </Link>
