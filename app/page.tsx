@@ -6,7 +6,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import MainNavbar from './components/MainNavbar'
 
 type Espacio = {
   id: string
@@ -77,52 +78,8 @@ type EspacioAirbnb = {
   }[]
 }
 
-// Iconos SVG
-const HomeIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-  </svg>
-)
-
-const CalendarIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-)
-
-const BuildingIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-  </svg>
-)
-
-const AirbnbIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C8.5 2 6 4.5 6 7.5c0 2 1 3.5 2 5l4 6 4-6c1-1.5 2-3 2-5C18 4.5 15.5 2 12 2zm0 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-  </svg>
-)
-
-const SettingsIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-)
-
-const MenuIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-  </svg>
-)
-
-const CloseIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-)
 
 export default function LandingPage() {
-  const router = useRouter()
   const [mesSeleccionado, setMesSeleccionado] = useState(new Date().getMonth() + 1)
   const [anioSeleccionado, setAnioSeleccionado] = useState(new Date().getFullYear())
   const [resumen, setResumen] = useState<ResumenMensual | null>(null)
@@ -130,7 +87,6 @@ export default function LandingPage() {
   const [espaciosAirbnb, setEspaciosAirbnb] = useState<EspacioAirbnb[]>([])
   const [espacios, setEspacios] = useState<Espacio[]>([])
   const [loading, setLoading] = useState(true)
-  const [menuAbierto, setMenuAbierto] = useState(false)
 
   // Formularios inline
   const [formIngreso, setFormIngreso] = useState<'consultorio' | 'horas' | null>(null)
@@ -162,15 +118,6 @@ export default function LandingPage() {
   const meses = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ]
-
-  // Configuracion de navegacion
-  const navItems = [
-    { id: 'inicio', nombre: 'Inicio', icon: <HomeIcon />, ruta: '/' },
-    { id: 'calendario', nombre: 'Calendario', icon: <CalendarIcon />, ruta: '/calendario' },
-    { id: 'espacios', nombre: 'Espacios', icon: <BuildingIcon />, ruta: '/espacios-admin' },
-    { id: 'airbnb', nombre: 'Airbnb', icon: <AirbnbIcon />, ruta: '/airbnb' },
-    { id: 'admin', nombre: 'Admin', icon: <SettingsIcon />, ruta: '/administracion' },
   ]
 
   useEffect(() => {
@@ -311,11 +258,6 @@ export default function LandingPage() {
     return new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(amount)
   }
 
-  const handleNavegar = (ruta: string) => {
-    setMenuAbierto(false)
-    router.push(ruta)
-  }
-
   if (loading && !resumen) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -332,136 +274,34 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header limpio blanco */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Titulo */}
-            <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
-              Administracion Espacios
-            </h1>
-
-            {/* Desktop: Navegacion */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavegar(item.ruta)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                    item.id === 'inicio'
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
-                >
-                  {item.icon}
-                  <span>{item.nombre}</span>
-                </button>
-              ))}
-            </nav>
-
-            {/* Selectores Mes/Anio + Hamburguesa Mobile */}
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2">
-                <select
-                  value={mesSeleccionado}
-                  onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
-                  className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  {meses.map((mes, i) => (
-                    <option key={i} value={i + 1}>{mes}</option>
-                  ))}
-                </select>
-                <select
-                  value={anioSeleccionado}
-                  onChange={(e) => setAnioSeleccionado(parseInt(e.target.value))}
-                  className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                >
-                  {(resumen?.aniosDisponibles || [new Date().getFullYear()]).map(anio => (
-                    <option key={anio} value={anio}>{anio}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Hamburguesa Mobile */}
-              <button
-                onClick={() => setMenuAbierto(!menuAbierto)}
-                className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
-                aria-label="Menu"
-              >
-                {menuAbierto ? <CloseIcon /> : <MenuIcon />}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Drawer */}
-      {menuAbierto && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/40 z-40 md:hidden"
-            onClick={() => setMenuAbierto(false)}
-          />
-          <div className="fixed top-0 right-0 h-full w-72 bg-white shadow-xl z-50 md:hidden">
-            <div className="p-5">
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-                <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
-                <button
-                  onClick={() => setMenuAbierto(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
-                >
-                  <CloseIcon />
-                </button>
-              </div>
-
-              {/* Selectores en mobile */}
-              <div className="mb-6 p-3 bg-gray-50 rounded-xl">
-                <p className="text-xs font-medium text-gray-500 mb-2">Periodo</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={mesSeleccionado}
-                    onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
-                    className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg"
-                  >
-                    {meses.map((mes, i) => (
-                      <option key={i} value={i + 1}>{mes}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={anioSeleccionado}
-                    onChange={(e) => setAnioSeleccionado(parseInt(e.target.value))}
-                    className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg"
-                  >
-                    {(resumen?.aniosDisponibles || [new Date().getFullYear()]).map(anio => (
-                      <option key={anio} value={anio}>{anio}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Links */}
-              <div className="space-y-1">
-                {navItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavegar(item.ruta)}
-                    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-3 ${
-                      item.id === 'inicio'
-                        ? 'bg-indigo-100 text-indigo-700'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {item.icon}
-                    {item.nombre}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {/* MainNavbar con todos los tabs */}
+      <MainNavbar activeSection="inicio" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Selectores de periodo */}
+        <div className="flex flex-wrap items-center gap-4">
+          <h2 className="text-lg font-semibold text-gray-900">Resumen</h2>
+          <div className="flex items-center gap-2">
+            <select
+              value={mesSeleccionado}
+              onChange={(e) => setMesSeleccionado(parseInt(e.target.value))}
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              {meses.map((mes, i) => (
+                <option key={i} value={i + 1}>{mes}</option>
+              ))}
+            </select>
+            <select
+              value={anioSeleccionado}
+              onChange={(e) => setAnioSeleccionado(parseInt(e.target.value))}
+              className="px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              {(resumen?.aniosDisponibles || [new Date().getFullYear()]).map(anio => (
+                <option key={anio} value={anio}>{anio}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         {/* Cards principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Card Ingresos */}
@@ -837,12 +677,12 @@ export default function LandingPage() {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Airbnb Ocupados</h2>
-              <button
-                onClick={() => handleNavegar('/airbnb')}
+              <Link
+                href="/airbnb"
                 className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
               >
                 Ver todo
-              </button>
+              </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {espaciosOcupados.map((espacio) => {
@@ -851,10 +691,10 @@ export default function LandingPage() {
                 )
 
                 return (
-                  <div
+                  <Link
                     key={espacio.id}
-                    className="bg-white rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => handleNavegar('/airbnb')}
+                    href="/airbnb"
+                    className="block bg-white rounded-xl border border-emerald-200 bg-emerald-50/30 p-4 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-gray-900">{espacio.nombre}</h3>
@@ -879,7 +719,7 @@ export default function LandingPage() {
                       <span className="text-sm font-medium text-gray-900">${espacio.precioBaseNoche}/noche</span>
                       <span className="text-xs text-gray-500">{espacio._count?.reservas || 0} reservas</span>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>
