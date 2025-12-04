@@ -1538,7 +1538,7 @@ export default function AdministracionPagosPage() {
         {/* Modal: Registrar Pago desde Pago Recurrente */}
         {showRegistrarPagoRecurrenteModal && pagoRecurrenteParaRegistrar && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}}>
-            <div className="bg-white rounded-xl max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-xl max-w-xl w-full max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
               <div className="p-6 border-b border-gray-100 rounded-t-xl">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1588,6 +1588,7 @@ export default function AdministracionPagosPage() {
                   setShowRegistrarPagoRecurrenteModal(false)
                   setPagoRecurrenteParaRegistrar(null)
                   cargarPagosRecurrentes()
+                  cargarPagosEventuales()
                   alert('Pago registrado exitosamente')
                 } catch (error) {
                   console.error('Error:', error)
@@ -1595,7 +1596,7 @@ export default function AdministracionPagosPage() {
                 } finally {
                   setGuardando(false)
                 }
-              }} className="p-6 space-y-4">
+              }} className="flex-1 overflow-y-auto p-6 space-y-4">
                 <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-700">Proveedor:</span>
@@ -1645,10 +1646,11 @@ export default function AdministracionPagosPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-                  <textarea name="observaciones" rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" placeholder="Notas adicionales..." />
+                  <textarea name="observaciones" rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none" placeholder="Notas adicionales..." />
                 </div>
 
-                <div className="flex gap-2 pt-2 border-t border-gray-200">
+                {/* Botones dentro del form para que submit funcione */}
+                <div className="flex gap-2 pt-4 border-t border-gray-200 sticky bottom-0 bg-white pb-2">
                   <button type="button" onClick={() => {setShowRegistrarPagoRecurrenteModal(false); setPagoRecurrenteParaRegistrar(null);}} disabled={guardando} className="flex-1 py-2.5 px-4 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50">Cancelar</button>
                   <button type="submit" disabled={guardando} className="flex-1 py-2.5 px-4 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50">{guardando ? 'Registrando...' : 'Registrar Pago'}</button>
                 </div>
