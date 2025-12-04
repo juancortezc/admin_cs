@@ -1,3 +1,8 @@
+/**
+ * Modal de Ticket - Estilo Apple/Clean
+ * Crear y editar tickets de mantenimiento
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -138,93 +143,77 @@ export default function ModalTicket({ ticket, onClose, onGuardar }: ModalTicketP
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
-      <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 bg-white p-6 rounded-t-2xl border-b border-gray-100 z-10">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl pointer-events-auto animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-zinc-200 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-zinc-900">
                 {ticket ? 'Editar Ticket' : 'Nuevo Ticket'}
               </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                {ticket ? 'Actualiza la información del ticket' : 'Completa la información para crear el ticket'}
-              </p>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-zinc-100 transition-colors"
+                disabled={loading}
+              >
+                <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Información Básica */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Información Básica
-            </h3>
-
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* Título */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Título <span className="text-red-600">*</span>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                Título <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={formData.titulo}
                 onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 placeholder="Ej: Reparar fuga en baño"
               />
             </div>
 
             {/* Descripción */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Descripción <span className="text-red-600">*</span>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                Descripción <span className="text-red-500">*</span>
               </label>
               <textarea
                 required
                 value={formData.descripcion}
                 onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                rows={3}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-                placeholder="Describe el problema o trabajo a realizar en detalle..."
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                placeholder="Describe el problema o trabajo..."
               />
             </div>
-          </div>
 
-          {/* Clasificación */}
-          <div className="space-y-4 pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-              Clasificación
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Prioridad */}
+            {/* Prioridad, Estado, Categoría */}
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Prioridad</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Prioridad</label>
                 <select
                   value={formData.prioridad}
                   onChange={(e) => setFormData({ ...formData, prioridad: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 >
                   <option value="BAJA">Baja</option>
                   <option value="MEDIA">Media</option>
@@ -233,13 +222,12 @@ export default function ModalTicket({ ticket, onClose, onGuardar }: ModalTicketP
                 </select>
               </div>
 
-              {/* Estado */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Estado</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Estado</label>
                 <select
                   value={formData.estado}
                   onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 >
                   <option value="PENDIENTE">Pendiente</option>
                   <option value="EN_PROCESO">En Proceso</option>
@@ -249,13 +237,12 @@ export default function ModalTicket({ ticket, onClose, onGuardar }: ModalTicketP
                 </select>
               </div>
 
-              {/* Categoría */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Categoría</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Categoría</label>
                 <select
                   value={formData.categoria}
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 >
                   <option value="GENERAL">General</option>
                   <option value="ELECTRICIDAD">Electricidad</option>
@@ -272,28 +259,17 @@ export default function ModalTicket({ ticket, onClose, onGuardar }: ModalTicketP
                 </select>
               </div>
             </div>
-          </div>
 
-          {/* Ubicación y Asignación */}
-          <div className="space-y-4 pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Ubicación y Asignación
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Espacio */}
+            {/* Espacio y Asignado */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Espacio</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Espacio</label>
                 <select
                   value={formData.espacioId}
                   onChange={(e) => setFormData({ ...formData, espacioId: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 >
-                  <option value="">Sin espacio asignado</option>
+                  <option value="">Sin espacio</option>
                   {espacios.map((espacio) => (
                     <option key={espacio.id} value={espacio.id}>
                       {espacio.identificador}
@@ -302,132 +278,113 @@ export default function ModalTicket({ ticket, onClose, onGuardar }: ModalTicketP
                 </select>
               </div>
 
-              {/* Asignado a */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Asignado a</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Asignado a</label>
                 <input
                   type="text"
                   value={formData.asignadoA}
                   onChange={(e) => setFormData({ ...formData, asignadoA: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Nombre del técnico o persona"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="Nombre del técnico"
                 />
               </div>
-
-              {/* Proveedor */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Proveedor de Servicio</label>
-                <select
-                  value={formData.proveedorId}
-                  onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                >
-                  <option value="">Sin proveedor</option>
-                  {proveedores.map((proveedor) => (
-                    <option key={proveedor.id} value={proveedor.id}>
-                      {proveedor.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
             </div>
-          </div>
 
-          {/* Fechas y Costos */}
-          <div className="space-y-4 pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Fechas y Costos
-            </h3>
+            {/* Proveedor */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">Proveedor de Servicio</label>
+              <select
+                value={formData.proveedorId}
+                onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+              >
+                <option value="">Sin proveedor</option>
+                {proveedores.map((proveedor) => (
+                  <option key={proveedor.id} value={proveedor.id}>
+                    {proveedor.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Fecha de Inicio */}
+            {/* Fechas y Costo */}
+            <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Fecha de Inicio</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Fecha Inicio</label>
                 <input
                   type="date"
                   value={formData.fechaInicio}
                   onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>
 
-              {/* Fecha Estimada */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Fecha Estimada</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Fecha Estimada</label>
                 <input
                   type="date"
                   value={formData.fechaEstimada}
                   onChange={(e) => setFormData({ ...formData, fechaEstimada: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 />
               </div>
 
-              {/* Costo Estimado */}
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Costo Estimado</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.costoEstimado}
-                  onChange={(e) => setFormData({ ...formData, costoEstimado: Number(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="0.00"
-                />
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Costo Estimado</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-zinc-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.costoEstimado}
+                    onChange={(e) => setFormData({ ...formData, costoEstimado: Number(e.target.value) })}
+                    className="w-full pl-7 pr-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Observaciones */}
-          <div className="pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-              </svg>
-              Observaciones
-            </h3>
-            <textarea
-              value={formData.observaciones}
-              onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-              placeholder="Notas adicionales, comentarios especiales, requerimientos..."
-            />
-          </div>
+            {/* Observaciones */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">Observaciones</label>
+              <textarea
+                value={formData.observaciones}
+                onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                placeholder="Notas adicionales..."
+              />
+            </div>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-6 border-t-2 border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all font-semibold disabled:opacity-50 flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {ticket ? 'Actualizar Ticket' : 'Crear Ticket'}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+            {/* Botones */}
+            <div className="flex gap-3 pt-2 border-t border-zinc-200 sticky bottom-0 bg-white pb-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-300 text-zinc-900 font-medium text-sm hover:bg-zinc-50 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Guardando...
+                  </>
+                ) : (
+                  ticket ? 'Actualizar' : 'Crear Ticket'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
