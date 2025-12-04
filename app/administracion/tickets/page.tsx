@@ -1,10 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import MainNavbar from '@/app/components/MainNavbar'
-import TabsPill from '@/app/components/TabsPill'
-import { WrenchIcon, CoinsIcon, BoxIcon } from '@/app/components/icons'
 import ModalTicket from '@/app/components/ModalTicket'
 import ModalDetalleTicket from '@/app/components/ModalDetalleTicket'
 
@@ -41,7 +38,6 @@ type Estadisticas = {
 }
 
 export default function MantenimientoPage() {
-  const router = useRouter()
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [estadisticas, setEstadisticas] = useState<Estadisticas>({
     total: 0,
@@ -112,28 +108,12 @@ export default function MantenimientoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <MainNavbar activeSection="pagos" />
+      <MainNavbar activeSection="mantenimiento" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <h1 className="text-lg font-semibold text-gray-900">Tickets de Mantenimiento</h1>
-        </div>
-
-        {/* Navigation Tabs - Administración */}
-        <div className="mb-6">
-          <TabsPill
-            tabs={[
-              { id: 'pagos', nombre: 'Pagos', icon: <CoinsIcon /> },
-              { id: 'tickets', nombre: 'Tickets', icon: <WrenchIcon /> },
-              { id: 'inventario', nombre: 'Inventario', icon: <BoxIcon /> },
-            ]}
-            activeTab="tickets"
-            onTabChange={(tabId) => {
-              if (tabId === 'pagos') router.push('/administracion/pagos')
-              else if (tabId === 'inventario') router.push('/administracion/inventario')
-            }}
-          />
         </div>
 
         {/* Estadísticas Cards */}
