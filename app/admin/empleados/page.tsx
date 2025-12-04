@@ -189,7 +189,7 @@ export default function EmpleadosPage() {
         observaciones: formPago.observaciones || null,
       }
 
-      const res = await fetch('/api/pagos-salario', {
+      const res = await fetch('/api/pagos/salarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
