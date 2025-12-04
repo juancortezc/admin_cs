@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { navigationConfig, VISIBLE_NAV_TABS } from '@/app/lib/navigation'
 
 type MainNavbarProps = {
@@ -15,10 +16,15 @@ type MainNavbarProps = {
 
 export default function MainNavbar({ activeSection }: MainNavbarProps) {
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const pathname = usePathname()
 
   // Tabs visibles en desktop (6 principales)
   const visibleTabs = navigationConfig.slice(0, VISIBLE_NAV_TABS)
   const menuTabs = navigationConfig.slice(VISIBLE_NAV_TABS)
+
+  // Obtener subtabs de la sección activa
+  const activeNavSection = navigationConfig.find(s => s.id === activeSection)
+  const subtabs = activeNavSection?.subtabs
 
   return (
     <>
@@ -111,6 +117,35 @@ export default function MainNavbar({ activeSection }: MainNavbarProps) {
           </div>
         </div>
       </header>
+
+      {/* Subtabs bar - Desktop */}
+      {subtabs && subtabs.length > 0 && (
+        <div className="bg-gray-50 border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-1 py-2">
+              {subtabs.map((subtab) => {
+                const subtabPath = subtab.ruta.split('?')[0]
+                const isActive = pathname === subtabPath
+                return (
+                  <Link
+                    key={subtab.id}
+                    href={subtab.ruta}
+                    className={`
+                      px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                      ${isActive
+                        ? 'bg-white text-indigo-700 shadow-sm border border-gray-200'
+                        : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                      }
+                    `}
+                  >
+                    {subtab.nombre}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Drawer */}
       {menuAbierto && (
