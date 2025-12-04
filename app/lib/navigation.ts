@@ -80,10 +80,6 @@ export const navigationConfig: NavSection[] = [
     nombre: 'Espacios',
     ruta: '/espacios',
     icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-    subtabs: [
-      { id: 'arrendamiento', nombre: 'Arrendamiento', ruta: '/espacios' },
-      { id: 'airbnb', nombre: 'Airbnb', ruta: '/espacios/airbnb' },
-    ],
   },
   {
     id: 'arrendatarios',
@@ -102,9 +98,7 @@ export const navigationConfig: NavSection[] = [
     icon: 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
     subtabs: [
       { id: 'usuarios', nombre: 'Usuarios', ruta: '/admin' },
-      { id: 'servicios', nombre: 'Servicios', ruta: '/admin/servicios' },
       { id: 'empleados', nombre: 'Empleados', ruta: '/admin/empleados' },
-      { id: 'configuracion', nombre: 'Configuración', ruta: '/admin/configuracion' },
     ],
   },
 ]
