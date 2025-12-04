@@ -76,66 +76,62 @@ export default function ModalItem({ item, onClose, onGuardar }: ModalItemProps) 
   }
 
   return (
-    <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-    >
-      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 bg-white p-6 rounded-t-2xl border-b border-gray-100 z-10">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                {item ? 'Editar Item' : 'Nuevo Item de Inventario'}
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-lg pointer-events-auto animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-zinc-200 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-zinc-900">
+                {item ? 'Editar Item' : 'Nuevo Item'}
               </h2>
-              <p className="text-gray-500 text-sm mt-1">
-                {item ? 'Actualiza la información del item' : 'Completa la información para crear el item'}
-              </p>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg hover:bg-zinc-100 transition-colors"
+                disabled={loading}
+              >
+                <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Información Básica */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Información Básica
-            </h3>
-
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+            {/* Nombre */}
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                Nombre del Item <span className="text-red-600">*</span>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                Nombre <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 required
                 value={formData.nombre}
                 onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 placeholder="Ej: Jabón líquido para manos"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Categoría y Unidad */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Categoría</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Categoría</label>
                 <select
                   value={formData.categoria}
                   onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                 >
                   <option value="LIMPIEZA">Limpieza</option>
                   <option value="AMENIDADES">Amenidades</option>
@@ -151,105 +147,88 @@ export default function ModalItem({ item, onClose, onGuardar }: ModalItemProps) 
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Unidad de Medida</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Unidad</label>
                 <input
                   type="text"
                   value={formData.unidadMedida}
                   onChange={(e) => setFormData({ ...formData, unidadMedida: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="Ej: unidad, caja, litro"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  placeholder="Ej: unidad, caja"
                 />
               </div>
             </div>
-          </div>
 
-          {/* Stock y Costos */}
-          <div className="space-y-4 pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-              Stock y Costos
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Stock Mínimo y Costo */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Stock Mínimo</label>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Stock Mínimo</label>
                 <input
                   type="number"
                   min="0"
                   value={formData.stockMinimo}
                   onChange={(e) => setFormData({ ...formData, stockMinimo: Number(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                   placeholder="0"
                 />
-                <p className="text-xs text-gray-500 mt-1">Cantidad mínima antes de alertar</p>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">Costo Unitario</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.costoUnitario}
-                  onChange={(e) => setFormData({ ...formData, costoUnitario: Number(e.target.value) })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  placeholder="0.00"
-                />
-                <p className="text-xs text-gray-500 mt-1">Precio de compra por unidad</p>
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">Costo Unitario</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-zinc-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.costoUnitario}
+                    onChange={(e) => setFormData({ ...formData, costoUnitario: Number(e.target.value) })}
+                    className="w-full pl-7 pr-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Proveedor */}
-          <div className="pt-6 border-t-2 border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
-              <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              Proveedor
-            </h3>
-            <input
-              type="text"
-              value={formData.proveedor}
-              onChange={(e) => setFormData({ ...formData, proveedor: e.target.value })}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              placeholder="Nombre del proveedor (opcional)"
-            />
-          </div>
+            {/* Proveedor */}
+            <div>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">Proveedor</label>
+              <input
+                type="text"
+                value={formData.proveedor}
+                onChange={(e) => setFormData({ ...formData, proveedor: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-zinc-300 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                placeholder="Nombre del proveedor (opcional)"
+              />
+            </div>
 
-          {/* Botones */}
-          <div className="flex justify-end gap-3 pt-6 border-t-2 border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-all"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {item ? 'Actualizar Item' : 'Crear Item'}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+            {/* Botones */}
+            <div className="flex gap-3 pt-2 border-t border-zinc-200 sticky bottom-0 bg-white pb-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-zinc-300 text-zinc-900 font-medium text-sm hover:bg-zinc-50 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    Guardando...
+                  </>
+                ) : (
+                  item ? 'Actualizar' : 'Crear Item'
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

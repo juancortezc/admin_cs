@@ -88,7 +88,6 @@ export default function MovimientosTab() {
 
       if (res.ok) {
         alert('Movimiento registrado exitosamente')
-        // Reset form
         setFormData({
           itemId: '',
           tipoMovimiento: 'ENTRADA',
@@ -98,7 +97,7 @@ export default function MovimientosTab() {
           personaRecibe: '',
           espacioId: '',
         })
-        cargarItems() // Reload items to update stock
+        cargarItems()
       } else {
         const error = await res.json()
         alert(`Error: ${error.error}`)
@@ -111,62 +110,51 @@ export default function MovimientosTab() {
     }
   }
 
-  const getTipoColor = (tipo: string) => {
+  const getTipoStyle = (tipo: string, isSelected: boolean) => {
+    if (!isSelected) return 'bg-white border-zinc-200 hover:border-zinc-300'
+
     switch (tipo) {
-      case 'ENTRADA': return 'bg-green-600'
-      case 'SALIDA': return 'bg-red-600'
-      case 'AJUSTE_POSITIVO': return 'bg-blue-600'
-      case 'AJUSTE_NEGATIVO': return 'bg-orange-600'
-      default: return 'bg-gray-600'
+      case 'ENTRADA': return 'bg-green-50 border-green-500 text-green-700'
+      case 'SALIDA': return 'bg-red-50 border-red-500 text-red-700'
+      case 'AJUSTE_POSITIVO': return 'bg-blue-50 border-blue-500 text-blue-700'
+      case 'AJUSTE_NEGATIVO': return 'bg-orange-50 border-orange-500 text-orange-700'
+      default: return 'bg-zinc-50 border-zinc-500'
     }
   }
 
   const itemSeleccionado = items.find(i => i.id === formData.itemId)
 
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Registrar Movimiento</h2>
-        <p className="text-sm text-gray-600 mt-1">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-zinc-900">Registrar Movimiento</h2>
+        <p className="text-sm text-zinc-500 mt-1">
           Registra entradas, salidas y ajustes de inventario
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md p-6">
+      <div className="bg-white rounded-xl border border-zinc-200 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Tipo de movimiento con gradientes */}
+          {/* Tipo de movimiento */}
           <div>
-            <label className="block text-sm font-bold text-gray-900 mb-3">
-              Tipo de Movimiento <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-zinc-900 mb-3">
+              Tipo de Movimiento <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { value: 'ENTRADA', label: 'Entrada', icon: '📥', desc: 'Compra o devolución' },
-                { value: 'SALIDA', label: 'Salida', icon: '📤', desc: 'Consumo o entrega' },
-                { value: 'AJUSTE_POSITIVO', label: 'Ajuste +', icon: '➕', desc: 'Corrección positiva' },
-                { value: 'AJUSTE_NEGATIVO', label: 'Ajuste -', icon: '➖', desc: 'Corrección negativa' },
+                { value: 'ENTRADA', label: 'Entrada', desc: 'Compra o devolución' },
+                { value: 'SALIDA', label: 'Salida', desc: 'Consumo o entrega' },
+                { value: 'AJUSTE_POSITIVO', label: 'Ajuste +', desc: 'Corrección positiva' },
+                { value: 'AJUSTE_NEGATIVO', label: 'Ajuste -', desc: 'Corrección negativa' },
               ].map((tipo) => (
                 <button
                   key={tipo.value}
                   type="button"
                   onClick={() => setFormData({ ...formData, tipoMovimiento: tipo.value })}
-                  className={`p-4 rounded-xl text-left transition-all ${
-                    formData.tipoMovimiento === tipo.value
-                      ? `${getTipoColor(tipo.value)} text-white scale-105`
-                      : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-md'
-                  }`}
+                  className={`p-4 rounded-xl text-left transition-all border-2 ${getTipoStyle(tipo.value, formData.tipoMovimiento === tipo.value)}`}
                 >
-                  <div className="text-3xl mb-2">{tipo.icon}</div>
-                  <div className={`text-sm font-bold mb-1 ${
-                    formData.tipoMovimiento === tipo.value ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {tipo.label}
-                  </div>
-                  <div className={`text-xs ${
-                    formData.tipoMovimiento === tipo.value ? 'text-white/80' : 'text-gray-500'
-                  }`}>
-                    {tipo.desc}
-                  </div>
+                  <div className="text-sm font-medium mb-1">{tipo.label}</div>
+                  <div className="text-xs text-zinc-500">{tipo.desc}</div>
                 </button>
               ))}
             </div>
@@ -174,14 +162,14 @@ export default function MovimientosTab() {
 
           {/* Item */}
           <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">
-              Item <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+              Item <span className="text-red-500">*</span>
             </label>
             <select
               required
               value={formData.itemId}
               onChange={(e) => handleItemChange(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all text-sm"
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             >
               <option value="">Selecciona un item</option>
               {items.map((item) => (
@@ -193,19 +181,19 @@ export default function MovimientosTab() {
 
             {/* Info del item seleccionado */}
             {itemSeleccionado && (
-              <div className="mt-3 bg-indigo-50 rounded-xl p-4 border border-indigo-200">
+              <div className="mt-3 bg-zinc-50 rounded-lg p-4 border border-zinc-200">
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <p className="text-indigo-600 text-xs font-medium mb-1">Stock Actual</p>
-                    <p className="font-bold text-gray-900 text-lg">{itemSeleccionado.stockActual} {itemSeleccionado.unidadMedida}</p>
+                    <p className="text-zinc-500 text-xs mb-1">Stock Actual</p>
+                    <p className="font-semibold text-zinc-900">{itemSeleccionado.stockActual} {itemSeleccionado.unidadMedida}</p>
                   </div>
                   <div>
-                    <p className="text-indigo-600 text-xs font-medium mb-1">Costo Unitario</p>
-                    <p className="font-bold text-gray-900 text-lg">${itemSeleccionado.costoUnitario.toFixed(2)}</p>
+                    <p className="text-zinc-500 text-xs mb-1">Costo Unitario</p>
+                    <p className="font-semibold text-zinc-900">${itemSeleccionado.costoUnitario.toFixed(2)}</p>
                   </div>
                   <div>
-                    <p className="text-indigo-600 text-xs font-medium mb-1">Nuevo Stock</p>
-                    <p className="font-bold text-indigo-600 text-lg">
+                    <p className="text-zinc-500 text-xs mb-1">Nuevo Stock</p>
+                    <p className="font-semibold text-indigo-600">
                       {formData.tipoMovimiento === 'ENTRADA' || formData.tipoMovimiento === 'AJUSTE_POSITIVO'
                         ? itemSeleccionado.stockActual + formData.cantidad
                         : itemSeleccionado.stockActual - formData.cantidad
@@ -220,8 +208,8 @@ export default function MovimientosTab() {
           {/* Cantidad y Costo */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
-                Cantidad <span className="text-red-600">*</span>
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">
+                Cantidad <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -229,12 +217,12 @@ export default function MovimientosTab() {
                 min="1"
                 value={formData.cantidad}
                 onChange={(e) => setFormData({ ...formData, cantidad: Number(e.target.value) })}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-900 mb-2">
+              <label className="block text-sm font-medium text-zinc-900 mb-1.5">
                 Costo Unitario
               </label>
               <input
@@ -242,23 +230,23 @@ export default function MovimientosTab() {
                 step="0.01"
                 value={formData.costoUnitario}
                 onChange={(e) => setFormData({ ...formData, costoUnitario: Number(e.target.value) })}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Costo total */}
           {formData.cantidad > 0 && formData.costoUnitario > 0 && (
-            <div className="bg-green-600 rounded-xl p-5">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-3 rounded-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-green-100 p-2 rounded-lg">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-white/80 font-medium">Costo Total del Movimiento</p>
-                  <p className="text-3xl font-bold text-white">
+                  <p className="text-xs text-green-600 font-medium">Costo Total del Movimiento</p>
+                  <p className="text-2xl font-semibold text-green-700">
                     ${(formData.cantidad * formData.costoUnitario).toFixed(2)}
                   </p>
                 </div>
@@ -268,42 +256,42 @@ export default function MovimientosTab() {
 
           {/* Motivo */}
           <div>
-            <label className="block text-sm font-bold text-gray-900 mb-2">
+            <label className="block text-sm font-medium text-zinc-900 mb-1.5">
               Motivo / Descripción
             </label>
             <textarea
               value={formData.motivo}
               onChange={(e) => setFormData({ ...formData, motivo: e.target.value })}
-              rows={3}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-              placeholder="Ej: Compra mensual, consumo habitación 201, ajuste por inventario físico..."
+              rows={2}
+              className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              placeholder="Ej: Compra mensual, consumo habitación 201..."
             />
           </div>
 
           {/* Campos adicionales para salidas */}
-          {(formData.tipoMovimiento === 'SALIDA') && (
+          {formData.tipoMovimiento === 'SALIDA' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">
                   Persona que Recibe
                 </label>
                 <input
                   type="text"
                   value={formData.personaRecibe}
                   onChange={(e) => setFormData({ ...formData, personaRecibe: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white"
                   placeholder="Nombre de quien recibe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
+                <label className="block text-sm font-medium text-zinc-900 mb-1.5">
                   Espacio Relacionado
                 </label>
                 <select
                   value={formData.espacioId}
                   onChange={(e) => setFormData({ ...formData, espacioId: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all bg-white"
+                  className="w-full px-3 py-2 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white"
                 >
                   <option value="">Sin espacio</option>
                   {espacios.map((espacio) => (
@@ -317,7 +305,7 @@ export default function MovimientosTab() {
           )}
 
           {/* Botones */}
-          <div className="flex justify-end gap-3 pt-4 border-t-2 border-gray-200">
+          <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200">
             <button
               type="button"
               onClick={() => {
@@ -331,23 +319,23 @@ export default function MovimientosTab() {
                   espacioId: '',
                 })
               }}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-all"
+              className="px-4 py-2 border border-zinc-300 text-zinc-700 text-sm font-medium rounded-lg hover:bg-zinc-50 transition-colors"
             >
               Limpiar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                   Registrando...
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   Registrar Movimiento
