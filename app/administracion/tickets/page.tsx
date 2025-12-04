@@ -37,6 +37,16 @@ type Estadisticas = {
   urgentes: number
 }
 
+type EstadoTicket = 'PENDIENTE' | 'EN_PROCESO' | 'EN_ESPERA' | 'COMPLETADO' | 'CANCELADO'
+
+const COLUMNAS: { estado: EstadoTicket; nombre: string; color: string; bgColor: string }[] = [
+  { estado: 'PENDIENTE', nombre: 'Pendiente', color: 'text-gray-700', bgColor: 'bg-gray-100' },
+  { estado: 'EN_PROCESO', nombre: 'En Proceso', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+  { estado: 'EN_ESPERA', nombre: 'En Espera', color: 'text-yellow-700', bgColor: 'bg-yellow-100' },
+  { estado: 'COMPLETADO', nombre: 'Completado', color: 'text-green-700', bgColor: 'bg-green-100' },
+  { estado: 'CANCELADO', nombre: 'Cancelado', color: 'text-red-700', bgColor: 'bg-red-100' },
+]
+
 export default function MantenimientoPage() {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [estadisticas, setEstadisticas] = useState<Estadisticas>({
@@ -48,23 +58,23 @@ export default function MantenimientoPage() {
     urgentes: 0,
   })
   const [busqueda, setBusqueda] = useState('')
-  const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroPrioridad, setFiltroPrioridad] = useState('')
   const [filtroCategoria, setFiltroCategoria] = useState('')
   const [loading, setLoading] = useState(true)
   const [mostrarModal, setMostrarModal] = useState(false)
   const [mostrarDetalle, setMostrarDetalle] = useState(false)
   const [ticketSeleccionado, setTicketSeleccionado] = useState<Ticket | null>(null)
+  const [draggingTicket, setDraggingTicket] = useState<Ticket | null>(null)
+  const [dragOverColumn, setDragOverColumn] = useState<EstadoTicket | null>(null)
 
   useEffect(() => {
     cargarTickets()
-  }, [busqueda, filtroEstado, filtroPrioridad, filtroCategoria])
+  }, [busqueda, filtroPrioridad, filtroCategoria])
 
   const cargarTickets = async () => {
     try {
       const params = new URLSearchParams()
       if (busqueda) params.append('busqueda', busqueda)
-      if (filtroEstado) params.append('estado', filtroEstado)
       if (filtroPrioridad) params.append('prioridad', filtroPrioridad)
       if (filtroCategoria) params.append('categoria', filtroCategoria)
 
@@ -81,63 +91,98 @@ export default function MantenimientoPage() {
 
   const getPrioridadColor = (prioridad: string) => {
     switch (prioridad) {
-      case 'URGENTE': return 'bg-red-100 text-red-700'
-      case 'ALTA': return 'bg-orange-100 text-orange-700'
-      case 'MEDIA': return 'bg-yellow-100 text-yellow-700'
-      case 'BAJA': return 'bg-green-100 text-green-700'
-      default: return 'bg-gray-100 text-gray-700'
+      case 'URGENTE': return 'bg-red-500 text-white'
+      case 'ALTA': return 'bg-orange-500 text-white'
+      case 'MEDIA': return 'bg-yellow-500 text-white'
+      case 'BAJA': return 'bg-green-500 text-white'
+      default: return 'bg-gray-500 text-white'
     }
   }
 
-  const getEstadoColor = (estado: string) => {
-    switch (estado) {
-      case 'COMPLETADO': return 'bg-green-100 text-green-700 border-green-200'
-      case 'EN_PROCESO': return 'bg-blue-100 text-blue-700 border-blue-200'
-      case 'EN_ESPERA': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'PENDIENTE': return 'bg-gray-100 text-gray-700 border-gray-200'
-      case 'CANCELADO': return 'bg-red-100 text-red-700 border-red-200'
-      default: return 'bg-gray-100 text-gray-700 border-gray-200'
+  const getTicketsByEstado = (estado: EstadoTicket) => {
+    return tickets.filter(t => t.estado === estado)
+  }
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, ticket: Ticket) => {
+    setDraggingTicket(ticket)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', ticket.id)
+  }
+
+  const handleDragEnd = () => {
+    setDraggingTicket(null)
+    setDragOverColumn(null)
+  }
+
+  const handleDragOver = (e: React.DragEvent, estado: EstadoTicket) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverColumn !== estado) {
+      setDragOverColumn(estado)
     }
   }
 
-  const formatEstado = (estado: string) => {
-    return estado.replace(/_/g, ' ')
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Solo resetear si salimos completamente de la columna
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const x = e.clientX
+    const y = e.clientY
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverColumn(null)
+    }
   }
 
-  const ticketsFiltrados = tickets
+  const handleDrop = async (e: React.DragEvent, nuevoEstado: EstadoTicket) => {
+    e.preventDefault()
+    setDragOverColumn(null)
+
+    if (!draggingTicket || draggingTicket.estado === nuevoEstado) {
+      setDraggingTicket(null)
+      return
+    }
+
+    // Optimistic update
+    setTickets(prev =>
+      prev.map(t => t.id === draggingTicket.id ? { ...t, estado: nuevoEstado } : t)
+    )
+
+    try {
+      const res = await fetch(`/api/mantenimiento/tickets/${draggingTicket.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      })
+
+      if (!res.ok) {
+        // Revert on error
+        setTickets(prev =>
+          prev.map(t => t.id === draggingTicket.id ? { ...t, estado: draggingTicket.estado } : t)
+        )
+        console.error('Error al actualizar estado')
+      } else {
+        // Recargar estadísticas
+        cargarTickets()
+      }
+    } catch (error) {
+      // Revert on error
+      setTickets(prev =>
+        prev.map(t => t.id === draggingTicket.id ? { ...t, estado: draggingTicket.estado } : t)
+      )
+      console.error('Error al actualizar estado:', error)
+    }
+
+    setDraggingTicket(null)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <MainNavbar activeSection="mantenimiento" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <h1 className="text-lg font-semibold text-gray-900">Tickets de Mantenimiento</h1>
-        </div>
-
-        {/* Estadísticas Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-sm text-gray-600">Total</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{estadisticas.total}</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-sm text-gray-600">Pendientes</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{estadisticas.pendientes}</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-sm text-gray-600">En Proceso</p>
-            <p className="text-2xl font-bold text-blue-600 mt-1">{estadisticas.enProceso}</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <p className="text-sm text-gray-600">Completados</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">{estadisticas.completados}</p>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mb-6 flex justify-end">
           <button
             onClick={() => {
               setTicketSeleccionado(null)
@@ -152,204 +197,168 @@ export default function MantenimientoPage() {
           </button>
         </div>
 
-
-        {/* Alerta de tickets urgentes */}
-        {estadisticas.urgentes > 0 && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="bg-red-100 p-2 rounded-lg">
-                <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-red-800">
-                  {estadisticas.urgentes} ticket(s) urgente(s) requieren atención
-                </h3>
-                <p className="text-sm text-red-600 mt-0.5">Revisa los tickets marcados como urgentes</p>
-              </div>
-            </div>
+        {/* Estadísticas compactas */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+            <span className="text-sm text-gray-600">Total:</span>
+            <span className="text-sm font-bold text-gray-900">{estadisticas.total}</span>
           </div>
-        )}
-
-        {/* Filtros y búsqueda */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
-          <div className="flex flex-wrap gap-4 items-end">
-            {/* Buscar */}
-            <div className="flex-1 min-w-[250px]">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Buscar</label>
-              <input
-                type="text"
-                placeholder="Número, título o descripción..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all"
-              />
+          {estadisticas.urgentes > 0 && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-lg border border-red-200">
+              <svg className="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm font-bold text-red-700">{estadisticas.urgentes} urgente(s)</span>
             </div>
-
-            {/* Estado */}
-            <div className="min-w-[180px]">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Estado</label>
-              <select
-                value={filtroEstado}
-                onChange={(e) => setFiltroEstado(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all"
-              >
-                <option value="">Todos</option>
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="EN_PROCESO">En Proceso</option>
-                <option value="EN_ESPERA">En Espera</option>
-                <option value="COMPLETADO">Completado</option>
-                <option value="CANCELADO">Cancelado</option>
-              </select>
-            </div>
-
-            {/* Prioridad */}
-            <div className="min-w-[180px]">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Prioridad</label>
-              <select
-                value={filtroPrioridad}
-                onChange={(e) => setFiltroPrioridad(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all"
-              >
-                <option value="">Todas</option>
-                <option value="URGENTE">Urgente</option>
-                <option value="ALTA">Alta</option>
-                <option value="MEDIA">Media</option>
-                <option value="BAJA">Baja</option>
-              </select>
-            </div>
-
-            {/* Categoría */}
-            <div className="min-w-[200px]">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Categoría</label>
-              <select
-                value={filtroCategoria}
-                onChange={(e) => setFiltroCategoria(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-all"
-              >
-                <option value="">Todas</option>
-                <option value="ELECTRICIDAD">Electricidad</option>
-                <option value="PLOMERIA">Plomería</option>
-                <option value="PINTURA">Pintura</option>
-                <option value="CARPINTERIA">Carpintería</option>
-                <option value="CERRAJERIA">Cerrajería</option>
-                <option value="LIMPIEZA">Limpieza</option>
-                <option value="ELECTRODOMESTICOS">Electrodomésticos</option>
-                <option value="CLIMATIZACION">Climatización</option>
-                <option value="TECNOLOGIA">Tecnología</option>
-                <option value="MOBILIARIO">Mobiliario</option>
-                <option value="GENERAL">General</option>
-                <option value="OTROS">Otros</option>
-              </select>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Cards de tickets */}
+        {/* Filtros compactos */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <input
+            type="text"
+            placeholder="Buscar..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-48"
+          />
+          <select
+            value={filtroPrioridad}
+            onChange={(e) => setFiltroPrioridad(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          >
+            <option value="">Todas las prioridades</option>
+            <option value="URGENTE">Urgente</option>
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Media</option>
+            <option value="BAJA">Baja</option>
+          </select>
+          <select
+            value={filtroCategoria}
+            onChange={(e) => setFiltroCategoria(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          >
+            <option value="">Todas las categorías</option>
+            <option value="ELECTRICIDAD">Electricidad</option>
+            <option value="PLOMERIA">Plomería</option>
+            <option value="PINTURA">Pintura</option>
+            <option value="CARPINTERIA">Carpintería</option>
+            <option value="CERRAJERIA">Cerrajería</option>
+            <option value="LIMPIEZA">Limpieza</option>
+            <option value="ELECTRODOMESTICOS">Electrodomésticos</option>
+            <option value="CLIMATIZACION">Climatización</option>
+            <option value="TECNOLOGIA">Tecnología</option>
+            <option value="MOBILIARIO">Mobiliario</option>
+            <option value="GENERAL">General</option>
+            <option value="OTROS">Otros</option>
+          </select>
+        </div>
+
+        {/* Tablero Kanban */}
         {loading ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <div className="animate-spin rounded-full h-10 w-10 border-3 border-indigo-600 border-t-transparent mx-auto"></div>
             <p className="text-gray-500 mt-4">Cargando tickets...</p>
           </div>
-        ) : ticketsFiltrados.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <div className="bg-gray-100 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <p className="text-gray-500">No hay tickets registrados</p>
-            <button
-              onClick={() => {
-                setTicketSeleccionado(null)
-                setMostrarModal(true)
-              }}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-            >
-              Crear primer ticket
-            </button>
-          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {ticketsFiltrados.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="bg-white rounded-xl border border-gray-200 hover:shadow-md transition-all overflow-hidden"
-              >
-                {/* Header del card */}
-                <div className="p-4 border-b border-gray-100">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold text-gray-900">{ticket.numeroTicket}</h3>
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPrioridadColor(ticket.prioridad)}`}>
-                          {ticket.prioridad}
-                        </span>
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${getEstadoColor(ticket.estado)}`}>
-                          {formatEstado(ticket.estado)}
-                        </span>
-                      </div>
-                      <p className="font-medium text-gray-900">{ticket.titulo}</p>
-                      <p className="text-sm text-gray-600 mt-1">{ticket.descripcion}</p>
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {COLUMNAS.map((columna) => {
+              const ticketsColumna = getTicketsByEstado(columna.estado)
+              const isDropTarget = dragOverColumn === columna.estado
+
+              return (
+                <div
+                  key={columna.estado}
+                  className={`flex-shrink-0 w-72 flex flex-col rounded-xl transition-all duration-200 ${
+                    isDropTarget
+                      ? 'bg-indigo-50 ring-2 ring-indigo-400 ring-offset-2'
+                      : 'bg-gray-100'
+                  }`}
+                  onDragOver={(e) => handleDragOver(e, columna.estado)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, columna.estado)}
+                >
+                  {/* Header de columna */}
+                  <div className={`px-4 py-3 rounded-t-xl ${columna.bgColor}`}>
+                    <div className="flex items-center justify-between">
+                      <h3 className={`font-semibold ${columna.color}`}>{columna.nombre}</h3>
+                      <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${columna.bgColor} ${columna.color}`}>
+                        {ticketsColumna.length}
+                      </span>
                     </div>
+                  </div>
+
+                  {/* Lista de tickets */}
+                  <div className="flex-1 p-2 space-y-2 min-h-[200px] max-h-[calc(100vh-320px)] overflow-y-auto">
+                    {ticketsColumna.length === 0 ? (
+                      <div className="flex items-center justify-center h-24 text-gray-400 text-sm">
+                        Sin tickets
+                      </div>
+                    ) : (
+                      ticketsColumna.map((ticket) => (
+                        <div
+                          key={ticket.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, ticket)}
+                          onDragEnd={handleDragEnd}
+                          onClick={() => {
+                            setTicketSeleccionado(ticket)
+                            setMostrarDetalle(true)
+                          }}
+                          className={`bg-white rounded-lg border border-gray-200 p-3 cursor-grab active:cursor-grabbing hover:shadow-md transition-all ${
+                            draggingTicket?.id === ticket.id ? 'opacity-50 scale-95' : ''
+                          }`}
+                        >
+                          {/* Header del ticket */}
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <span className="text-xs font-mono text-gray-500">{ticket.numeroTicket}</span>
+                            <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${getPrioridadColor(ticket.prioridad)}`}>
+                              {ticket.prioridad}
+                            </span>
+                          </div>
+
+                          {/* Título */}
+                          <h4 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">
+                            {ticket.titulo}
+                          </h4>
+
+                          {/* Descripción */}
+                          {ticket.descripcion && (
+                            <p className="text-xs text-gray-500 mb-2 line-clamp-2">
+                              {ticket.descripcion}
+                            </p>
+                          )}
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
+                            <div className="flex items-center gap-2">
+                              {ticket.espacio && (
+                                <span className="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded">
+                                  {ticket.espacio.identificador}
+                                </span>
+                              )}
+                              {ticket.asignadoA && (
+                                <span className="bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded truncate max-w-[80px]">
+                                  {ticket.asignadoA}
+                                </span>
+                              )}
+                            </div>
+                            {ticket._count.novedades > 0 && (
+                              <span className="flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                                {ticket._count.novedades}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
-
-                {/* Contenido del card */}
-                <div className="p-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                    {/* Categoría */}
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <span className="text-xs text-gray-500">Categoría</span>
-                      <p className="text-sm font-medium text-gray-900">{ticket.categoria.replace(/_/g, ' ')}</p>
-                    </div>
-
-                    {/* Espacio */}
-                    {ticket.espacio && (
-                      <div className="bg-indigo-50 p-3 rounded-lg">
-                        <span className="text-xs text-indigo-600">Espacio</span>
-                        <p className="text-sm font-medium text-gray-900">{ticket.espacio.identificador}</p>
-                      </div>
-                    )}
-
-                    {/* Asignado a */}
-                    {ticket.asignadoA && (
-                      <div className="bg-purple-50 p-3 rounded-lg">
-                        <span className="text-xs text-purple-600">Asignado</span>
-                        <p className="text-sm font-medium text-gray-900">{ticket.asignadoA}</p>
-                      </div>
-                    )}
-
-                    {/* Costos */}
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <span className="text-xs text-green-600">Costo</span>
-                      <p className="text-sm font-bold text-gray-900">${ticket.costoReal.toLocaleString()}</p>
-                      {ticket.costoEstimado > 0 && (
-                        <p className="text-xs text-gray-500">Est: ${ticket.costoEstimado.toLocaleString()}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Fechas y acciones */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-gray-100">
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>{new Date(ticket.fechaCreacion).toLocaleDateString()}</span>
-                      <span>{ticket._count.novedades} novedades</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setTicketSeleccionado(ticket)
-                        setMostrarDetalle(true)
-                      }}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
-                    >
-                      Ver Detalles
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
